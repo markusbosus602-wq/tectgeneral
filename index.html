@@ -502,7 +502,7 @@ async function loadPlayers() {
 }
 
 async function deleteUser(username) {
-  if(!confirm(`Точно видалити користувача ${username}?`)) return;
+  if(!confirm(`Точно видалити користувача ${username}? Це незворотно!`)) return;
   await fetch(DB + username + ".json", {method: 'DELETE'});
   alert(`Користувач ${username} видалений`);
   loadPlayers();
@@ -550,4 +550,70 @@ function start(i) {
   document.getElementById('qtext').innerText = `Рівень ${i+1}: ${curr.t}`;
   let b = document.getElementById('abox'); b.innerHTML = '';
   [curr.cor, curr.inc].sort(()=>Math.random()-0.5).forEach(o=>{
-    let btn = document.createElement('button'); btn.class
+    let btn = document.createElement('button'); btn.className='btn'; btn.style.background='#444';
+    btn.innerText=o; btn.onclick=()=>check(o,curr.cor,i); b.appendChild(btn);
+  });
+  show('game');
+}
+
+function check(p,c,i){
+  if(p===c){
+    user.points+=1000;
+    if(i===user.lvl-1 && user.lvl<50) user.lvl++;
+    correctSound.currentTime = 0;
+    correctSound.play().catch(()=>{});
+    alert("ПРАВИЛЬНО!");
+  } else {
+    if(pOn) user.points = Math.max(0,user.points-150);
+    wrongSound.currentTime = 0;
+    wrongSound.play().catch(()=>{});
+    alert("❌");
+  }
+  save(); update(); renderL(); show('levels');
+}
+
+async function loadT() {
+  show('top'); let r=await fetch(DB+".json"), d=await r.json(), l=document.getElementById('tlist'); l.innerHTML='';
+  if(d) {
+    let topPlayers = Object.values(d).sort((a,b)=>b.points-a.points).slice(0,1000);
+    topPlayers.forEach((u,i)=>l.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points}</b></div>`);
+  } else l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+}
+
+async function logAdminAccess() {
+  if (user.name !== "Марк Девіцький") return;
+  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+  const entry = { nick: user.name, time: now };
+  await fetch("https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/admin_logs.json", {
+    method: 'POST',
+    body: JSON.stringify(entry)
+  });
+}
+
+async function loadAdminLogs() {
+  try {
+    let r = await fetch("https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/admin_logs.json");
+    let data = await r.json();
+    let logDiv = document.getElementById('admin-log');
+    logDiv.innerHTML = '';
+    if (data) {
+      Object.values(data).reverse().forEach(log => {
+        logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
+      });
+    } else {
+      logDiv.innerHTML = 'Лог порожній';
+    }
+  } catch (e) {
+    document.getElementById('admin-log').innerHTML = 'Помилка завантаження логу';
+  }
+}
+
+async function clearAdminLogs() {
+  if (!confirm("Очистити весь лог входів?")) return;
+  await fetch("https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/admin_logs.json", {method: 'DELETE'});
+  loadAdminLogs();
+  alert("Лог очищено");
+}
+</script>
+</body>
+</html>
