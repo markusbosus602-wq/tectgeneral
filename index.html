@@ -184,8 +184,7 @@ const themes = {
     {t:"До якої відміни належить слово «ніч» у множині?",cor:"третя відміна",inc:"друга відміна"},
     {t:"До якої відміни належить слово «руки»?",cor:"перша відміна",inc:"третя відміна"},
     {t:"До якої відміни належить слово «очі»?",cor:"третя відміна",inc:"друга відміна"},
-    {t:"До якої відміни належить слово «дерево»?",cor:"друга відміна",inc:"третя відміна"},
-    {t:"До якої відміни належить слово «кров»?",cor:"третя відміна",inc:"друга відміна"}
+    {t:"До якої відміни належить слово «дерево»?",cor:"друга відміна",inc:"третя відміна"}
   ],
   chasyslova: [
     {t:"Який час дієслова «читати» у реченні «Я читав книгу»?",cor:"минулий час",inc:"теперішній час"},
@@ -398,21 +397,44 @@ const themes = {
 };
 
 async function auth() {
-  let n = document.getElementById('nick').value.trim(), p = document.getElementById('pass').value.trim();
-  if(!n || !p) return alert("Введіть нікнейм та пароль");
-  localStorage.setItem('un', n); localStorage.setItem('up', p);
-  let r = await fetch(DB+n+".json"), d = await r.json();
-  user = d || {name:n, pass:p, points:0, lvl:1, items:{gold_frame:false}};
-  if(d && d.pass !== p) return alert("Неправильний пароль!");
-  items = user.items || {gold_frame:false};
-  save(); 
-  applyItems();
-  update(); show('menu');
+  let n = document.getElementById('nick').value.trim();
+  let p = document.getElementById('pass').value.trim();
+
+  if (!n || !p) {
+    alert("Введіть нікнейм та пароль");
+    return;
+  }
+
+  localStorage.setItem('un', n);
+  localStorage.setItem('up', p);
+
+  try {
+    let r = await fetch(DB + n + ".json");
+    let d = await r.json();
+
+    if (d) {
+      if (d.pass !== p) {
+        alert("Неправильний пароль!");
+        return;
+      }
+      user = d;
+    } else {
+      user = {name: n, pass: p, points: 0, lvl: 1, items: {gold_frame: false}};
+    }
+
+    items = user.items || {gold_frame: false};
+    save();
+    applyItems();
+    update();
+    show('menu');  // ← это было пропущено, теперь меню открывается после входа
+  } catch (e) {
+    alert("Помилка входу: " + e.message);
+  }
 }
 
 function save() { 
   user.items = items;
-  fetch(DB+user.name+".json", {method:'PUT', body:JSON.stringify(user)}); 
+  fetch(DB + user.name + ".json", {method: 'PUT', body: JSON.stringify(user)}); 
 }
 
 function update() { 
@@ -421,137 +443,72 @@ function update() {
 
 function applyItems() {
   let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
-  if(items.crown) nickDisplay += ' 👑';
-  if(items.fire) nickDisplay += ' 🔥';
-  if(items.shield) nickDisplay += ' 🛡️';
-  if(items.vip) nickDisplay += ' 💎 VIP';
+  if (items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  if (items.crown) nickDisplay += ' 👑';
+  if (items.fire) nickDisplay += ' 🔥';
+  if (items.shield) nickDisplay += ' 🛡️';
+  if (items.vip) nickDisplay += ' 💎 VIP';
   document.getElementById('playerNick').innerHTML = nickDisplay;
 }
 
 function show(id) { 
-  document.querySelectorAll('.screen').forEach(s=>s.style.display='none'); 
-  document.getElementById(id).style.display='block'; 
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); 
+  document.getElementById(id).style.display = 'flex'; 
 }
 
-function admT() { if(++cC >= 5) document.getElementById('admin-panel').style.display='block'; }
-function closeAdm() { document.getElementById('admin-panel').style.display='none'; cC = 0; }
-function toggleP() { pOn = !pOn; document.getElementById('pen-btn').innerText = pOn ? "ШТРАФИ: ВКЛ" : "ШТРАФИ: ВИКЛ"; document.getElementById('pen-btn').style.background = pOn ? "var(--red)" : "var(--green)"; }
+function admT() { 
+  if (++cC >= 5) document.getElementById('admin-panel').style.display = 'block'; 
+}
+
+function closeAdm() { 
+  document.getElementById('admin-panel').style.display = 'none'; 
+  cC = 0; 
+}
+
+function toggleP() { 
+  pOn = !pOn; 
+  document.getElementById('pen-btn').innerText = pOn ? "ШТРАФИ: ВКЛ" : "ШТРАФИ: ВИКЛ"; 
+  document.getElementById('pen-btn').style.background = pOn ? "var(--red)" : "var(--green)"; 
+}
+
 async function delU() {
   let n = document.getElementById('a-n').value.trim();
-  if(!n) return alert("Введіть нікнейм");
-  if(confirm(`Видалити ${n}?`)) await fetch(DB+n+".json", {method:'DELETE'}), alert("Видалено");
+  if (!n) return alert("Введіть нікнейм");
+  if (confirm(`Видалити ${n}?`)) {
+    await fetch(DB + n + ".json", {method: 'DELETE'});
+    alert("Видалено");
+  }
 }
+
 async function edO(add) {
   let n = document.getElementById('a-n').value.trim();
-  if(!n) return alert("Введіть ник");
+  if (!n) return alert("Введіть ник");
   let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
-  if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
+  if (isNaN(amt) || amt <= 0) return alert("Невірна сума");
   amt = parseInt(amt);
-  let r = await fetch(DB+n+".json"), d = await r.json();
-  if(!d) return alert("Гравця не знайдено");
+  let r = await fetch(DB + n + ".json");
+  let d = await r.json();
+  if (!d) return alert("Гравця не знайдено");
   d.points += add ? amt : -amt;
   d.points = Math.max(0, d.points);
-  await fetch(DB+n+".json", {method:'PUT', body:JSON.stringify(d)});
+  await fetch(DB + n + ".json", {method: 'PUT', body: JSON.stringify(d)});
   alert("Гроші оновлено");
 }
+
 async function loadPlayers() {
-  let r = await fetch(DB+".json"), d = await r.json(), list = document.getElementById('player-list');
+  let r = await fetch(DB + ".json");
+  let d = await r.json();
+  let list = document.getElementById('player-list');
   list.innerHTML = '';
-  if(!d || !Object.keys(d).length) return list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
-  for(let k in d){
+  if (!d || !Object.keys(d).length) {
+    list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
+    return;
+  }
+  for (let k in d) {
     let u = d[k];
     let div = document.createElement('div');
     div.style.cssText = 'padding:10px 12px;border-bottom:1px solid #444;display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:8px;margin-bottom:6px';
     div.innerHTML = `
       <div>
-        <strong>${u.name||k}</strong><br>
-        <small style="color:#555">Гроші: ${u.points||0} ₴ | Рівень: ${u.lvl||1}<br>Пароль: ${u.pass||'—'}</small>
-      </div>
-      <button class="btn" style="background:var(--red);width:auto;padding:8px 14px;font-size:13px" onclick="deletePlayer('${k.replace(/'/g,"\\'")}')">Видалити</button>
-    `;
-    list.appendChild(div);
-  }
-}
-async function deletePlayer(n) {
-  if(!confirm(`Видалити ${n}?`)) return;
-  let res = await fetch(DB+n+".json",{method:'DELETE'});
-  if(res.ok) { alert(`Видалено ${n}`); loadPlayers(); }
-  else alert("Помилка видалення");
-}
-function addQ() {
-  let q = document.getElementById('q-in').value.trim(), c = document.getElementById('c-in').value.trim(), w = document.getElementById('w-in').value.trim();
-  if(q && c && w){ customQ.push({t:q,cor:c,inc:w}); alert("Додано"); document.getElementById('q-in').value=document.getElementById('c-in').value=document.getElementById('w-in').value=''; }
-  else alert("Заповніть усі поля");
-}
-function buyItem(item) {
-  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
-  if(user.points >= prices[item]){
-    user.points -= prices[item];
-    items[item] = true;
-    applyItems();
-    save(); update();
-    alert("Куплено: " + item);
-  } else alert("Недостатньо грошей!");
-}
-function applyItems() {
-  let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
-  if(items.crown) nickDisplay += ' 👑';
-  if(items.fire) nickDisplay += ' 🔥';
-  if(items.shield) nickDisplay += ' 🛡️';
-  if(items.vip) nickDisplay += ' 💎 VIP';
-  document.getElementById('playerNick').innerHTML = nickDisplay;
-}
-function showThemes() {
-  show('themes');
-}
-function startTheme(theme) {
-  currentTheme = theme;
-  usedQuestions.clear();
-  renderL();
-  show('levels');
-}
-function renderL() {
-  let g = document.getElementById('lgrid'); g.innerHTML = '';
-  let maxLvl = 50;
-  for(let i=0;i<maxLvl;i++) g.innerHTML += `<div class="lvl ${i<user.lvl?'open':''}" onclick="start(${i})">${i+1}</div>`;
-}
-function start(i) {
-  if(i >= user.lvl) return;
-  let pool = currentTheme && themes[currentTheme] ? themes[currentTheme] : [...base, ...customQ];
-  if(i >= pool.length) return alert("Питання в темі закінчилися!");
-  let curr = pool[i];
-  document.getElementById('qtext').innerText = `Рівень ${i+1}: ${curr.t}`;
-  let b = document.getElementById('abox'); b.innerHTML = '';
-  [curr.cor, curr.inc].sort(()=>Math.random()-0.5).forEach(o=>{
-    let btn = document.createElement('button'); btn.className='btn'; btn.style.background='#444';
-    btn.innerText=o; btn.onclick=()=>check(o,curr.cor,i); b.appendChild(btn);
-  });
-  show('game');
-}
-function check(p,c,i){
-  if(p===c){
-    user.points+=1000;
-    if(i===user.lvl-1 && user.lvl<50) user.lvl++;
-    correctSound.currentTime = 0;
-    correctSound.play().catch(()=>{});
-    alert("ПРАВИЛЬНО!");
-  } else {
-    if(pOn) user.points = Math.max(0,user.points-150);
-    wrongSound.currentTime = 0;
-    wrongSound.play().catch(()=>{});
-    alert("❌");
-  }
-  save(); update(); renderL(); show('levels');
-}
-async function loadT() {
-  show('top'); let r=await fetch(DB+".json"), d=await r.json(), l=document.getElementById('tlist'); l.innerHTML='';
-  if(d) {
-    let topPlayers = Object.values(d).sort((a,b)=>b.points-a.points).slice(0,1000);
-    topPlayers.forEach((u,i)=>l.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points}</b></div>`);
-  } else l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
-}
-</script>
-</body>
-</html>
+        <strong>${u.name || k}</strong><br>
+        <small style="color:#555">Гроші: ${u.points || 0} 
