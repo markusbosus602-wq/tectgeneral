@@ -482,16 +482,12 @@ async function loadPlayers() {
   if(!d || !Object.keys(d).length) return list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
   for(let k in d){
     let u = d[k];
-    let div = document.createElement('div');
-    div.style.cssText = 'padding:10px 12px;border-bottom:1px solid #444;display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:8px;margin-bottom:6px';
-    div.innerHTML = `
-      <div>
-        <strong>${u.name||k}</strong><br>
-        <small style="color:#555">Гроші: ${u.points||0} ₴ | Рівень: ${u.lvl||1}<br>Пароль: ${u.pass||'—'}</small>
+    list.innerHTML += `
+      <div style="padding:8px;border-bottom:1px solid #ccc">
+        <strong>${u.name || k}</strong><br>
+        Баланс: ${u.points || 0} ₴ | Рівень: ${u.lvl || 1} | Пароль: ${u.pass || '—'}
       </div>
-      <button class="btn" style="background:var(--red);width:auto;padding:8px 14px;font-size:13px" onclick="deletePlayer('${k.replace(/'/g,"\\'")}')">Видалити</button>
     `;
-    list.appendChild(div);
   }
 }
 
