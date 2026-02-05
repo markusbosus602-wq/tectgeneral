@@ -482,27 +482,30 @@ async function edO(add) {
 }
 
 async function loadPlayers() {
-  let r = await fetch(DB+"users/.json"), d = await r.json(), list = document.getElementById('player-list');
+  let r = await fetch(DB + "users/.json"), d = await r.json(), list = document.getElementById('player-list');
   list.innerHTML = '';
-  if(!d || !Object.keys(d).length) {
+  if (!d || !Object.keys(d).length) {
     list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
     return;
   }
-  for(let k in d){
-    let u = d[k];
+  for (let key in d) {
+    let u = d[key];
+    let displayNick = u.name || key; // якщо є name — показуємо його, інакше ключ
     list.innerHTML += `
-      <div style="padding:10px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;">
+      <div style="padding:10px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <strong>${u.name || k}</strong><br>
-          <small>Юз: ${k}<br>Баланс: ${u.points || 0} ₴ | Рівень: ${u.lvl || 1} | Пароль: ${u.pass || '—'}</small>
+          <strong>${displayNick}</strong><br>
+          <small style="color:#555;">
+            Юз: <b>${key}</b><br>
+            Баланс: ${u.points || 0} ₴ | Рівень: ${u.lvl || 1} | Пароль: ${u.pass || '—'}
+          </small>
         </div>
-        <button class="btn danger" style="width:auto;padding:6px 12px;font-size:13px;" 
-                onclick="deleteUser('${k.replace(/'/g, "\\'")}')">ВИДАЛИТИ</button>
+        <button class="btn danger" style="width:auto; padding:6px 12px; font-size:13px;" 
+                onclick="deleteUser('${key.replace(/'/g, "\\'")}')">ВИДАЛИТИ</button>
       </div>
     `;
   }
 }
-
 async function deleteUser(username) {
   if(!confirm(`Видалити ${username}?`)) return;
   await fetch(DB+"users/"+username+".json", {method: 'DELETE'});
