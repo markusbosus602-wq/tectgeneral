@@ -22,11 +22,7 @@ body{background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/U
 .lvl.open{opacity:1;background:var(--blue);border:2px solid white;box-shadow:0 0 15px var(--blue);color:white}
 #admin-panel{border:2px dashed var(--red);padding:15px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px}
 input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;color:#000;width:90%;margin-bottom:8px}
-.shop-item{background:#eee;padding:12px;margin:8px 0;border-radius:10px;cursor:pointer}
-.shop-item.bought{background:#c8e6c9}
-.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.theme-btn{background:#9c27b0;color:white}
-.log-box{max-height:180px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
+.log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
 .log-entry{padding:4px 0;border-bottom:1px solid #eee}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
@@ -57,7 +53,7 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
       <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
 
       <p><b>Управління гравцями</b></p>
-      <input type="text" id="a-n" placeholder="Нік гравця (для ручного видалення)">
+      <input type="text" id="a-n" placeholder="Нік гравця">
       <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
       <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
       <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
@@ -65,13 +61,7 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
       <br><br>
       <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
 
-      <div id="player-list" style="max-height:300px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
-
-      <p>Додати питання:</p>
-      <input type="text" id="q-in" placeholder="Питання">
-      <input type="text" id="c-in" placeholder="Вірна відповідь">
-      <input type="text" id="w-in" placeholder="Хибна відповідь">
-      <button class="btn" style="background:var(--gold);color:#000" onclick="addQ()">ДОДАТИ ПИТАННЯ</button>
+      <div id="player-list" style="max-height:250px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
 
       <br><br>
       <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
@@ -79,23 +69,23 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
       <button class="btn" style="background:#ff9800" onclick="clearAdminLogs()">Очистити лог адмінки</button>
 
       <br><br>
-      <h4 style="color:var(--blue)">Лог всіх юзерів (з Telegram)</h4>
+      <h4 style="color:var(--blue)">Лог усіх входів у гру</h4>
       <div id="user-log" class="log-box">Завантаження...</div>
-      <button class="btn" style="background:#ff9800" onclick="loadUserLog()">Оновити лог юзерів</button>
-      <button class="btn" style="background:#ff9800" onclick="clearUserLog()">Очистити лог юзерів</button>
+      <button class="btn" style="background:#ff9800;margin-top:8px" onclick="loadUserLog()">Оновити</button>
+      <button class="btn danger" style="margin-top:8px" onclick="clearUserLog()">Очистити</button>
     </div>
   </div>
 </div>
 
 <div id="shop" class="screen">
   <div class="card">
-    <h2>Магазин (для топа)</h2>
+    <h2>Магазин</h2>
     <div class="shop-grid">
-      <div class="shop-item" id="gold_frame" onclick="buyItem('gold_frame')">Золота рамка навколо ніку — 1000 ₴</div>
-      <div class="shop-item" id="crown" onclick="buyItem('crown')">Корона над ніком — 2000 ₴</div>
-      <div class="shop-item" id="fire" onclick="buyItem('fire')">Полум'я біля ніку — 1500 ₴</div>
-      <div class="shop-item" id="shield" onclick="buyItem('shield')">Щит захисника — 2500 ₴</div>
-      <div class="shop-item" id="vip" onclick="buyItem('vip')">ВІП статус — 5000 ₴</div>
+      <div class="shop-item" id="gold_frame" onclick="buyItem('gold_frame')">Золота рамка — 1000 ₴</div>
+      <div class="shop-item" id="crown" onclick="buyItem('crown')">Корона — 2000 ₴</div>
+      <div class="shop-item" id="fire" onclick="buyItem('fire')">Полум'я — 1500 ₴</div>
+      <div class="shop-item" id="shield" onclick="buyItem('shield')">Щит — 2500 ₴</div>
+      <div class="shop-item" id="vip" onclick="buyItem('vip')">ВІП — 5000 ₴</div>
     </div>
     <button class="btn" onclick="show('menu')">НАЗАД</button>
   </div>
@@ -412,38 +402,22 @@ async function auth() {
   if(!n || !p) return alert("Введіть нікнейм та пароль");
   localStorage.setItem('un', n); localStorage.setItem('up', p);
 
-  // Лог юзера при входе
-  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user || {username: "немає TG"};
-  const ip = "не визначено"; // IP можна отримати тільки на сервері, тут заглушка
-  const geo = "не визначено"; // Геолокація теж на сервері
-  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+  const tg = window.Telegram?.WebApp?.initDataUnsafe?.user || {username:"немає",id:"немає"};
+  const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
+  const entry = {game_nick:n,tg_username:tg.username||"немає",tg_id:tg.id||"немає",time:now};
 
-  const entry = {
-    game_nick: n,
-    tg_username: tgUser.username || "немає TG",
-    tg_id: tgUser.id || "немає ID",
-    time: now,
-    ip: ip,
-    geo: geo
-  };
+  await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify(entry)});
 
-  await fetch(DB + "user_log.json", {
-    method: 'POST',
-    body: JSON.stringify(entry)
-  });
-
-  let r = await fetch(DB+n+".json"), d = await r.json();
+  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
   user = d || {name:n, pass:p, points:0, lvl:1, items:{gold_frame:false}};
   if(d && d.pass !== p) return alert("Неправильний пароль!");
   items = user.items || {gold_frame:false};
-  save(); 
-  applyItems();
-  update(); show('menu');
+  save(); applyItems(); update(); show('menu');
 }
 
 function save() { 
   user.items = items;
-  fetch(DB+user.name+".json", {method:'PUT', body:JSON.stringify(user)}); 
+  fetch(DB+"users/"+user.name+".json", {method:'PUT', body:JSON.stringify(user)}); 
 }
 
 function update() { 
@@ -470,6 +444,7 @@ function admT() {
     document.getElementById('admin-panel').style.display='block';
     logAdminAccess();
     loadAdminLogs();
+    loadUserLog();
   }
 }
 
@@ -485,7 +460,7 @@ async function delU() {
   let n = document.getElementById('a-n').value.trim();
   if(!n) return alert("Введіть нікнейм");
   if(confirm(`Видалити ${n}?`)) {
-    await fetch(DB+n+".json", {method:'DELETE'});
+    await fetch(DB+"users/"+n+".json", {method:'DELETE'});
     alert("Видалено");
     loadPlayers();
   }
@@ -497,17 +472,17 @@ async function edO(add) {
   let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
   if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
   amt = parseInt(amt);
-  let r = await fetch(DB+n+".json"), d = await r.json();
+  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
   if(!d) return alert("Гравця не знайдено");
   d.points += add ? amt : -amt;
   d.points = Math.max(0, d.points);
-  await fetch(DB+n+".json", {method:'PUT', body:JSON.stringify(d)});
+  await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(d)});
   alert("Гроші оновлено");
   loadPlayers();
 }
 
 async function loadPlayers() {
-  let r = await fetch(DB+".json"), d = await r.json(), list = document.getElementById('player-list');
+  let r = await fetch(DB+"users/.json"), d = await r.json(), list = document.getElementById('player-list');
   list.innerHTML = '';
   if(!d || !Object.keys(d).length) {
     list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
@@ -529,9 +504,9 @@ async function loadPlayers() {
 }
 
 async function deleteUser(username) {
-  if(!confirm(`Точно видалити користувача ${username}? Це незворотно!`)) return;
-  await fetch(DB + username + ".json", {method: 'DELETE'});
-  alert(`Користувач ${username} видалений`);
+  if(!confirm(`Видалити ${username}?`)) return;
+  await fetch(DB+"users/"+username+".json", {method: 'DELETE'});
+  alert(`Видалено ${username}`);
   loadPlayers();
 }
 
@@ -600,7 +575,7 @@ function check(p,c,i){
 }
 
 async function loadT() {
-  show('top'); let r=await fetch(DB+".json"), d=await r.json(), l=document.getElementById('tlist'); l.innerHTML='';
+  show('top'); let r=await fetch(DB+"users/.json"), d=await r.json(), l=document.getElementById('tlist'); l.innerHTML='';
   if(d) {
     let topPlayers = Object.values(d).sort((a,b)=>b.points-a.points).slice(0,1000);
     topPlayers.forEach((u,i)=>l.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points}</b></div>`);
@@ -611,10 +586,7 @@ async function logAdminAccess() {
   if (user.name !== "Марк Девіцький") return;
   const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
   const entry = { nick: user.name, time: now };
-  await fetch(DB + "admin_logs.json", {
-    method: 'POST',
-    body: JSON.stringify(entry)
-  });
+  await fetch(DB + "admin_logs.json", {method: 'POST', body: JSON.stringify(entry)});
 }
 
 async function loadAdminLogs() {
@@ -636,10 +608,35 @@ async function loadAdminLogs() {
 }
 
 async function clearAdminLogs() {
-  if (!confirm("Очистити весь лог входів?")) return;
+  if (!confirm("Очистити лог адмінки?")) return;
   await fetch(DB + "admin_logs.json", {method: 'DELETE'});
   loadAdminLogs();
-  alert("Лог очищено");
+  alert("Лог адмінки очищено");
+}
+
+async function loadUserLog() {
+  try {
+    let r = await fetch(DB + "user_logs.json");
+    let data = await r.json();
+    let logDiv = document.getElementById('user-log');
+    logDiv.innerHTML = '';
+    if (data) {
+      Object.values(data).reverse().slice(0,100).forEach(entry => {
+        logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${entry.game_nick}</b> (TG: @${entry.tg_username})</div>`;
+      });
+    } else {
+      logDiv.innerHTML = 'Лог порожній';
+    }
+  } catch (e) {
+    document.getElementById('user-log').innerHTML = 'Помилка завантаження';
+  }
+}
+
+async function clearUserLog() {
+  if (!confirm("Очистити лог усіх входів?")) return;
+  await fetch(DB + "user_logs.json", {method: 'DELETE'});
+  loadUserLog();
+  alert("Лог входів очищено");
 }
 </script>
 </body>
