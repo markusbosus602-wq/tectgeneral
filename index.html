@@ -76,7 +76,13 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
       <br><br>
       <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
       <div id="admin-log" class="log-box">Завантаження...</div>
-      <button class="btn" style="background:#ff9800" onclick="clearAdminLogs()">Очистити лог</button>
+      <button class="btn" style="background:#ff9800" onclick="clearAdminLogs()">Очистити лог адмінки</button>
+
+      <br><br>
+      <h4 style="color:var(--blue)">Лог всіх юзерів (з Telegram)</h4>
+      <div id="user-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800" onclick="loadUserLog()">Оновити лог юзерів</button>
+      <button class="btn" style="background:#ff9800" onclick="clearUserLog()">Очистити лог юзерів</button>
     </div>
   </div>
 </div>
@@ -112,7 +118,7 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 <div id="top" class="screen"><div class="card"><h3>ТОП 1000</h3><div id="tlist"></div><button class="btn" onclick="show('menu')">НАЗАД</button></div></div>
 
 <script>
-const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/users/";
+const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
 let user = null, cC = 0, pOn = true, customQ = [], usedQuestions = new Set();
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
 let currentTheme = '';
@@ -405,6 +411,27 @@ async function auth() {
   let n = document.getElementById('nick').value.trim(), p = document.getElementById('pass').value.trim();
   if(!n || !p) return alert("Введіть нікнейм та пароль");
   localStorage.setItem('un', n); localStorage.setItem('up', p);
+
+  // Лог юзера при входе
+  const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user || {username: "немає TG"};
+  const ip = "не визначено"; // IP можна отримати тільки на сервері, тут заглушка
+  const geo = "не визначено"; // Геолокація теж на сервері
+  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+
+  const entry = {
+    game_nick: n,
+    tg_username: tgUser.username || "немає TG",
+    tg_id: tgUser.id || "немає ID",
+    time: now,
+    ip: ip,
+    geo: geo
+  };
+
+  await fetch(DB + "user_log.json", {
+    method: 'POST',
+    body: JSON.stringify(entry)
+  });
+
   let r = await fetch(DB+n+".json"), d = await r.json();
   user = d || {name:n, pass:p, points:0, lvl:1, items:{gold_frame:false}};
   if(d && d.pass !== p) return alert("Неправильний пароль!");
@@ -584,7 +611,7 @@ async function logAdminAccess() {
   if (user.name !== "Марк Девіцький") return;
   const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
   const entry = { nick: user.name, time: now };
-  await fetch("https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/admin_logs.json", {
+  await fetch(DB + "admin_logs.json", {
     method: 'POST',
     body: JSON.stringify(entry)
   });
@@ -592,7 +619,7 @@ async function logAdminAccess() {
 
 async function loadAdminLogs() {
   try {
-    let r = await fetch("https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/admin_logs.json");
+    let r = await fetch(DB + "admin_logs.json");
     let data = await r.json();
     let logDiv = document.getElementById('admin-log');
     logDiv.innerHTML = '';
@@ -610,7 +637,7 @@ async function loadAdminLogs() {
 
 async function clearAdminLogs() {
   if (!confirm("Очистити весь лог входів?")) return;
-  await fetch("https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/admin_logs.json", {method: 'DELETE'});
+  await fetch(DB + "admin_logs.json", {method: 'DELETE'});
   loadAdminLogs();
   alert("Лог очищено");
 }
