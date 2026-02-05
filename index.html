@@ -8,7 +8,7 @@
 :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
 body{margin:0;padding:0;font-family:sans-serif;color:#000;background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/2560px-Flag_of_Ukraine.svg.png') no-repeat center center fixed;background-size:cover;min-height:100vh;position:relative}
 body::before{content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.75);z-index:-2}
-.screen{display:none;padding:20px;flex-direction:column;min-height:calc(100vh - 120px);box-sizing:border-box;position:relative;z-index:1}
+.screen{display:none;padding:20px;flex-direction:column;min-height:100vh;box-sizing:border-box;position:relative;z-index:1}
 .active{display:flex;animation:fadeIn .3s ease}
 .card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3);position:relative;z-index:2}
 .btn{background:var(--blue);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;width:100%;margin:6px 0;cursor:pointer;text-transform:uppercase;transition:all .2s}
@@ -28,9 +28,6 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 .theme-btn{background:#9c27b0;color:white}
 .log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
 .log-entry{padding:4px 0;border-bottom:1px solid #eee}
-#footer{position:fixed;bottom:0;left:0;right:0;background:rgba(30,30,36,0.95);color:#fff;padding:10px;text-align:center;font-size:14px;border-top:1px solid #444;z-index:1000}
-#footer .my-info{font-weight:bold;color:var(--gold)}
-#footer .top10{margin-top:6px}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
@@ -114,11 +111,6 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 <div id="game" class="screen"><div class="card"><h3 id="qtext"></h3><div id="abox"></div></div></div>
 <div id="top" class="screen"><div class="card"><h3>ТОП 1000</h3><div id="tlist"></div><button class="btn" onclick="show('menu')">НАЗАД</button></div></div>
 
-<div id="footer">
-  <div class="my-info" id="myResult">Твій нік: — | Очки: 0 | Рівень: 1</div>
-  <div class="top10" id="top10">Топ-10 завантажується...</div>
-</div>
-
 <script>
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
 let user = null, cC = 0, pOn = true, customQ = [], usedQuestions = new Set();
@@ -136,7 +128,6 @@ document.addEventListener('click', () => {
 window.onload = () => {
   if(localStorage.getItem('un')) document.getElementById('nick').value = localStorage.getItem('un');
   if(localStorage.getItem('up')) document.getElementById('pass').value = localStorage.getItem('up');
-  loadFooterInfo();
 };
 
 const base = [
@@ -242,7 +233,6 @@ async function auth() {
   if(d && d.pass !== p) return alert("Неправильний пароль!");
   items = user.items || {gold_frame:false};
   save(); applyItems(); update(); show('menu');
-  loadFooterInfo();
 }
 
 function save() { 
@@ -252,7 +242,6 @@ function save() {
 
 function update() { 
   document.getElementById('mon').innerText = user.points.toLocaleString(); 
-  loadFooterInfo();
 }
 
 function applyItems() {
@@ -411,7 +400,6 @@ function check(p,c,i){
     alert("❌");
   }
   save(); update(); renderL(); show('levels');
-  loadFooterInfo();
 }
 
 async function loadT() {
@@ -477,27 +465,6 @@ async function clearUserLog() {
   await fetch(DB + "user_logs.json", {method: 'DELETE'});
   loadUserLog();
   alert("Лог входів очищено");
-}
-
-async function loadFooterInfo() {
-  let myDiv = document.getElementById('myResult');
-  let topDiv = document.getElementById('top10');
-
-  if(user){
-    myDiv.innerHTML = `Твій нік: ${user.name} | Очки: ${user.points.toLocaleString()} | Рівень: ${user.lvl}`;
-  }
-
-  try {
-    let r = await fetch(DB+"users/.json"), d = await r.json();
-    if(d){
-      let top = Object.values(d).sort((a,b)=>b.points - a.points).slice(0,10);
-      topDiv.innerHTML = "Топ-10:<br>" + top.map((u,i)=>`${i+1}. ${u.name || '—'} — ${u.points} очок`).join("<br>");
-    } else {
-      topDiv.innerHTML = "Топ порожній";
-    }
-  } catch(e){
-    topDiv.innerHTML = "Помилка завантаження топу";
-  }
 }
 </script>
 </body>
