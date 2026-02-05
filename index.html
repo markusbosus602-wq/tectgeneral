@@ -6,14 +6,7 @@
 <title>UkrMova Pro</title>
 <style>
 :root{--blue:#00a2ff;--card:#1e1e24;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f}
-body{
-  background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;
-  background-size:160px;
-  color:#000;
-  font-family:sans-serif;
-  margin:0;
-  text-align:center;
-}
+body{background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;background-size:160px;color:#000;font-family:sans-serif;margin:0;text-align:center}
 .screen{display:none;padding:20px;flex-direction:column;min-height:100vh;box-sizing:border-box}
 .active{display:flex;animation:fadeIn .3s ease}
 .card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3)}
@@ -190,8 +183,7 @@ const themes = {
     {t:"До якої відміни належить слово «сон»?",cor:"друга відміна",inc:"перша відміна"},
     {t:"До якої відміни належить слово «ніч» у множині?",cor:"третя відміна",inc:"друга відміна"},
     {t:"До якої відміни належить слово «руки»?",cor:"перша відміна",inc:"третя відміна"},
-    {t:"До якої відміни належить слово «очі»?",cor:"третя відміна",inc:"друга відміна"},
-    {t:"До якої відміни належить слово «дерево»?",cor:"друга відміна",inc:"третя відміна"}
+    {t:"До якої відміни належить слово «очі»?",cor:"третя відміна",inc:"друга відміна"}
   ],
   chasyslova: [
     {t:"Який час дієслова «читати» у реченні «Я читав книгу»?",cor:"минулий час",inc:"теперішній час"},
@@ -491,13 +483,6 @@ async function loadPlayers() {
   }
 }
 
-async function deletePlayer(n) {
-  if(!confirm(`Видалити ${n}?`)) return;
-  let res = await fetch(DB+n+".json",{method:'DELETE'});
-  if(res.ok) { alert(`Видалено ${n}`); loadPlayers(); }
-  else alert("Помилка видалення");
-}
-
 function addQ() {
   let q = document.getElementById('q-in').value.trim(), c = document.getElementById('c-in').value.trim(), w = document.getElementById('w-in').value.trim();
   if(q && c && w){ customQ.push({t:q,cor:c,inc:w}); alert("Додано"); document.getElementById('q-in').value=document.getElementById('c-in').value=document.getElementById('w-in').value=''; }
@@ -552,7 +537,7 @@ function check(p,c,i){
     if(i===user.lvl-1 && user.lvl<50) user.lvl++;
     correctSound.currentTime = 0;
     correctSound.play().catch(()=>{});
-    alert("ВІРНО!");
+    alert("ПРАВИЛЬНО!");
   } else {
     if(pOn) user.points = Math.max(0,user.points-150);
     wrongSound.currentTime = 0;
