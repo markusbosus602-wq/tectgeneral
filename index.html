@@ -5,35 +5,101 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>UkrMova Pro</title>
 <style>
-:root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
-body{margin:0;padding:0;font-family:sans-serif;color:#000;background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/2560px-Flag_of_Ukraine.svg.png') no-repeat center center fixed;background-size:cover;min-height:100vh;position:relative}
-body::before{content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.75);z-index:-2}
-.screen{display:none;padding:20px;flex-direction:column;min-height:100vh;box-sizing:border-box;position:relative;z-index:1}
-.active{display:flex;animation:fadeIn .3s ease}
-.card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3);position:relative;z-index:2}
-.btn{background:var(--blue);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;width:100%;margin:6px 0;cursor:pointer;text-transform:uppercase;transition:all .2s}
-.btn:hover{transform:scale(1.02);box-shadow:0 0 15px rgba(0,162,255,.6)}
-.btn.green{background:var(--green)}
-.btn.danger{background:var(--dark)}
-.money{font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 10px #f1c40f}
-.nickname{font-size:28px;font-weight:bold;margin:10px 0;cursor:pointer}
-.gold-nick{color:var(--gold);text-shadow:0 0 10px var(--gold)}
-.lvl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-height:40vh;overflow-y:auto;padding:10px}
-.lvl{background:rgba(51,51,51,0.7);padding:12px 0;border-radius:10px;opacity:0.6;transition:all .3s;border:1px solid #ccc}
-.lvl.open{opacity:1;background:var(--blue);border:2px solid white;box-shadow:0 0 15px var(--blue);color:white}
-#admin-panel{border:2px dashed var(--red);padding:15px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px}
-input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;color:#000;width:90%;margin-bottom:8px}
-.shop-item{background:#eee;padding:12px;margin:8px 0;border-radius:10px;cursor:pointer}
-.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.theme-btn{background:#9c27b0;color:white}
-.log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
-.log-entry{padding:4px 0;border-bottom:1px solid #eee}
-#bot-chat-box{max-height:300px;overflow-y:auto;border:1px solid #ccc;padding:15px;margin:15px 0;background:rgba(255,255,255,0.8);border-radius:10px}
-.bot-msg{padding:10px;margin:8px 0;background:#e3f2fd;border-radius:10px;max-width:80%;text-align:left}
-#bot-chat-input{display:flex;gap:10px;margin-top:10px}
-#bot-chat-input input{flex:1;padding:10px;border:1px solid #ccc;border-radius:8px}
-#bot-chat-input button{padding:10px 20px}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+:root {
+  --blue: #00a2ff;
+  --red: #ff4d4d;
+  --green: #2ecc71;
+  --gold: #f1c40f;
+  --dark: #d32f2f;
+}
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  color: #000;
+  background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/2560px-Flag_of_Ukraine.svg.png') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.75);
+  z-index: -2;
+}
+.screen {
+  display: none;
+  padding: 20px;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+.active { display: flex; animation: fadeIn .3s ease; }
+.card {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid #444;
+  margin: auto;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+.btn {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 700;
+  width: 100%;
+  margin: 6px 0;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .2s;
+}
+.btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,162,255,.6); }
+.btn.green { background: var(--green); }
+.btn.danger { background: var(--dark); }
+.money { font-size: 32px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px #f1c40f; }
+.nickname { font-size: 28px; font-weight: bold; margin: 10px 0; cursor: pointer; }
+.gold-nick { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+.lvl-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; max-height: 40vh; overflow-y: auto; padding: 10px; }
+.lvl { background: rgba(51,51,51,0.7); padding: 12px 0; border-radius: 10px; opacity: 0.6; transition: all .3s; border: 1px solid #ccc; }
+.lvl.open { opacity: 1; background: var(--blue); border: 2px solid white; box-shadow: 0 0 15px var(--blue); color: white; }
+#admin-panel { border: 2px dashed var(--red); padding: 15px; margin-top: 15px; display: none; background: rgba(255,255,255,0.92); text-align: left; border-radius: 15px; }
+input { background: #f5f5f5; border: 1px solid #444; padding: 10px; border-radius: 8px; color: #000; width: 90%; margin-bottom: 8px; }
+.shop-item { background: #eee; padding: 12px; margin: 8px 0; border-radius: 10px; cursor: pointer; }
+.shop-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+.theme-btn { background: #9c27b0; color: white; }
+.log-box { max-height: 220px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin: 10px 0; background: #f8f8f8; border-radius: 8px; }
+.log-entry { padding: 4px 0; border-bottom: 1px solid #eee; }
+#bot-chat-box {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 15px;
+  margin: 15px 0;
+  background: rgba(255,255,255,0.8);
+  border-radius: 10px;
+}
+.bot-msg {
+  padding: 10px;
+  margin: 8px 0;
+  background: #e3f2fd;
+  border-radius: 10px;
+  max-width: 80%;
+  text-align: left;
+}
+#bot-chat-input { display: flex; gap: 10px; margin-top: 10px; }
+#bot-chat-input input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+#bot-chat-input button { padding: 10px 20px; }
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
 </style>
 </head>
 <body>
@@ -88,10 +154,13 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 
       <br><br>
       <h4 style="color:var(--blue)">Написати від імені бота (всім)</h4>
-      <div id="bot-chat-input">
-        <input type="text" id="bot-message" placeholder="Текст повідомлення...">
+      <div style="display:flex;gap:10px;">
+        <input type="text" id="bot-message" placeholder="Текст повідомлення..." style="flex:1;">
         <button class="btn" onclick="sendBotMessage()">Відправити</button>
       </div>
+
+      <br>
+      <button class="btn danger" onclick="clearBotChat()">Очистити весь чат бота</button>
     </div>
   </div>
 </div>
@@ -151,10 +220,7 @@ const base = [
 ];
 
 const themes = {
-  vydminy: [
-    {t:"До якої відміни належить слово «книга»?",cor:"перша відміна",inc:"друга відміна"},
-    {t:"До якої відміни належить слово «стіл»?",cor:"друга відміна",inc:"перша відміна"}
-  ],
+  vydminy: base,
   chasyslova: [],
   prykmetnyky: [],
   pryslinniky: [],
@@ -162,20 +228,24 @@ const themes = {
 };
 
 async function auth() {
-  let n = document.getElementById('nick').value.trim(), p = document.getElementById('pass').value.trim();
+  let n = document.getElementById('nick').value.trim();
+  let p = document.getElementById('pass').value.trim();
   if(!n || !p) return alert("Введіть нікнейм та пароль");
-  localStorage.setItem('un', n); localStorage.setItem('up', p);
+  localStorage.setItem('un', n);
+  localStorage.setItem('up', p);
 
-  const tg = window.Telegram?.WebApp?.initDataUnsafe?.user || {username:"немає",id:"немає"};
   const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
-  const entry = {game_nick:n,tg_username:tg.username||"немає",tg_id:tg.id||"немає",time:now};
-  await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify(entry)});
+  await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({nick:n,time:now})});
 
-  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
+  let r = await fetch(DB+"users/"+n+".json");
+  let d = await r.json();
   user = d || {name:n, pass:p, points:0, lvl:1, items:{gold_frame:false}};
   if(d && d.pass !== p) return alert("Неправильний пароль!");
   items = user.items || {gold_frame:false};
-  save(); applyItems(); update(); show('menu');
+  save();
+  applyItems();
+  update();
+  show('menu');
 }
 
 function save() { 
@@ -206,7 +276,6 @@ function show(id) {
 function admT() { 
   if(++cC >= 5) {
     document.getElementById('admin-panel').style.display='block';
-    logAdminAccess();
     loadAdminLogs();
     loadUserLog();
     loadPlayers();
@@ -239,7 +308,7 @@ async function edO(add) {
   amt = parseInt(amt);
   let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
   if(!d) return alert("Гравця не знайдено");
-  d.points += add ? amt : -amt;
+  d.points = (d.points || 0) + (add ? amt : -amt);
   d.points = Math.max(0, d.points);
   await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(d)});
   alert("Гроші оновлено");
@@ -255,27 +324,22 @@ async function loadPlayers() {
   }
   for (let key in d) {
     let u = d[key];
-    let displayNick = u.name || key;
     list.innerHTML += `
-      <div style="padding:10px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+      <div style="padding:10px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <strong>${displayNick}</strong><br>
-          <small style="color:#555;">
-            Юз: <b>${key}</b><br>
-            Баланс: ${u.points || 0} ₴ | Рівень: ${u.lvl || 1} | Пароль: ${u.pass || '—'}
-          </small>
+          <strong>${u.name || key}</strong><br>
+          <small>Юз: ${key} | Баланс: ${u.points || 0} ₴ | Рівень: ${u.lvl || 1}</small>
         </div>
-        <button class="btn danger" style="width:auto; padding:6px 12px; font-size:13px;" 
-                onclick="deleteUser('${key.replace(/'/g, "\\'")}')">ВИДАЛИТИ</button>
+        <button class="btn danger" style="width:auto;padding:6px 12px;" onclick="deleteUser('${key}')">ВИДАЛИТИ</button>
       </div>
     `;
   }
 }
 
-async function deleteUser(username) {
-  if(!confirm(`Видалити ${username}?`)) return;
-  await fetch(DB+"users/"+username+".json", {method: 'DELETE'});
-  alert(`Видалено ${username}`);
+async function deleteUser(key) {
+  if(!confirm(`Видалити ${key}?`)) return;
+  await fetch(DB+"users/"+key+".json", {method:'DELETE'});
+  alert("Видалено");
   loadPlayers();
 }
 
@@ -296,7 +360,6 @@ function showThemes() {
 
 function startTheme(theme) {
   currentTheme = theme;
-  usedQuestions.clear();
   renderL();
   show('levels');
 }
@@ -309,29 +372,28 @@ function renderL() {
 
 function start(i) {
   if(i >= user.lvl) return;
-  let pool = currentTheme && themes[currentTheme] ? themes[currentTheme] : [...base, ...customQ];
-  if(i >= pool.length) return alert("Питання в темі закінчилися!");
+  let pool = themes[currentTheme] || base;
+  if(i >= pool.length) return alert("Питання закінчилися!");
   let curr = pool[i];
   document.getElementById('qtext').innerText = `Рівень ${i+1}: ${curr.t}`;
   let b = document.getElementById('abox'); b.innerHTML = '';
   [curr.cor, curr.inc].sort(()=>Math.random()-0.5).forEach(o=>{
-    let btn = document.createElement('button'); btn.className='btn'; btn.style.background='#444';
-    btn.innerText=o; btn.onclick=()=>check(o,curr.cor,i); b.appendChild(btn);
+    let btn = document.createElement('button');
+    btn.className='btn'; btn.style.background='#444';
+    btn.innerText=o;
+    btn.onclick=()=>check(o===curr.cor,i);
+    b.appendChild(btn);
   });
   show('game');
 }
 
-function check(p,c,i){
-  if(p===c){
+function check(correct, level){
+  if(correct){
     user.points+=1000;
-    if(i===user.lvl-1 && user.lvl<50) user.lvl++;
+    if(level===user.lvl-1 && user.lvl<50) user.lvl++;
     correctSound.currentTime = 0;
     correctSound.play().catch(()=>{});
     alert("ПРАВИЛЬНО!");
-
-    if([10,20,30,40,50].includes(user.lvl)){
-      alert(`Вітаю! Ти пройшов рівень ${user.lvl}\nРезультат: ${user.points} очок`);
-    }
   } else {
     if(pOn) user.points = Math.max(0,user.points-150);
     wrongSound.currentTime = 0;
@@ -342,68 +404,13 @@ function check(p,c,i){
 }
 
 async function loadT() {
-  show('top'); let r=await fetch(DB+"users/.json"), d=await r.json(), l=document.getElementById('tlist'); l.innerHTML='';
+  show('top');
+  let r = await fetch(DB+"users/.json"), d = await r.json(), l = document.getElementById('tlist');
+  l.innerHTML = '';
   if(d) {
-    let topPlayers = Object.values(d).sort((a,b)=>b.points-a.points).slice(0,1000);
-    topPlayers.forEach((u,i)=>l.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points}</b></div>`);
+    let top = Object.values(d).sort((a,b)=>b.points-a.points).slice(0,1000);
+    top.forEach((u,i)=>l.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points}</b></div>`);
   } else l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
-}
-
-async function logAdminAccess() {
-  if (user.name !== "Марк Девіцький") return;
-  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-  const entry = { nick: user.name, time: now };
-  await fetch(DB + "admin_logs.json", {method: 'POST', body: JSON.stringify(entry)});
-}
-
-async function loadAdminLogs() {
-  try {
-    let r = await fetch(DB + "admin_logs.json");
-    let data = await r.json();
-    let logDiv = document.getElementById('admin-log');
-    logDiv.innerHTML = '';
-    if (data) {
-      Object.values(data).reverse().forEach(log => {
-        logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
-      });
-    } else {
-      logDiv.innerHTML = 'Лог порожній';
-    }
-  } catch (e) {
-    document.getElementById('admin-log').innerHTML = 'Помилка завантаження логу';
-  }
-}
-
-async function clearAdminLogs() {
-  if (!confirm("Очистити лог адмінки?")) return;
-  await fetch(DB + "admin_logs.json", {method: 'DELETE'});
-  loadAdminLogs();
-  alert("Лог адмінки очищено");
-}
-
-async function loadUserLog() {
-  try {
-    let r = await fetch(DB + "user_logs.json");
-    let data = await r.json();
-    let logDiv = document.getElementById('user-log');
-    logDiv.innerHTML = '';
-    if (data) {
-      Object.values(data).reverse().slice(0,100).forEach(entry => {
-        logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${entry.game_nick}</b> (TG: @${entry.tg_username})</div>`;
-      });
-    } else {
-      logDiv.innerHTML = 'Лог порожній';
-    }
-  } catch (e) {
-    document.getElementById('user-log').innerHTML = 'Помилка завантаження';
-  }
-}
-
-async function clearUserLog() {
-  if (!confirm("Очистити лог усіх входів?")) return;
-  await fetch(DB + "user_logs.json", {method: 'DELETE'});
-  loadUserLog();
-  alert("Лог входів очищено");
 }
 
 async function sendBotMessage() {
@@ -411,12 +418,9 @@ async function sendBotMessage() {
   if (!msg) return;
 
   const now = new Date().toLocaleString('uk-UA', {timeZone: 'Europe/Kyiv'});
-  const entry = { text: msg, time: now, from: "BOT" };
+  const entry = { text: msg, time: now };
 
-  await fetch(DB + "bot_chat.json", {
-    method: 'POST',
-    body: JSON.stringify(entry)
-  });
+  await fetch(DB + "bot_chat.json", { method: 'POST', body: JSON.stringify(entry) });
 
   document.getElementById('bot-message').value = '';
   loadBotChat();
@@ -437,6 +441,13 @@ async function loadBotChat() {
     });
     box.scrollTop = box.scrollHeight;
   }
+}
+
+async function clearBotChat() {
+  if (!confirm("Очистити весь чат бота? Це видалить усі повідомлення назавжди")) return;
+  await fetch(DB + "bot_chat.json", {method: 'DELETE'});
+  loadBotChat();
+  alert("Чат очищено!");
 }
 
 setInterval(() => {
