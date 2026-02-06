@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Адмін Консоль — UkrMova</title>
+<style>
+  body {
+    margin:0;
+    padding:20px;
+    background:#000;
+    color:#0f0;
+    font-family:'Courier New',monospace;
+    font-size:16px;
+    line-height:1.4;
+  }
+  h1 {color:#0f0;text-shadow:0 0 10px #0f0;}
+  button {
+    background:#0a0;
+    color:#000;
+    border:2px solid #0f0;
+    padding:8px 16px;
+    margin:6px;
+    font-family:inherit;
+    cursor:pointer;
+  }
+  button:hover {background:#0f0;color:#000;}
+  pre {white-space:pre-wrap;background:#111;padding:12px;border:1px solid #0f0;border-radius:4px;}
+  #output {min-height:400px;max-height:80vh;overflow-y:auto;}
+</style>
+</head>
+<body>
+
+<h1>АДМІН КОНСОЛЬ — UKRMOVA PRO</h1>
+
+<button onclick="getPlayers()">Список усіх гравців</button>
+<button onclick="getBotChat()">Показати чат бота</button>
+<button onclick="clearBotChat()">Очистити чат бота</button>
+<button onclick="getUserLogs()">Лог входів гравців</button>
+<button onclick="getAdminLogs()">Лог адмін-дій</button>
+<button onclick="clearScreen()">Очистити екран</button>
+
+<div id="output"><pre>Готовий до команд...</pre></div>
+
+<script>
+const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
+
+async function fetchData(path) {
+  try {
+    let res = await fetch(DB + path + ".json");
+    return await res.json() || {};
+  } catch(e) {
+    return {error: e.message};
+  }
+}
+
+function print(text) {
+  let out = document.getElementById("output");
+  let pre = document.createElement("pre");
+  pre.textContent = text;
+  out.appendChild(pre);
+  out.scrollTop = out.scrollHeight;
+}
+
+async function getPlayers() {
+  let data = await fetchData("users");
+  print("=== УСІ ГРАВЦІ ===");
+  if (Object.keys(data).length === 0) return print("Гравців немає");
+  for (let uid in data) {
+    let u = data[uid];
+    print(`Юз: ${uid}\nНік: ${u.name||'—'}\nГроші: ${u.points||0} ₴\nРівень: ${u.lvl||1}\nПароль: ${u.pass||'—'}\n───────────────────────`);
+  }
+}
+
+async function getBotChat() {
+  let data = await fetchData("bot_chat");
+  print("=== ЧАТ БОТА ===");
+  if (Object.keys(data).length === 0) return print("Повідомлень немає");
+  for (let key in data) {
+    let m = data[key];
+    print(`[${m.time}] БОТ: ${m.text}`);
+  }
+}
+
+async function clearBotChat() {
+  if (!confirm("Очистити чат бота?")) return;
+  await fetch(DB + "bot_chat.json", {method: "DELETE"});
+  print("Чат бота очищено");
+}
+
+async function getUserLogs() {
+  let data = await fetchData("user_logs");
+  print("=== ЛОГ ВХОДІВ ГРАВЦІВ ===");
+  if (Object.keys(data).length === 0) return print("Записів немає");
+  for (let key in data) {
+    let l = data[key];
+    print(`${l.time} → ${l.game_nick} (${l.tg_username||'немає TG'})`);
+  }
+}
+
+async function getAdminLogs() {
+  let data = await fetchData("admin_logs");
+  print("=== ЛОГ АДМІН ДІЙ ===");
+  if (Object.keys(data).length === 0) return print("Записів немає");
+  for (let key in data) {
+    let l = data[key];
+    print(`${l.time} → ${l.nick}`);
+  }
+}
+
+function clearScreen() {
+  document.getElementById("output").innerHTML = '<pre>Екран очищено...</pre>';
+}
+</script>
+</body>
+</html>
