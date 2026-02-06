@@ -5,177 +5,68 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>UkrMova Pro</title>
 <style>
-:root {
-  --blue: #00a2ff;
-  --red: #ff4d4d;
-  --green: #2ecc71;
-  --gold: #f1c40f;
-  --dark: #d32f2f;
-}
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-  color: #000;
-  background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/2560px-Flag_of_Ukraine.svg.png') no-repeat center center fixed;
-  background-size: cover;
-  min-height: 100vh;
-  position: relative;
-}
-body::before {
-  content: "";
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255,255,255,0.75);
-  z-index: -2;
-}
-.screen {
-  display: none;
-  padding: 20px;
-  flex-direction: column;
-  min-height: 100vh;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 1;
-}
-.active { display: flex; animation: fadeIn .3s ease; }
-.card {
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(10px);
-  padding: 20px;
-  border-radius: 20px;
-  border: 1px solid #444;
-  margin: auto;
-  width: 100%;
-  max-width: 450px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
-}
-.btn {
-  background: var(--blue);
-  color: #fff;
-  border: none;
-  padding: 14px;
-  border-radius: 12px;
-  font-weight: 700;
-  width: 100%;
-  margin: 6px 0;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: all .2s;
-}
-.btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,162,255,.6); }
-.btn.green { background: var(--green); }
-.btn.danger { background: var(--dark); }
-.money { font-size: 32px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px #f1c40f; }
-.nickname { font-size: 28px; font-weight: bold; margin: 10px 0; cursor: pointer; }
-.gold-nick { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
-.lvl-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; max-height: 40vh; overflow-y: auto; padding: 10px; }
-.lvl { background: rgba(51,51,51,0.7); padding: 12px 0; border-radius: 10px; opacity: 0.6; transition: all .3s; border: 1px solid #ccc; }
-.lvl.open { opacity: 1; background: var(--blue); border: 2px solid white; box-shadow: 0 0 15px var(--blue); color: white; }
-#admin-panel { border: 2px dashed var(--red); padding: 15px; margin-top: 15px; display: none; background: rgba(255,255,255,0.92); text-align: left; border-radius: 15px; }
-input { background: #f5f5f5; border: 1px solid #444; padding: 10px; border-radius: 8px; color: #000; width: 90%; margin-bottom: 8px; }
-.shop-item { background: #eee; padding: 12px; margin: 8px 0; border-radius: 10px; cursor: pointer; }
-.shop-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
-.theme-btn { background: #9c27b0; color: white; }
-.log-box { max-height: 220px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin: 10px 0; background: #f8f8f8; border-radius: 8px; }
-.log-entry { padding: 4px 0; border-bottom: 1px solid #eee; }
-#bot-chat-box {
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  padding: 15px;
-  margin: 15px 0;
-  background: rgba(255,255,255,0.8);
-  border-radius: 10px;
-}
-.bot-msg {
-  padding: 10px;
-  margin: 8px 0;
-  background: #e3f2fd;
-  border-radius: 10px;
-  max-width: 80%;
-  text-align: left;
-}
-#bot-chat-input { display: flex; gap: 10px; margin-top: 10px; }
-#bot-chat-input input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
-#bot-chat-input button { padding: 10px 20px; }
-@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+:root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
+body{margin:0;padding:0;font-family:sans-serif;color:#000;background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/2560px-Flag_of_Ukraine.svg.png') no-repeat center center fixed;background-size:cover;min-height:100vh;position:relative}
+body::before{content:"";position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.75);z-index:-2}
+.screen{display:none;padding:20px;flex-direction:column;min-height:100vh;box-sizing:border-box;position:relative;z-index:1}
+.active{display:flex;animation:fadeIn .3s ease}
+.card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3);position:relative;z-index:2}
+.btn{background:var(--blue);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;width:100%;margin:6px 0;cursor:pointer;text-transform:uppercase;transition:all .2s}
+.btn:hover{transform:scale(1.02);box-shadow:0 0 15px rgba(0,162,255,.6)}
+.btn.green{background:var(--green)}
+.btn.danger{background:var(--dark)}
+.money{font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 10px #f1c40f}
+.nickname{font-size:28px;font-weight:bold;margin:10px 0;cursor:pointer}
+.gold-nick{color:var(--gold);text-shadow:0 0 10px var(--gold)}
+.lvl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-height:40vh;overflow-y:auto;padding:10px}
+.lvl{background:rgba(51,51,51,0.7);padding:12px 0;border-radius:10px;opacity:0.6;transition:all .3s;border:1px solid #ccc;cursor:pointer}
+.lvl.open{opacity:1;background:var(--blue);border:2px solid white;box-shadow:0 0 15px var(--blue);color:white}
+#admin-panel{border:2px dashed var(--red);padding:15px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px}
+input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;color:#000;width:90%;margin-bottom:8px}
+.shop-item{background:#eee;padding:12px;margin:8px 0;border-radius:10px;cursor:pointer}
+.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.theme-btn{background:#9c27b0;color:white}
+#bot-chat-box{max-height:320px;overflow-y:auto;border:1px solid #aaa;padding:12px;margin:12px 0;background:rgba(255,255,255,0.85);border-radius:10px;font-size:15px;line-height:1.4}
+.bot-msg{margin:8px 0;padding:10px 14px;background:#e3f2fd;border-radius:10px;max-width:85%;text-align:left;word-wrap:break-word}
+#bot-input-area{display:flex;gap:8px;margin-top:10px}
+#bot-message{flex:1;padding:12px;border:1px solid #999;border-radius:8px;font-size:15px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 
-<div id="auth-screen" class="screen active">
+<div id="auth" class="screen active">
   <div class="card">
-    <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
-    <input type="text" id="nick" placeholder="Нікнейм">
-    <input type="password" id="pass" placeholder="Пароль">
-    <button class="btn" onclick="auth()">УВІЙТИ</button>
+    <h2 style="color:var(--gold);text-align:center">UKRMOVA PRO</h2>
+    <input type="text" id="nick" placeholder="Нікнейм" style="width:100%;margin:10px 0">
+    <input type="password" id="pass" placeholder="Пароль" style="width:100%;margin:10px 0">
+    <button class="btn" onclick="login()">УВІЙТИ</button>
   </div>
 </div>
 
 <div id="menu" class="screen">
   <div class="card">
-    <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
+    <h3 onclick="admT()" style="cursor:pointer;text-align:center">МЕНЮ</h3>
     <div class="nickname" id="playerNick"></div>
     <div class="money"><span id="mon">0</span> ₴</div>
 
-    <button class="btn" onclick="showThemes()">ГРАТИ</button>
-    <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
+    <button class="btn" onclick="show('themes')">ГРАТИ</button>
+    <button class="btn" style="background:#333" onclick="show('top')">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
 
-    <h4 style="color:var(--blue)">Чат від бота</h4>
+    <h4 style="color:var(--blue);margin-top:20px">Чат від бота</h4>
     <div id="bot-chat-box"></div>
 
-    <div id="admin-panel">
+    <div id="admin-panel" style="display:none">
       <b style="color:var(--red);cursor:pointer" onclick="closeAdm()">❌ ЗАКРИТИ</b><br><br>
-      <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
 
-      <p><b>Управління гравцями</b></p>
-      <input type="text" id="a-n" placeholder="Нік гравця">
-      <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
-      <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
-      <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
-
-      <br><br>
-      <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
-
-      <div id="player-list" style="max-height:250px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
-
-      <br><br>
-      <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
-      <div id="admin-log" class="log-box">Завантаження...</div>
-      <button class="btn" style="background:#ff9800" onclick="clearAdminLogs()">Очистити лог адмінки</button>
-
-      <br><br>
-      <h4 style="color:var(--blue)">Лог усіх входів у гру</h4>
-      <div id="user-log" class="log-box">Завантаження...</div>
-      <button class="btn" style="background:#ff9800;margin-top:8px" onclick="loadUserLog()">Оновити</button>
-      <button class="btn danger" style="margin-top:8px" onclick="clearUserLog()">Очистити</button>
-
-      <br><br>
-      <h4 style="color:var(--blue)">Написати від імені бота (всім)</h4>
-      <div style="display:flex;gap:10px;">
-        <input type="text" id="bot-message" placeholder="Текст повідомлення..." style="flex:1;">
-        <button class="btn" onclick="sendBotMessage()">Відправити</button>
+      <h4 style="color:var(--blue)">Адмін-чат</h4>
+      <div id="bot-input-area">
+        <input type="text" id="bot-message" placeholder="Повідомлення від бота...">
+        <button class="btn" onclick="sendBotMsg()">Відправити</button>
       </div>
-
-      <br>
-      <button class="btn danger" onclick="clearBotChat()">Очистити весь чат бота</button>
+      <button class="btn danger" onclick="clearBotChat()" style="margin-top:12px;width:100%">Очистити чат</button>
     </div>
-  </div>
-</div>
-
-<div id="shop" class="screen">
-  <div class="card">
-    <h2>Магазин</h2>
-    <div class="shop-grid">
-      <div class="shop-item" id="gold_frame" onclick="buyItem('gold_frame')">Золота рамка — 1000 ₴</div>
-      <div class="shop-item" id="crown" onclick="buyItem('crown')">Корона — 2000 ₴</div>
-      <div class="shop-item" id="fire" onclick="buyItem('fire')">Полум'я — 1500 ₴</div>
-      <div class="shop-item" id="shield" onclick="buyItem('shield')">Щит — 2500 ₴</div>
-      <div class="shop-item" id="vip" onclick="buyItem('vip')">ВІП — 5000 ₴</div>
-    </div>
-    <button class="btn" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
 
@@ -191,270 +82,451 @@ input { background: #f5f5f5; border: 1px solid #444; padding: 10px; border-radiu
   </div>
 </div>
 
-<div id="levels" class="screen"><div class="card"><h3>РІВНІ</h3><div class="lvl-grid" id="lgrid"></div><button class="btn" onclick="show('menu')">НАЗАД</button></div></div>
-<div id="game" class="screen"><div class="card"><h3 id="qtext"></h3><div id="abox"></div></div></div>
-<div id="top" class="screen"><div class="card"><h3>ТОП 1000</h3><div id="tlist"></div><button class="btn" onclick="show('menu')">НАЗАД</button></div></div>
+<div id="levels" class="screen">
+  <div class="card">
+    <h3 id="themeTitle">РІВНІ</h3>
+    <div class="lvl-grid" id="lgrid"></div>
+    <button class="btn" onclick="show('themes')">НАЗАД ДО ТЕМ</button>
+  </div>
+</div>
+
+<div id="game" class="screen">
+  <div class="card">
+    <h3 id="qtext"></h3>
+    <div id="abox"></div>
+  </div>
+</div>
+
+<div id="top" class="screen">
+  <div class="card">
+    <h3>ТОП 1000</h3>
+    <div id="tlist"></div>
+    <button class="btn" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
+
+<div id="shop" class="screen">
+  <div class="card">
+    <h2>Магазин</h2>
+    <div class="shop-grid">
+      <div class="shop-item" onclick="buyItem('gold_frame')">Золота рамка — 1000 ₴</div>
+      <div class="shop-item" onclick="buyItem('crown')">Корона — 2000 ₴</div>
+      <div class="shop-item" onclick="buyItem('fire')">Полум'я — 1500 ₴</div>
+      <div class="shop-item" onclick="buyItem('shield')">Щит — 2500 ₴</div>
+      <div class="shop-item" onclick="buyItem('vip')">ВІП — 5000 ₴</div>
+    </div>
+    <button class="btn" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
 
 <script>
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-let user = null, cC = 0, pOn = true, customQ = [], usedQuestions = new Set();
-let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
-let currentTheme = '';
+let user = null, cC = 0, pOn = true;
+let currentTheme = '', usedQuestions = new Set(), themeScore = 0;
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
-document.addEventListener('click', () => {
-  correctSound.play().catch(()=>{});
-  wrongSound.play().catch(()=>{});
-}, {once: true});
+function $(id){return document.getElementById(id)}
 
-window.onload = () => {
-  if(localStorage.getItem('un')) document.getElementById('nick').value = localStorage.getItem('un');
-  if(localStorage.getItem('up')) document.getElementById('pass').value = localStorage.getItem('up');
-};
-
-const base = [
-  {t:"До якої відміни належить слово «книга»?",cor:"перша відміна",inc:"друга відміна"},
-  {t:"До якої відміни належить слово «стіл»?",cor:"друга відміна",inc:"перша відміна"}
-];
-
-const themes = {
-  vydminy: base,
-  chasyslova: [],
-  prykmetnyky: [],
-  pryslinniky: [],
-  synonimy: []
-};
-
-async function auth() {
-  let n = document.getElementById('nick').value.trim();
-  let p = document.getElementById('pass').value.trim();
-  if(!n || !p) return alert("Введіть нікнейм та пароль");
-  localStorage.setItem('un', n);
-  localStorage.setItem('up', p);
-
-  const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
-  await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({nick:n,time:now})});
-
-  let r = await fetch(DB+"users/"+n+".json");
-  let d = await r.json();
-  user = d || {name:n, pass:p, points:0, lvl:1, items:{gold_frame:false}};
-  if(d && d.pass !== p) return alert("Неправильний пароль!");
-  items = user.items || {gold_frame:false};
-  save();
-  applyItems();
-  update();
-  show('menu');
+async function login(){
+  let n=$("nick").value.trim(),p=$("pass").value.trim();
+  if(!n||!p)return alert("Введи нік та пароль");
+  localStorage.setItem('un',n);localStorage.setItem('up',p);
+  let r=await fetch(DB+"users/"+n+".json"),d=await r.json();
+  user=d||{name:n,pass:p,points:0,lvl:1};
+  if(d&&d.pass!==p)return alert("Неправильний пароль!");
+  $("playerNick").innerText=user.name;
+  $("mon").innerText=user.points;
+  show("menu");
 }
 
-function save() { 
-  user.items = items;
-  fetch(DB+"users/"+user.name+".json", {method:'PUT', body:JSON.stringify(user)}); 
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  $(id).classList.add("active");
+  if(id==="menu"){loadChat();usedQuestions.clear();themeScore=0}
 }
 
-function update() { 
-  document.getElementById('mon').innerText = user.points.toLocaleString(); 
+function admT(){if(++cC>=5){$("admin-panel").style.display="block";cC=0}}
+
+function closeAdm(){$("admin-panel").style.display="none"}
+
+function startTheme(t){
+  currentTheme=t;usedQuestions.clear();themeScore=0;renderLevels();show("levels")
 }
 
-function applyItems() {
-  let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
-  if(items.crown) nickDisplay += ' 👑';
-  if(items.fire) nickDisplay += ' 🔥';
-  if(items.shield) nickDisplay += ' 🛡️';
-  if(items.vip) nickDisplay += ' 💎 VIP';
-  document.getElementById('playerNick').innerHTML = nickDisplay;
-}
-
-function show(id) { 
-  document.querySelectorAll('.screen').forEach(s=>s.style.display='none'); 
-  document.getElementById(id).style.display='block'; 
-  if (id === 'menu') loadBotChat();
-}
-
-function admT() { 
-  if(++cC >= 5) {
-    document.getElementById('admin-panel').style.display='block';
-    loadAdminLogs();
-    loadUserLog();
-    loadPlayers();
+function renderLevels(){
+  let g=$("lgrid");g.innerHTML="";
+  $("themeTitle").innerText=`РІВНІ — ${currentTheme}`;
+  for(let i=0;i<50;i++){
+    let l=document.createElement("div");
+    l.className="lvl"+(i<user.lvl?" open":"");
+    l.innerText=i+1;
+    l.onclick=()=>startLevel(i);
+    g.appendChild(l)
   }
 }
 
-function closeAdm() { document.getElementById('admin-panel').style.display='none'; cC = 0; }
-
-function toggleP() { 
-  pOn = !pOn; 
-  document.getElementById('pen-btn').innerText = pOn ? "ШТРАФИ: ВКЛ" : "ШТРАФИ: ВИКЛ"; 
-  document.getElementById('pen-btn').style.background = pOn ? "var(--red)" : "var(--green)"; 
-}
-
-async function delU() {
-  let n = document.getElementById('a-n').value.trim();
-  if(!n) return alert("Введіть нікнейм");
-  if(confirm(`Видалити ${n}?`)) {
-    await fetch(DB+"users/"+n+".json", {method:'DELETE'});
-    alert("Видалено");
-    loadPlayers();
+function startLevel(i){
+  if(i>=user.lvl)return;
+  let q=getQuestions(currentTheme);
+  let av=q.filter((_,idx)=>!usedQuestions.has(idx));
+  if(av.length===0){
+    alert(`Тему пройдено!\nРезультат: +${themeScore} очок`);
+    show("themes");usedQuestions.clear();themeScore=0;return
   }
-}
-
-async function edO(add) {
-  let n = document.getElementById('a-n').value.trim();
-  if(!n) return alert("Введіть ник");
-  let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
-  if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
-  amt = parseInt(amt);
-  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
-  if(!d) return alert("Гравця не знайдено");
-  d.points = (d.points || 0) + (add ? amt : -amt);
-  d.points = Math.max(0, d.points);
-  await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(d)});
-  alert("Гроші оновлено");
-  loadPlayers();
-}
-
-async function loadPlayers() {
-  let r = await fetch(DB + "users/.json"), d = await r.json(), list = document.getElementById('player-list');
-  list.innerHTML = '';
-  if (!d || !Object.keys(d).length) {
-    list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
-    return;
-  }
-  for (let key in d) {
-    let u = d[key];
-    list.innerHTML += `
-      <div style="padding:10px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <strong>${u.name || key}</strong><br>
-          <small>Юз: ${key} | Баланс: ${u.points || 0} ₴ | Рівень: ${u.lvl || 1}</small>
-        </div>
-        <button class="btn danger" style="width:auto;padding:6px 12px;" onclick="deleteUser('${key}')">ВИДАЛИТИ</button>
-      </div>
-    `;
-  }
-}
-
-async function deleteUser(key) {
-  if(!confirm(`Видалити ${key}?`)) return;
-  await fetch(DB+"users/"+key+".json", {method:'DELETE'});
-  alert("Видалено");
-  loadPlayers();
-}
-
-function buyItem(item) {
-  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
-  if(user.points >= prices[item]){
-    user.points -= prices[item];
-    items[item] = true;
-    applyItems();
-    save(); update();
-    alert("Куплено: " + item);
-  } else alert("Недостатньо грошей!");
-}
-
-function showThemes() {
-  show('themes');
-}
-
-function startTheme(theme) {
-  currentTheme = theme;
-  renderL();
-  show('levels');
-}
-
-function renderL() {
-  let g = document.getElementById('lgrid'); g.innerHTML = '';
-  let maxLvl = 50;
-  for(let i=0;i<maxLvl;i++) g.innerHTML += `<div class="lvl ${i<user.lvl?'open':''}" onclick="start(${i})">${i+1}</div>`;
-}
-
-function start(i) {
-  if(i >= user.lvl) return;
-  let pool = themes[currentTheme] || base;
-  if(i >= pool.length) return alert("Питання закінчилися!");
-  let curr = pool[i];
-  document.getElementById('qtext').innerText = `Рівень ${i+1}: ${curr.t}`;
-  let b = document.getElementById('abox'); b.innerHTML = '';
-  [curr.cor, curr.inc].sort(()=>Math.random()-0.5).forEach(o=>{
-    let btn = document.createElement('button');
-    btn.className='btn'; btn.style.background='#444';
+  let idx=Math.floor(Math.random()*av.length);
+  let qu=av[idx];usedQuestions.add(q.indexOf(qu));
+  $("qtext").innerText=`Рівень ${i+1}: ${qu.t}`;
+  let b=$("abox");b.innerHTML="";
+  [qu.cor,qu.inc].sort(()=>Math.random()-0.5).forEach(o=>{
+    let btn=document.createElement("button");
+    btn.className="btn";btn.style.background="#444";
     btn.innerText=o;
-    btn.onclick=()=>check(o===curr.cor,i);
-    b.appendChild(btn);
+    btn.onclick=()=>checkAnswer(o===qu.cor,i);
+    b.appendChild(btn)
   });
-  show('game');
+  show("game")
 }
 
-function check(correct, level){
+function checkAnswer(correct,i){
   if(correct){
-    user.points+=1000;
-    if(level===user.lvl-1 && user.lvl<50) user.lvl++;
-    correctSound.currentTime = 0;
-    correctSound.play().catch(()=>{});
-    alert("ПРАВИЛЬНО!");
-  } else {
-    if(pOn) user.points = Math.max(0,user.points-150);
-    wrongSound.currentTime = 0;
-    wrongSound.play().catch(()=>{});
-    alert("❌");
+    user.points+=1000;themeScore+=1000;
+    if(i===user.lvl-1&&user.lvl<50)user.lvl++;
+    correctSound.currentTime=0;correctSound.play().catch(()=>{});
+    alert("ПРАВИЛЬНО! +1000")
+  }else{
+    if(pOn)user.points=Math.max(0,user.points-150);
+    wrongSound.currentTime=0;wrongSound.play().catch(()=>{});
+    alert("❌ -150")
   }
-  save(); update(); renderL(); show('levels');
+  save();update();renderLevels();show("levels")
 }
 
-async function loadT() {
-  show('top');
-  let r = await fetch(DB+"users/.json"), d = await r.json(), l = document.getElementById('tlist');
-  l.innerHTML = '';
-  if(d) {
-    let top = Object.values(d).sort((a,b)=>b.points-a.points).slice(0,1000);
-    top.forEach((u,i)=>l.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points}</b></div>`);
-  } else l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+function save(){
+  fetch(DB+"users/"+user.name+".json",{method:"PUT",body:JSON.stringify(user)})
 }
 
-async function sendBotMessage() {
-  let msg = document.getElementById('bot-message').value.trim();
-  if (!msg) return;
-
-  const now = new Date().toLocaleString('uk-UA', {timeZone: 'Europe/Kyiv'});
-  const entry = { text: msg, time: now };
-
-  await fetch(DB + "bot_chat.json", { method: 'POST', body: JSON.stringify(entry) });
-
-  document.getElementById('bot-message').value = '';
-  loadBotChat();
+function update(){
+  $("mon").innerText=user.points
 }
 
-async function loadBotChat() {
-  let r = await fetch(DB + "bot_chat.json");
-  let data = await r.json();
-  let box = document.getElementById('bot-chat-box');
-  box.innerHTML = '';
+async function sendBotMsg(){
+  let t=$("bot-message").value.trim();
+  if(!t)return;
+  let time=new Date().toLocaleString("uk-UA",{timeZone:"Europe/Kyiv"});
+  await fetch(DB+"bot_chat.json",{method:"POST",body:JSON.stringify({text:t,time})});
+  $("bot-message").value="";loadChat()
+}
 
-  if (data) {
-    Object.values(data).sort((a,b) => new Date(a.time) - new Date(b.time)).forEach(msg => {
-      let div = document.createElement('div');
-      div.className = 'bot-msg';
-      div.innerHTML = `<strong>БОТ:</strong> ${msg.text}<br><small>${msg.time}</small>`;
-      box.appendChild(div);
+async function loadChat(){
+  let r=await fetch(DB+"bot_chat.json");
+  let d=await r.json();
+  let b=$("bot-chat-box");b.innerHTML="";
+  if(d){
+    Object.values(d).forEach(m=>{
+      let div=document.createElement("div");
+      div.className="bot-msg";
+      div.innerHTML=`<strong>БОТ</strong> <small>(${m.time})</small><br>${m.text}`;
+      b.appendChild(div)
     });
-    box.scrollTop = box.scrollHeight;
+    b.scrollTop=b.scrollHeight
   }
 }
 
-async function clearBotChat() {
-  if (!confirm("Очистити весь чат бота? Це видалить усі повідомлення назавжди")) return;
-  await fetch(DB + "bot_chat.json", {method: 'DELETE'});
-  loadBotChat();
-  alert("Чат очищено!");
+async function clearBotChat(){
+  if(!confirm("Очистити весь чат?"))return;
+  await fetch(DB+"bot_chat.json",{method:"DELETE"});
+  loadChat();alert("Чат очищено")
 }
 
-setInterval(() => {
-  if (document.getElementById('menu').classList.contains('active')) {
-    loadBotChat();
-  }
-}, 2000);
+setInterval(()=>{
+  if($("menu").classList.contains("active"))loadChat()
+},2000);
+
+function buyItem(i){
+  const p={gold_frame:1000,crown:2000,fire:1500,shield:2500,vip:5000};
+  if(user.points>=p[i]){
+    user.points-=p[i];
+    save();update();
+    alert("Куплено!")
+  }else alert("Недостатньо грошей")
+}
+
+async function loadT(){
+  show("top");
+  let r=await fetch(DB+"users/.json"),d=await r.json(),l=$("tlist");
+  l.innerHTML="";
+  if(d){
+    let top=Object.values(d).sort((a,b)=>b.points-a.points).slice(0,1000);
+    top.forEach((u,i)=>l.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points}</b></div>`)
+  }else l.innerHTML='<div style="padding:12px;color:#aaa">Топ порожній</div>'
+}
+
+const questions = {
+  vydminy: [
+    {t:"До якої відміни належить слово «книга»?",cor:"перша відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «стіл»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «мати»?",cor:"третя відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «ім'я»?",cor:"четверта відміна",inc:"третя відміна"},
+    {t:"До якої відміни належать іменники на -о/-е середнього роду?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «любов»?",cor:"третя відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «сіль»?",cor:"третя відміна",inc:"четверта відміна"},
+    {t:"До якої відміни належить слово «серце»?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «земля»?",cor:"перша відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «день»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належать іменники жіночого роду на приголосний?",cor:"третя відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «дитина»?",cor:"перша відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «вікно»?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «тінь»?",cor:"третя відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «місто»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «кров»?",cor:"третя відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «дерево»?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «мама»?",cor:"перша відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «око»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «рука»?",cor:"перша відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «пісня»?",cor:"перша відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «море»?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «гість»?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «голова»?",cor:"перша відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «яблуко»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «сестра»?",cor:"перша відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «хліб»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «молодість»?",cor:"третя відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «сонце»?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «вулиця»?",cor:"перша відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «вітер»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «радість»?",cor:"третя відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «річка»?",cor:"перша відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «ліс»?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «двері»?",cor:"третя відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «гора»?",cor:"перша відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «поле» у множині?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «знання»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «дружба»?",cor:"третя відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «будинок»?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «мова»?",cor:"перша відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «життя»?",cor:"друга відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «людина»?",cor:"перша відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «час»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «надія»?",cor:"третя відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «вода»?",cor:"перша відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «сон»?",cor:"друга відміна",inc:"перша відміна"},
+    {t:"До якої відміни належить слово «ніч» у множині?",cor:"третя відміна",inc:"друга відміна"},
+    {t:"До якої відміни належить слово «руки»?",cor:"перша відміна",inc:"третя відміна"},
+    {t:"До якої відміни належить слово «очі»?",cor:"третя відміна",inc:"друга відміна"}
+  ],
+  chasyslova: [
+    {t:"Який час дієслова «читати» у реченні «Я читав книгу»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «писати» у реченні «Він пише листа»?",cor:"теперішній час",inc:"майбутній час"},
+    {t:"Який час дієслова «йти» у реченні «Я йду додому»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «будувати» у реченні «Ми побудуємо будинок»?",cor:"майбутній час",inc:"минулий час"},
+    {t:"Який час дієслова «співати» у реченні «Вона співала пісню»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «говорити» у реченні «Вони говорять швидко»?",cor:"теперішній час",inc:"майбутній час"},
+    {t:"Який час дієслова «їсти» у реченні «Я їв борщ»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «дивитися» у реченні «Ми будемо дивитися фільм»?",cor:"майбутній час",inc:"минулий час"},
+    {t:"Який час дієслова «малювати» у реченні «Дитина малює»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «грати» у реченні «Він грав у футбол»?",cor:"минулий час",inc:"майбутній час"},
+    {t:"Який час дієслова «бігти» у реченні «Вона бігла швидко»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «спати» у реченні «Я сплю вночі»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «танцювати» у реченні «Вони будуть танцювати»?",cor:"майбутній час",inc:"минулий час"},
+    {t:"Який час дієслова «пити» у реченні «Він пив каву»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «читати» у реченні «Ми читаємо книгу»?",cor:"теперішній час",inc:"майбутній час"},
+    {t:"Який час дієслова «писати» у реченні «Я напишу листа»?",cor:"майбутній час",inc:"минулий час"},
+    {t:"Який час дієслова «бачити» у реченні «Вона бачила сон»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «слухати» у реченні «Ми слухаємо музику»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «робити» у реченні «Він зробив уроки»?",cor:"минулий час",inc:"майбутній час"},
+    {t:"Який час дієслова «любити» у реченні «Я люблю Україну»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «знати» у реченні «Вона знала відповідь»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «хотіти» у реченні «Він хоче їсти»?",cor:"теперішній час",inc:"майбутній час"},
+    {t:"Який час дієслова «могти» у реченні «Ми могли допомогти»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «мати» у реченні «Вона має собаку»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «жити» у реченні «Я живу в Сумах»?",cor:"теперішній час",inc:"майбутній час"},
+    {t:"Який час дієслова «працювати» у реченні «Він працював вчора»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «навчатися» у реченні «Вона вчиться в школі»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «грати» у реченні «Ми будемо грати»?",cor:"майбутній час",inc:"минулий час"},
+    {t:"Який час дієслова «співати» у реченні «Вони співали пісню»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «танцювати» у реченні «Діти танцюють»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «малювати» у реченні «Я намалюю картину»?",cor:"майбутній час",inc:"минулий час"},
+    {t:"Який час дієслова «читати» у реченні «Він читав книгу»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «писати» у реченні «Ми пишемо диктант»?",cor:"теперішній час",inc:"майбутній час"},
+    {t:"Який час дієслова «дивитися» у реченні «Вона дивилася фільм»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «слухати» у реченні «Він слухає музику»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «їсти» у реченні «Ми їмо борщ»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «пити» у реченні «Вона пила чай»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «бігти» у реченні «Він біг швидко»?",cor:"минулий час",inc:"майбутній час"},
+    {t:"Який час дієслова «спати» у реченні «Я сплю вночі»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «ходити» у реченні «Ми ходили в парк»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «жити» у реченні «Вона жила в Києві»?",cor:"минулий час",inc:"майбутній час"},
+    {t:"Який час дієслова «працювати» у реченні «Він працює в офісі»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «навчатися» у реченні «Діти навчаються»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «любити» у реченні «Я люблю маму»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «знати» у реченні «Він знав відповідь»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «хотіти» у реченні «Вона хоче піти»?",cor:"теперішній час",inc:"майбутній час"},
+    {t:"Який час дієслова «могти» у реченні «Ми могли допомогти»?",cor:"минулий час",inc:"теперішній час"},
+    {t:"Який час дієслова «мати» у реченні «Він має машину»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «бачити» у реченні «Я бачу сонце»?",cor:"теперішній час",inc:"минулий час"},
+    {t:"Який час дієслова «слухати» у реченні «Вони слухали музику»?",cor:"минулий час",inc:"теперішній час"}
+  ],
+  prykmetnyky: [
+    {t:"Який рід прикметника «гарний» у «гарна дівчина»?",cor:"жіночий рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «великий» у «велике поле»?",cor:"середній рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «сильний» у «сильний чоловік»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «красива» у «красива квітка»?",cor:"жіночий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «нове» у «нове авто»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «довгий» у «довга дорога»?",cor:"жіночий рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «високий» у «високий будинок»?",cor:"чоловічий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «маленька» у «маленька дитина»?",cor:"жіночий рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «старий» у «старий дідусь»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «молодий» у «молодий хлопець»?",cor:"чоловічий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «смачний» у «смачна страва»?",cor:"жіночий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «цікаве» у «цікаве кіно»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «довгі» у «довгі коси»?",cor:"жіночий рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «хороший» у «хороший день»?",cor:"чоловічий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «важка» у «важка сумка»?",cor:"жіночий рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «сильна» у «сильна людина»?",cor:"жіночий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «новий» у «новий рік»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «гарне» у «гарне місце»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «висока» у «висока гора»?",cor:"жіночий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «маленький» у «маленький будинок»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «старе» у «старе дерево»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «молоді» у «молоді люди»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «смачне» у «смачне яблуко»?",cor:"середній рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «цікавий» у «цікавий фільм»?",cor:"чоловічий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «довге» у «довге волосся»?",cor:"середній рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «хороше» у «хороше життя»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «важкий» у «важкий день»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «сильне» у «сильне почуття»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «нові» у «нові друзі»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «гарний» у «гарний настрій»?",cor:"чоловічий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «високий» у «високий рівень»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «маленьке» у «маленьке місто»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «старий» у «старий друг»?",cor:"чоловічий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «молоде» у «молоде покоління»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «смачний» у «смачний суп»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «цікава» у «цікава книга»?",cor:"жіночий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «довгий» у «довгий шлях»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «хороша» у «хороша погода»?",cor:"жіночий рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «важке» у «важке завдання»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «сильний» у «сильний характер»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «нове» у «нове життя»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «гарне» у «гарне місто»?",cor:"середній рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «висока» у «висока ціна»?",cor:"жіночий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «маленький» у «маленький успіх»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «старе» у «старе фото»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «молодий» у «молодий вчитель»?",cor:"чоловічий рід",inc:"жіночий рід"},
+    {t:"Який рід прикметника «смачна» у «смачна кава»?",cor:"жіночий рід",inc:"середній рід"},
+    {t:"Який рід прикметника «цікаве» у «цікаве місце»?",cor:"середній рід",inc:"чоловічий рід"},
+    {t:"Який рід прикметника «довга» у «довга ніч»?",cor:"жіночий рід",inc:"чоловічий рід"}
+  ],
+  pryslinniky: [
+    {t:"Який прислівник часу в «Вчора я був у кіно»?",cor:"вчора",inc:"завтра"},
+    {t:"Який прислівник місця в «Там стоїть стіл»?",cor:"там",inc:"тут"},
+    {t:"Який прислівник способу в «Він швидко біг»?",cor:"швидко",inc:"повільно"},
+    {t:"Який прислівник міри в «Дуже гарно»?",cor:"дуже",inc:"трохи"},
+    {t:"Який прислівник причини в «Тому що холодно»?",cor:"тому що",inc:"чому"},
+    {t:"Який прислівник частоти в «Завжди вчасно»?",cor:"завжди",inc:"ніколи"},
+    {t:"Який прислівник місця в «Вгорі літає птах»?",cor:"вгорі",inc:"внизу"},
+    {t:"Який прислівник часу в «Завтра поїдемо»?",cor:"завтра",inc:"вчора"},
+    {t:"Який прислівник способу в «Голосно кричав»?",cor:"голосно",inc:"тихо"},
+    {t:"Який прислівник міри в «Трохи втомився»?",cor:"трохи",inc:"дуже"},
+    {t:"Який прислівник часу в «Сьогодні гарний день»?",cor:"сьогодні",inc:"завтра"},
+    {t:"Який прислівник місця в «Десь далеко»?",cor:"десь",inc:"тут"},
+    {t:"Який прислівник способу в «Красиво співає»?",cor:"красиво",inc:"погано"},
+    {t:"Який прислівник частоти в «Рідко бачу»?",cor:"рідко",inc:"завжди"},
+    {t:"Який прислівник міри в «Надто багато»?",cor:"надто",inc:"мало"},
+    {t:"Який прислівник причини в «Через дощ»?",cor:"через",inc:"тому що"},
+    {t:"Який прислівник часу в «Пізно повернувся»?",cor:"пізно",inc:"рано"},
+    {t:"Який прислівник місця в «Близько дому»?",cor:"близько",inc:"далеко"},
+    {t:"Який прислівник способу в «Тихо сидів»?",cor:"тихо",inc:"голосно"},
+    {t:"Який прислівник частоти в «Часто приходить»?",cor:"часто",inc:"рідко"},
+    {t:"Який прислівник міри в «Майже готово»?",cor:"майже",inc:"зовсім"},
+    {t:"Який прислівник часу в «Рано встав»?",cor:"рано",inc:"пізно"},
+    {t:"Який прислівник місця в «Далеко від міста»?",cor:"далеко",inc:"близько"},
+    {t:"Який прислівник способу в «Погано намалював»?",cor:"погано",inc:"добре"},
+    {t:"Який прислівник частоти в «Іноді сміється»?",cor:"іноді",inc:"завжди"},
+    {t:"Який прислівник міри в «Зовсім не розумію»?",cor:"зовсім",inc:"майже"},
+    {t:"Який прислівник часу в «Ніколи не забуду»?",cor:"ніколи",inc:"завжди"},
+    {t:"Який прислівник місця в «Ніде не знайшов»?",cor:"ніде",inc:"тут"},
+    {t:"Який прислівник способу в «Добре зробив»?",cor:"добре",inc:"погано"},
+    {t:"Який прислівник частоти в «Постійно працює»?",cor:"постійно",inc:"рідко"},
+    {t:"Який прислівник міри в «Досить гарно»?",cor:"досить",inc:"мало"},
+    {t:"Який прислівник часу в «Тепер усе ясно»?",cor:"тепер",inc:"тоді"},
+    {t:"Який прислівник місця в «Сюди йди»?",cor:"сюди",inc:"туди"},
+    {t:"Який прислівник способу в «Швидко побіг»?",cor:"швидко",inc:"повільно"},
+    {t:"Який прислівник частоти в «Рідко пише»?",cor:"рідко",inc:"часто"},
+    {t:"Який прислівник міри в «Надзвичайно красиво»?",cor:"надзвичайно",inc:"трохи"},
+    {t:"Який прислівник часу в «Тоді все змінилося»?",cor:"тоді",inc:"тепер"},
+    {t:"Який прислівник місця в «Туди пішов»?",cor:"туди",inc:"сюди"},
+    {t:"Який прислівник способу в «Повільно йшов»?",cor:"повільно",inc:"швидко"},
+    {t:"Який прислівник частоти в «Завжди допомагає»?",cor:"завжди",inc:"ніколи"},
+    {t:"Який прислівник міри в «Мало спить»?",cor:"мало",inc:"багато"},
+    {t:"Який прислівник часу в «Скоро прийду»?",cor:"скоро",inc:"пізно"},
+    {t:"Який прислівник місця в «Звідси видно»?",cor:"звідси",inc:"звідти"},
+    {t:"Який прислівник способу в «Гарно співає»?",cor:"гарно",inc:"погано"},
+    {t:"Який прислівник частоти в «Інколи забуває»?",cor:"інколи",inc:"завжди"},
+    {t:"Який прислівник міри в «Дуже сильно»?",cor:"дуже",inc:"трохи"},
+    {t:"Який прислівник часу в «Давно не бачив»?",cor:"давно",inc:"недавно"},
+    {t:"Який прислівник місця в «Звідти прийшов»?",cor:"звідти",inc:"звідси"},
+    {t:"Який прислівник способу в «Сміливо йшов»?",cor:"сміливо",inc:"боязко"},
+    {t:"Який прислівник частоти в «Постійно вчиться»?",cor:"постійно",inc:"рідко"},
+    {t:"Який прислівник міри в «Надто дорого»?",cor:"надто",inc:"дешево"}
+  ],
+  synonimy: [
+    {t:"Синонім до слова «великий»?",cor:"огромний",inc:"маленький"},
+    {t:"Антонім до слова «швидко»?",cor:"повільно",inc:"швидко"},
+    {t:"Синонім до слова «гарний»?",cor:"красивий",inc:"потворний"},
+    {t:"Антонім до слова «гарячий»?",cor:"холодний",inc:"гарячий"},
+    {t:"Синонім до слова «розумний»?",cor:"кмітливий",inc:"дурний"},
+    {t:"Антонім до слова «добрий»?",cor:"злий",inc:"добрий"},
+    {t:"Синонім до слова «швидкий»?",cor:"стрімкий",inc:"повільний"},
+    {t:"Антонім до слова «світлий»?",cor:"темний",inc:"світлий"},
+    {t:"Синонім до слова «веселий»?",cor:"радісний",inc:"сумний"},
+    {t:"Антонім до слова «новий»?",cor:"старий",inc:"новий"},
+    {t:"Синонім до слова «сильний»?",cor:"міцний",inc:"слабкий"},
+    {t:"Антонім до слова «високий»?",cor:"низький",inc:"високий"},
+    {t:"Синонім до слова «багатий»?",cor:"заможний",inc:"бідний"},
+    {t:"Антонім до слова «легкий»?",cor:"важкий",inc:"легкий"},
+    {t:"Синонім до слова «чистий»?",cor:"охайний",inc:"брудний"},
+    {t:"Антонім до слова «гучний»?",cor:"тихий",inc:"гучний"},
+    {t:"Синонім до слова «молодий»?",cor:"юний",inc:"старий"},
+    {t:"Антонім до слова «солодкий»?",cor:"гіркий",inc:"солодкий"},
+    {t:"Синонім до слова «важливий»?",cor:"значущий",inc:"неважливий"},
+    {t:"Антонім до слова «щасливий»?",cor:"нещасний",inc:"щасливий"},
+    {t:"Синонім до слова «дорогий»?",cor:"цінний",inc:"дешевий"},
+    {t:"Антонім до слова «сильний»?",cor:"слабкий",inc:"сильний"},
+    {t:"Синонім до слова «розумний»?",cor:"розважливий",inc:"дурний"},
+    {t:"Антонім до слова «багатий»?",cor:"бідний",inc:"багатий"},
+    {t:"Синонім до слова «гарний»?",cor:"прекрасний",inc:"потворний"},
+    {t:"Антонім до слова «світлий»?",cor:"темний",inc:"світлий"},
+    {t:"Синонім до слова «веселий»?",cor:"життєрадісний",inc:"сумний"},
+    {t:"Антонім до слова «високий»?",cor:"низький",inc:"високий"},
+    {t:"Синонім до слова «швидкий»?",cor:"миттєвий",inc:"повільний"},
+    {t:"Антонім до слова «чистий»?",cor:"брудний",inc:"чистий"},
+    {t:"Синонім до слова «молодий»?",cor:"юний",inc:"старий"},
+    {t:"Антонім до слова «солодкий»?",cor:"гіркий",inc:"солодкий"},
+    {t:"Синонім до слова «важливий»?",cor:"серйозний",inc:"неважливий"},
+    {t:"Антонім до слова «щасливий»?",cor:"нещасний",inc:"щасливий"},
+    {t:"Синонім до слова «дорогий»?",cor:"коштовний",inc:"дешевий"},
+    {t:"Антонім до слова «сильний»?",cor:"слабкий",inc:"сильний"},
+    {t:"Синонім до слова «розумний»?",cor:"інтелігентний",inc:"дурний"},
+    {t:"Антонім до слова «багатий»?",cor:"бідний",inc:"багатий"},
+    {t:"Синонім до слова «гарний»?",cor:"чудовий",inc:"потворний"},
+    {t:"Антонім до слова «світлий»?",cor:"темний",inc:"світлий"},
+    {t:"Синонім до слова «веселий»?",cor:"жартівливий",inc:"сумний"},
+    {t:"Антонім до слова «високий»?",cor:"низький",inc:"високий"},
+    {t:"Синонім до слова «швидкий»?",cor:"стрімкий",inc:"повільний"},
+    {t:"Антонім до слова «чистий»?",cor:"брудний",inc:"чистий"},
+    {t:"Синонім до слова «молодий»?",cor:"юний",inc:"старий"},
+    {t:"Антонім до слова «солодкий»?",cor:"гіркий",inc:"солодкий"},
+    {t:"Синонім до слова «важливий»?",cor:"значущий",inc:"неважливий"},
+    {t:"Антонім до слова «щасливий»?",cor:"нещасний",inc:"щасливий"},
+    {t:"Синонім до слова «дорогий»?",cor:"цінний",inc:"дешевий"},
+    {t:"Антонім до слова «сильний»?",cor:"слабкий",inc:"сильний"}
+  ]
+};
+
+function getQuestions(t){return questions[t]||[]}
 </script>
 </body>
 </html>
