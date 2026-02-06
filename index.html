@@ -126,15 +126,36 @@ const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-
 function $(id){return document.getElementById(id)}
 
 async function login(){
-  let n=$("nick").value.trim(), p=$("pass").value.trim();
-  if(!n || !p) return alert("Введи нік та пароль");
-  let res = await fetch(DB+"users/"+n+".json");
+  let n = $("nick").value.trim();
+  let p = $("pass").value.trim();
+
+  if(!n || !p){
+    alert("Введи нікнейм та пароль!");
+    return;
+  }
+
+  let res = await fetch(DB + "users/" + n + ".json");
   let data = await res.json();
-  user = data || {name:n, pass:p, points:0, lvl:1};
-  if(data && data.pass !== p) return alert("Неправильний пароль!");
-  $("playerNick").textContent = user.name;
-  $("mon").textContent = user.points;
-  show("menu");
+
+  if(data){
+    if(data.pass === p){
+      user = data;
+      $("playerNick").textContent = user.name;
+      $("mon").textContent = user.points;
+      show("menu");
+    } else {
+      alert("Неправильний пароль!");
+    }
+  } else {
+    user = {name: n, pass: p, points: 0, lvl: 1};
+    await fetch(DB + "users/" + n + ".json", {
+      method: "PUT",
+      body: JSON.stringify(user)
+    });
+    $("playerNick").textContent = user.name;
+    $("mon").textContent = user.points;
+    show("menu");
+  }
 }
 
 function show(id){
@@ -206,7 +227,7 @@ function check(isCorrect, levelIdx){
     correctSound.play().catch(()=>null);
     alert("Правильно! +1000");
   } else {
-    if(pOn) user.points = Math.max(0, user.points - 150);
+    user.points = Math.max(0, user.points - 150);
     wrong++;
     wrongSound.currentTime = 0;
     wrongSound.play().catch(()=>null);
@@ -276,7 +297,7 @@ function buyItem(item){
     user.points -= prices[item];
     save();
     updateUI();
-    alert("Куплено! (поки що без візуальних ефектів)");
+    alert("Куплено!");
   } else {
     alert("Недостатньо коштів!");
   }
