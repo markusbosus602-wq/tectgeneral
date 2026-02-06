@@ -2,44 +2,64 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>Адмін Консоль — UkrMova</title>
+<title>Адмін Консоль — UkrMova PRO</title>
 <style>
   body {
-    margin:0;
-    padding:20px;
-    background:#000;
-    color:#0f0;
-    font-family:'Courier New',monospace;
-    font-size:16px;
-    line-height:1.4;
+    margin:0; padding:20px; background:#000; color:#0f0;
+    font-family:'Courier New',monospace; font-size:16px; line-height:1.4;
   }
-  h1 {color:#0f0;text-shadow:0 0 10px #0f0;}
+  h1 { color:#0f0; text-shadow:0 0 10px #0f0; }
   button {
-    background:#0a0;
-    color:#000;
-    border:2px solid #0f0;
-    padding:8px 16px;
-    margin:6px;
-    font-family:inherit;
-    cursor:pointer;
+    background:#0a0; color:#000; border:2px solid #0f0;
+    padding:8px 16px; margin:6px 2px; font-family:inherit;
+    cursor:pointer; min-width:180px;
   }
-  button:hover {background:#0f0;color:#000;}
-  pre {white-space:pre-wrap;background:#111;padding:12px;border:1px solid #0f0;border-radius:4px;}
-  #output {min-height:400px;max-height:80vh;overflow-y:auto;}
+  button:hover { background:#0f0; color:#000; }
+  input, select {
+    background:#111; color:#0f0; border:1px solid #0f0;
+    padding:6px; margin:4px; font-family:inherit; width:220px;
+  }
+  pre { white-space:pre-wrap; background:#111; padding:12px;
+        border:1px solid #0f0; border-radius:4px; margin:10px 0; }
+  #output { min-height:400px; max-height:70vh; overflow-y:auto; }
+  .section { margin:20px 0; padding:10px; border:1px dashed #0f0; }
 </style>
 </head>
 <body>
 
 <h1>АДМІН КОНСОЛЬ — UKRMOVA PRO</h1>
 
-<button onclick="getPlayers()">Список усіх гравців</button>
-<button onclick="getBotChat()">Показати чат бота</button>
-<button onclick="clearBotChat()">Очистити чат бота</button>
-<button onclick="getUserLogs()">Лог входів гравців</button>
-<button onclick="getAdminLogs()">Лог адмін-дій</button>
-<button onclick="clearScreen()">Очистити екран</button>
+<div class="section">
+  <h3>Гравці</h3>
+  <button onclick="getPlayers()">Список усіх гравців</button>
+  <br>
+  <input id="nickEdit" placeholder="Нік гравця">
+  <button onclick="deletePlayer()">Видалити гравця</button>
+  <button onclick="editMoney(true)">+ Гроші</button>
+  <button onclick="editMoney(false)">- Гроші</button>
+  <button onclick="editLevel()">Змінити рівень</button>
+</div>
 
-<div id="output"><pre>Готовий до команд...</pre></div>
+<div class="section">
+  <h3>Чат бота</h3>
+  <button onclick="getBotChat()">Показати чат</button>
+  <button onclick="clearBotChat()">Очистити чат</button>
+</div>
+
+<div class="section">
+  <h3>Логи</h3>
+  <button onclick="getUserLogs()">Лог входів гравців</button>
+  <button onclick="getAdminLogs()">Лог адмін-дій</button>
+</div>
+
+<div class="section">
+  <h3>Статистика</h3>
+  <button onclick="getStats()">Загальна статистика</button>
+</div>
+
+<button onclick="clearScreen()" style="background:#800;color:#fff;border-color:#f00">Очистити екран</button>
+
+<div id="output"><pre>Готовий до команд... (оновлено 06.02.2026)</pre></div>
 
 <script>
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
@@ -71,6 +91,55 @@ async function getPlayers() {
   }
 }
 
+async function deletePlayer() {
+  let nick = document.getElementById("nickEdit").value.trim();
+  if (!nick) return alert("Введи нік!");
+  if (!confirm(`Видалити гравця ${nick}?`)) return;
+  await fetch(DB + "users/" + nick + ".json", {method: "DELETE"});
+  print(`Гравець ${nick} видалений`);
+}
+
+async function editMoney(add) {
+  let nick = document.getElementById("nickEdit").value.trim();
+  if (!nick) return alert("Введи нік!");
+  let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
+  amt = parseInt(amt);
+  if (isNaN(amt) || amt <= 0) return alert("Невірна сума");
+  
+  let r = await fetch(DB + "users/" + nick + ".json");
+  let u = await r.json();
+  if (!u) return alert("Гравця не знайдено");
+  
+  u.points = (u.points || 0) + (add ? amt : -amt);
+  u.points = Math.max(0, u.points);
+  
+  await fetch(DB + "users/" + nick + ".json", {
+    method: "PUT",
+    body: JSON.stringify(u)
+  });
+  print(`${add ? "+" : "-"} ${amt} ₴ гравцю ${nick}. Новий баланс: ${u.points}`);
+}
+
+async function editLevel() {
+  let nick = document.getElementById("nickEdit").value.trim();
+  if (!nick) return alert("Введи нік!");
+  let lvl = prompt("Новий рівень (1–50):");
+  lvl = parseInt(lvl);
+  if (isNaN(lvl) || lvl < 1 || lvl > 50) return alert("Рівень від 1 до 50");
+  
+  let r = await fetch(DB + "users/" + nick + ".json");
+  let u = await r.json();
+  if (!u) return alert("Гравця не знайдено");
+  
+  u.lvl = lvl;
+  
+  await fetch(DB + "users/" + nick + ".json", {
+    method: "PUT",
+    body: JSON.stringify(u)
+  });
+  print(`Рівень гравця ${nick} змінено на ${lvl}`);
+}
+
 async function getBotChat() {
   let data = await fetchData("bot_chat");
   print("=== ЧАТ БОТА ===");
@@ -82,9 +151,9 @@ async function getBotChat() {
 }
 
 async function clearBotChat() {
-  if (!confirm("Очистити чат бота?")) return;
+  if (!confirm("Очистити весь чат бота?")) return;
   await fetch(DB + "bot_chat.json", {method: "DELETE"});
-  print("Чат бота очищено");
+  print("Чат бота повністю очищено");
 }
 
 async function getUserLogs() {
@@ -105,6 +174,18 @@ async function getAdminLogs() {
     let l = data[key];
     print(`${l.time} → ${l.nick}`);
   }
+}
+
+async function getStats() {
+  let users = await fetchData("users");
+  let count = Object.keys(users).length;
+  let totalMoney = 0;
+  for (let u in users) totalMoney += users[u].points || 0;
+  
+  print("=== ЗАГАЛЬНА СТАТИСТИКА ===");
+  print(`Кількість гравців: ${count}`);
+  print(`Загальні гроші в грі: ${totalMoney} ₴`);
+  print(`Середній баланс: ${count ? (totalMoney/count).toFixed(0) : 0} ₴`);
 }
 
 function clearScreen() {
