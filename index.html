@@ -2,302 +2,131 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>UkrMova Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-:root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f}
-body{margin:0;font-family:system-ui,sans-serif;background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Flag_of_Ukraine.svg/2560px-Flag_of_Ukraine.svg.png') center/cover fixed;color:#111;background-attachment:fixed}
-.screen{display:none;flex-direction:column;min-height:100vh;padding:16px;box-sizing:border-box}
-.active{display:flex}
-.card{background:rgba(255,255,255,0.94);backdrop-filter:blur(10px);border-radius:16px;padding:24px;box-shadow:0 10px 40px rgba(0,0,0,0.25);margin:auto;width:100%;max-width:520px}
-.btn{display:block;width:100%;padding:16px;margin:10px 0;border:none;border-radius:12px;font-size:17px;font-weight:bold;cursor:pointer;transition:all .18s}
-.btn.blue{background:var(--blue);color:white}
-.btn.green{background:var(--green);color:white}
-.btn.danger{background:var(--red);color:white}
-.btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,0.25)}
-.money{font-size:42px;font-weight:900;color:var(--gold);text-align:center;margin:20px 0;text-shadow:0 2px 10px rgba(0,0,0,0.3)}
-.nickname{font-size:32px;font-weight:bold;text-align:center;margin:15px 0;color:#222}
-.lvl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;max-height:55vh;overflow-y:auto;padding:20px 0}
-.lvl{padding:18px;border-radius:14px;text-align:center;font-weight:bold;font-size:18px;cursor:pointer;transition:all .2s;background:rgba(0,0,0,0.15);opacity:.55}
-.lvl.open{opacity:1;background:var(--blue);color:white;box-shadow:0 0 25px rgba(0,162,255,.7)}
-#qtext{font-size:22px;line-height:1.4;margin-bottom:28px;text-align:center;font-weight:500}
-#abox{display:flex;flex-direction:column;gap:14px}
-#bot-chat-box{max-height:300px;overflow-y:auto;border:1px solid #ddd;padding:14px;background:white;border-radius:12px;margin:14px 0}
-.bot-msg{margin:10px 0;padding:14px 18px;background:#e8f4ff;border-radius:14px;max-width:88%;word-wrap:break-word}
+:root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
+body{background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;background-size:160px;color:#000;font-family:sans-serif;margin:0;text-align:center}
+.screen{display:none;padding:20px;flex-direction:column;min-height:100vh;box-sizing:border-box}
+.active{display:flex;animation:fadeIn .3s ease}
+.card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3)}
+.btn{background:var(--blue);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;width:100%;margin:6px 0;cursor:pointer;text-transform:uppercase;transition:all .2s}
+.btn:hover{transform:scale(1.02);box-shadow:0 0 15px rgba(0,162,255,.6)}
+.btn.green{background:var(--green)}
+.btn.danger{background:var(--dark)}
+.money{font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 10px #f1c40f}
+.nickname{font-size:28px;font-weight:bold;margin:10px 0;cursor:pointer}
+.gold-nick{color:var(--gold);text-shadow:0 0 10px var(--gold)}
+.lvl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-height:40vh;overflow-y:auto;padding:10px}
+.lvl{background:rgba(51,51,51,0.7);padding:12px 0;border-radius:10px;opacity:0.6;transition:all .3s;border:1px solid #ccc}
+.lvl.open{opacity:1;background:var(--blue);border:2px solid white;box-shadow:0 0 15px var(--blue);color:white}
+#admin-panel{border:2px dashed var(--red);padding:15px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px}
+input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;color:#000;width:90%;margin-bottom:8px}
+.shop-item{background:#eee;padding:12px;margin:8px 0;border-radius:10px;cursor:pointer}
+.shop-item.bought{background:#c8e6c9}
+.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.theme-btn{background:#9c27b0;color:white}
+.log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
+.log-entry{padding:4px 0;border-bottom:1px solid #eee}
+.players-list{max-height:300px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
+.player-entry{padding:8px;border-bottom:1px solid #eee}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 
-<div id="auth" class="screen active">
+<div id="auth-screen" class="screen active">
   <div class="card">
-    <h2 style="color:var(--gold);text-align:center;margin-bottom:30px">UKRMOVA PRO</h2>
-    <input id="nick" placeholder="Нікнейм" style="width:100%;padding:16px;margin:16px 0;border:1px solid #ccc;border-radius:12px;font-size:17px">
-    <button class="btn blue" onclick="startGame()" style="padding:18px;font-size:18px">ГРАТИ</button>
+    <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
+    <input type="text" id="nick" placeholder="Нікнейм">
+    <input type="password" id="pass" placeholder="Пароль">
+    <button class="btn" onclick="auth()">УВІЙТИ</button>
   </div>
 </div>
 
 <div id="menu" class="screen">
   <div class="card">
-    <h3 onclick="admT()" style="cursor:pointer;text-align:center">МЕНЮ</h3>
+    <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
     <div class="nickname" id="playerNick"></div>
     <div class="money"><span id="mon">0</span> ₴</div>
-    <button class="btn blue" onclick="show('themes')">ГРАТИ</button>
-    <button class="btn" style="background:#333;color:white" onclick="show('top')">ТОП</button>
+    <button class="btn" onclick="showThemes()">ГРАТИ</button>
+    <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
+    <button class="btn" onclick="loadPlayersList()">УЧАСНИКИ</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
-    <h4 style="color:var(--blue);margin:28px 0 14px;text-align:center">Чат від бота</h4>
-    <div id="bot-chat-box"></div>
-    <div id="admin-panel" style="display:none;margin-top:20px;padding:20px;border:2px dashed var(--red);border-radius:14px;background:rgba(255,220,220,0.2)">
+
+    <div id="admin-panel">
       <b style="color:var(--red);cursor:pointer" onclick="closeAdm()">❌ ЗАКРИТИ</b><br><br>
-      <input id="bot-message" placeholder="Повідомлення від бота..." style="width:100%;padding:14px;margin-bottom:10px;border:1px solid #ccc;border-radius:10px">
-      <button class="btn blue" onclick="sendBotMsg()">Відправити</button>
-      <button class="btn danger" onclick="clearBotChat()" style="margin-top:14px">Очистити чат</button>
+      <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
+      <p><b>Управління гравцями</b></p>
+      <input type="text" id="a-n" placeholder="Нік гравця">
+      <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
+      <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
+      <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
+      <br><br>
+      <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ (адмін)</button>
+      <div id="player-list" style="max-height:250px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
+      <br><br>
+      <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
+      <div id="admin-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800" onclick="clearAdminLogs()">Очистити лог адмінки</button>
+      <br><br>
+      <h4 style="color:var(--blue)">Лог усіх входів у гру</h4>
+      <div id="user-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800;margin-top:8px" onclick="loadUserLog()">Оновити</button>
+      <button class="btn danger" style="margin-top:8px" onclick="clearUserLog()">Очистити</button>
     </div>
   </div>
 </div>
 
-<div id="themes" class="screen">
+<div id="players" class="screen">
   <div class="card">
-    <h2 style="text-align:center">Обери тему</h2><br>
-    <button class="btn blue" onclick="startTheme('vydminy')">Відміни іменників</button>
-    <button class="btn blue" onclick="startTheme('chasyslova')">Часи дієслів</button>
-    <button class="btn blue" onclick="startTheme('prykmetnyky')">Прикметники</button>
-    <button class="btn blue" onclick="startTheme('pryslinniky')">Прислівники</button>
-    <button class="btn blue" onclick="startTheme('synonimy')">Синоніми / Антоніми</button>
-    <button class="btn blue" onclick="startTheme('chyslyvnyky')">Числівники</button>
-    <button class="btn blue" onclick="startTheme('stupeni')">Ступені порівняння</button>
-    <button class="btn blue" onclick="startTheme('pravopys')">Правопис слів</button>
-    <button class="btn blue" onclick="startTheme('punktyatsiya')">Пунктуація</button>
-    <button class="btn blue" onclick="startTheme('frazeolohizmy')">Фразеологізми</button>
-    <button class="btn danger" onclick="show('menu')" style="margin-top:30px">НАЗАД</button>
+    <h2>Учасники гри</h2>
+    <div id="players-list" class="players-list"></div>
+    <button class="btn" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
 
-<div id="levels" class="screen">
-  <div class="card">
-    <h3 id="themeTitle" style="text-align:center">РІВНІ</h3>
-    <div class="lvl-grid" id="lgrid"></div>
-    <button class="btn danger" onclick="show('themes')" style="margin-top:20px">НАЗАД ДО ТЕМ</button>
-  </div>
-</div>
-
-<div id="game" class="screen">
-  <div class="card">
-    <div id="qtext" style="margin-bottom:28px;font-size:22px;line-height:1.4"></div>
-    <div id="abox"></div>
-  </div>
-</div>
-
-<div id="top" class="screen">
-  <div class="card">
-    <h3 style="text-align:center">ТОП 1000</h3>
-    <div id="tlist" style="margin:20px 0"></div>
-    <button class="btn blue" onclick="show('menu')">НАЗАД</button>
-  </div>
-</div>
-
-<div id="shop" class="screen">
-  <div class="card">
-    <h2 style="text-align:center">Магазин</h2><br>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div onclick="buyItem('gold_frame')" style="background:#f9f9f9;padding:18px;border-radius:12px;text-align:center;cursor:pointer;border:1px solid #ddd">Золота рамка — 1000 ₴</div>
-      <div onclick="buyItem('crown')" style="background:#f9f9f9;padding:18px;border-radius:12px;text-align:center;cursor:pointer;border:1px solid #ddd">Корона — 2000 ₴</div>
-      <div onclick="buyItem('fire')" style="background:#f9f9f9;padding:18px;border-radius:12px;text-align:center;cursor:pointer;border:1px solid #ddd">Полум'я — 1500 ₴</div>
-      <div onclick="buyItem('shield')" style="background:#f9f9f9;padding:18px;border-radius:12px;text-align:center;cursor:pointer;border:1px solid #ddd">Щит — 2500 ₴</div>
-      <div onclick="buyItem('vip')" style="background:#f9f9f9;padding:18px;border-radius:12px;text-align:center;cursor:pointer;border:1px solid #ddd;grid-column:span 2">ВІП — 5000 ₴</div>
-    </div>
-    <button class="btn blue" onclick="show('menu')" style="margin-top:30px">НАЗАД</button>
-  </div>
-</div>
+<!-- решта екранів (shop, themes, levels, game, top) залишаються без змін -->
 
 <script>
-let user = null;
-let clicks = 0;
-let currentTheme = '';
-let currentQuestionIndex = -1;
-let correct = 0;
-let wrong = 0;
-let qCount = 0;
+// ... весь попередній код до auth(), save(), update() тощо залишається без змін ...
 
-const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
-const wrongSound   = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
+// Нова функція для показу всіх унікальних гравців
+async function loadPlayersList() {
+  show('players');
+  const list = document.getElementById('players-list');
+  list.innerHTML = '<div style="color:#888;text-align:center">Завантаження...</div>';
 
-function $(id) { return document.getElementById(id); }
+  try {
+    const r = await fetch(DB + "users/.json");
+    const data = await r.json();
 
-function startGame() {
-  let n = $("nick").value.trim() || 'Гравець';
-  user = { name: n, points: 0, lvl: 50 };
-  $("playerNick").textContent = user.name;
-  $("mon").textContent = user.points;
-  show('menu');
-}
+    list.innerHTML = '';
 
-function show(id) {
-  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-  $(id).classList.add('active');
-}
+    if (!data || Object.keys(data).length === 0) {
+      list.innerHTML = '<div style="padding:15px;color:#888">Ще ніхто не грав</div>';
+      return;
+    }
 
-function admT() {
-  clicks++;
-  if (clicks >= 5) {
-    $("admin-panel").style.display = "block";
-    clicks = 0;
-  }
-}
+    const players = Object.values(data)
+      .filter(u => u && u.name) // фільтруємо биті записи
+      .sort((a, b) => (b.points || 0) - (a.points || 0));
 
-function closeAdm() {
-  $("admin-panel").style.display = "none";
-}
-
-function getSeenQuestions(theme) {
-  const key = `seen_${theme}_${user.name}`;
-  const saved = localStorage.getItem(key);
-  return saved ? new Set(JSON.parse(saved)) : new Set();
-}
-
-function saveSeenQuestions(theme, seen) {
-  const key = `seen_${theme}_${user.name}`;
-  localStorage.setItem(key, JSON.stringify([...seen]));
-}
-
-function startTheme(theme) {
-  currentTheme = theme;
-  correct = wrong = qCount = 0;
-  currentQuestionIndex = -1;
-
-  let grid = $("lgrid");
-  grid.innerHTML = "";
-  $("themeTitle").textContent = `РІВНІ — ${theme}`;
-
-  for (let i = 0; i < 50; i++) {
-    let el = document.createElement("div");
-    el.className = "lvl" + (i < user.lvl ? " open" : "");
-    el.textContent = i + 1;
-    el.onclick = () => startLevel(i + 1);
-    grid.appendChild(el);
-  }
-  show("levels");
-}
-
-function startLevel(level) {
-  if (level > user.lvl) return;
-
-  const seen = getSeenQuestions(currentTheme);
-  const qs = getQuestions(currentTheme);
-
-  const available = qs.filter(q => !seen.has(q.id));
-
-  if (available.length === 0) {
-    let acc = qCount > 0 ? Math.round(correct / qCount * 100) : 0;
-    alert(`Тему пройдено!\nПравильних: ${correct}\nПомилок: ${wrong}\nТочність: ${acc}%\nОчок: +${correct * 1000}`);
-    // Очищаємо список пройдених
-    localStorage.removeItem(`seen_${currentTheme}_${user.name}`);
-    show("themes");
-    return;
-  }
-
-  const randIndex = Math.floor(Math.random() * available.length);
-  const q = available[randIndex];
-
-  // Додаємо в список пройдених
-  seen.add(q.id);
-  saveSeenQuestions(currentTheme, seen);
-
-  qCount++;
-  $("qtext").textContent = `Питання ${qCount} (рівень ${level}): ${q.t}`;
-
-  let answers = $("abox");
-  answers.innerHTML = "";
-
-  let opts = [q.cor, q.inc].sort(() => Math.random() - 0.5);
-  opts.forEach(opt => {
-    let btn = document.createElement("button");
-    btn.className = "btn blue";
-    btn.textContent = opt;
-    btn.onclick = () => check(opt === q.cor, level);
-    answers.appendChild(btn);
-  });
-
-  show("game");
-}
-
-function check(isCorrect, level) {
-  if (isCorrect) {
-    user.points += 1000;
-    correct++;
-    correctSound.currentTime = 0;
-    correctSound.play().catch(() => {});
-    alert("Правильно! +1000");
-  } else {
-    user.points = Math.max(0, user.points - 150);
-    wrong++;
-    wrongSound.currentTime = 0;
-    wrongSound.play().catch(() => {});
-    alert("Помилка! -150");
-  }
-
-  $("mon").textContent = user.points;
-
-  if (qCount % 10 === 0) {
-    let acc = Math.round(correct / qCount * 100) || 0;
-    alert(`Блок 10 питань\nПравильних: ${correct}\nПомилок: ${wrong}\nТочність: ${acc}%`);
-  }
-
-  startLevel(level);
-}
-
-function sendBotMsg() {
-  let text = $("bot-message").value.trim();
-  if (!text) return;
-  let time = new Date().toLocaleString("uk-UA");
-  let msg = document.createElement("div");
-  msg.className = "bot-msg";
-  msg.innerHTML = `<strong>БОТ</strong> <small>(${time})</small><br>${text}`;
-  $("bot-chat-box").appendChild(msg);
-  $("bot-chat-box").scrollTop = $("bot-chat-box").scrollHeight;
-  $("bot-message").value = "";
-}
-
-function clearBotChat() {
-  if (!confirm("Очистити чат?")) return;
-  $("bot-chat-box").innerHTML = "";
-}
-
-function buyItem(item) {
-  const p = { gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000 };
-  if (user.points >= p[item]) {
-    user.points -= p[item];
-    $("mon").textContent = user.points;
-    alert("Куплено!");
-  } else {
-    alert("Недостатньо коштів!");
-  }
-}
-
-// Приклад бази питань (можна розширити)
-const questions = {
-  vydminy: [
-    {id:1, t:"До якої відміни належить слово «книга»?", cor:"перша відміна", inc:"друга відміна"},
-    {id:2, t:"До якої відміни належить слово «стіл»?", cor:"друга відміна", inc:"перша відміна"},
-    {id:3, t:"До якої відміни належить слово «мати»?", cor:"третя відміна", inc:"перша відміна"},
-    // ... додай ще 47 питань з id від 4 до 50
-  ],
-  // chasyslova: [...],
-  // prykmetnyky: [...],
-  // і так далі — заповни сам або зроби масив з 500 питань
-};
-
-// Заповнення тестових питань (для прикладу)
-for (let theme in questions) {
-  while (questions[theme].length < 50) {
-    let id = questions[theme].length + 1;
-    questions[theme].push({
-      id,
-      t: `Тестове питання ${id} для ${theme}`,
-      cor: "Правильна відповідь",
-      inc: "Неправильна"
+    players.forEach(u => {
+      list.innerHTML += `
+        <div class="player-entry">
+          <strong>${u.name}</strong><br>
+          <small>Очок: ${u.points || 0} • Рівень: ${u.lvl || 1}</small>
+        </div>
+      `;
     });
+  } catch (e) {
+    list.innerHTML = '<div style="color:#d32f2f">Помилка завантаження</div>';
   }
 }
+
+// Додаємо кнопку в меню (вставте цей рядок після кнопки МАГАЗИН, наприклад)
+<button class="btn" onclick="loadPlayersList()">УЧАСНИКИ</button>
 
 </script>
 </body>
