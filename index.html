@@ -22,29 +22,38 @@ body{margin:0;font-family:system-ui,sans-serif;background:url('https://upload.wi
 .lvl.open{opacity:1;background:var(--blue);color:white;box-shadow:0 0 25px rgba(0,162,255,.7)}
 #qtext{font-size:22px;line-height:1.4;margin-bottom:28px;text-align:center;font-weight:500}
 #abox{display:flex;flex-direction:column;gap:14px}
+#bot-chat-box{max-height:300px;overflow-y:auto;border:1px solid #ddd;padding:14px;background:white;border-radius:12px;margin:14px 0}
+.bot-msg{margin:10px 0;padding:14px 18px;background:#e8f4ff;border-radius:14px;max-width:88%;word-wrap:break-word}
 </style>
 </head>
 <body>
-
 <div id="auth" class="screen active">
   <div class="card">
     <h2 style="color:var(--gold);text-align:center;margin-bottom:30px">UKRMOVA PRO</h2>
     <input id="nick" placeholder="Нікнейм" style="width:100%;padding:16px;margin:16px 0;border:1px solid #ccc;border-radius:12px;font-size:17px">
-    <button class="btn blue" onclick="startGame()" style="padding:18px;font-size:18px">ГРАТИ</button>
+    <input id="pass" type="password" placeholder="Пароль" style="width:100%;padding:16px;margin:16px 0;border:1px solid #ccc;border-radius:12px;font-size:17px">
+    <button class="btn blue" onclick="auth()" style="padding:18px;font-size:18px">УВІЙТИ</button>
   </div>
 </div>
-
 <div id="menu" class="screen">
   <div class="card">
     <h3 onclick="admT()" style="cursor:pointer;text-align:center">МЕНЮ</h3>
     <div class="nickname" id="playerNick"></div>
     <div class="money"><span id="mon">0</span> ₴</div>
     <button class="btn blue" onclick="show('themes')">ГРАТИ</button>
-    <button class="btn" style="background:#333;color:white" onclick="show('top')">ТОП</button>
+    <button class="btn" style="background:#333;color:white" onclick="loadT()">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
+    <button class="btn" style="background:#ff9800" onclick="loadPlayersList()">УЧАСНИКИ</button>
+    <h4 style="color:var(--blue);margin:28px 0 14px;text-align:center">Чат від бота</h4>
+    <div id="bot-chat-box"></div>
+    <div id="admin-panel" style="display:none;margin-top:20px;padding:20px;border:2px dashed var(--red);border-radius:14px;background:rgba(255,220,220,0.2)">
+      <b style="color:var(--red);cursor:pointer" onclick="closeAdm()">❌ ЗАКРИТИ</b><br><br>
+      <input id="bot-message" placeholder="Повідомлення від бота..." style="width:100%;padding:14px;margin-bottom:10px;border:1px solid #ccc;border-radius:10px">
+      <button class="btn blue" onclick="sendBotMsg()">Відправити</button>
+      <button class="btn danger" onclick="clearBotChat()" style="margin-top:14px">Очистити чат</button>
+    </div>
   </div>
 </div>
-
 <div id="themes" class="screen">
   <div class="card">
     <h2 style="text-align:center">Обери тему</h2><br>
@@ -61,7 +70,6 @@ body{margin:0;font-family:system-ui,sans-serif;background:url('https://upload.wi
     <button class="btn danger" onclick="show('menu')" style="margin-top:30px">НАЗАД</button>
   </div>
 </div>
-
 <div id="levels" class="screen">
   <div class="card">
     <h3 id="themeTitle" style="text-align:center">РІВНІ</h3>
@@ -69,14 +77,12 @@ body{margin:0;font-family:system-ui,sans-serif;background:url('https://upload.wi
     <button class="btn danger" onclick="show('themes')" style="margin-top:20px">НАЗАД ДО ТЕМ</button>
   </div>
 </div>
-
 <div id="game" class="screen">
   <div class="card">
     <div id="qtext" style="margin-bottom:28px;font-size:22px;line-height:1.4"></div>
     <div id="abox"></div>
   </div>
 </div>
-
 <div id="top" class="screen">
   <div class="card">
     <h3 style="text-align:center">ТОП 1000</h3>
@@ -84,7 +90,6 @@ body{margin:0;font-family:system-ui,sans-serif;background:url('https://upload.wi
     <button class="btn blue" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
-
 <div id="shop" class="screen">
   <div class="card">
     <h2 style="text-align:center">Магазин</h2><br>
@@ -98,15 +103,18 @@ body{margin:0;font-family:system-ui,sans-serif;background:url('https://upload.wi
     <button class="btn blue" onclick="show('menu')" style="margin-top:30px">НАЗАД</button>
   </div>
 </div>
+<div id="players" class="screen">
+  <div class="card">
+    <h2>Учасники гри</h2>
+    <div id="players-list" style="max-height:300px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px"></div>
+    <button class="btn" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
 
 <script>
-let user = null;
-let clicks = 0;
-let currentTheme = '';
-let correct = 0, wrong = 0, qCount = 0;
-
+let user = null, clicks = 0, currentTheme = '', correct = 0, wrong = 0, qCount = 0;
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
-const wrongSound   = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
+const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
 function $(id) { return document.getElementById(id); }
 
@@ -126,19 +134,23 @@ function show(id) {
 function admT() {
   clicks++;
   if (clicks >= 5) {
-    alert("Адмін-панель в розробці");
+    $("admin-panel").style.display = "block";
     clicks = 0;
   }
 }
 
+function closeAdm() {
+  $("admin-panel").style.display = "none";
+}
+
 function getSeenQuestions(theme) {
-  const key = `seen_${theme}_${user ? user.name : 'guest'}`;
+  const key = `seen_${theme}_${user.name}`;
   const saved = localStorage.getItem(key);
   return saved ? new Set(JSON.parse(saved)) : new Set();
 }
 
 function saveSeenQuestions(theme, seen) {
-  const key = `seen_${theme}_${user ? user.name : 'guest'}`;
+  const key = `seen_${theme}_${user.name}`;
   localStorage.setItem(key, JSON.stringify([...seen]));
 }
 
@@ -165,12 +177,12 @@ function startLevel(level) {
 
   const seen = getSeenQuestions(currentTheme);
   const qs = getQuestions(currentTheme);
-  const available = qs.filter(q => !seen.has(q.id));
+  const available = qs.filter((q, index) => !seen.has(index));
 
   if (available.length === 0) {
     let acc = qCount > 0 ? Math.round(correct / qCount * 100) : 0;
     alert(`Тему пройдено!\nПравильних: ${correct}\nПомилок: ${wrong}\nТочність: ${acc}%\nОчок: +${correct * 1000}`);
-    localStorage.removeItem(`seen_${currentTheme}_${user ? user.name : 'guest'}`);
+    localStorage.removeItem(`seen_${currentTheme}_${user.name}`);
     show("themes");
     return;
   }
@@ -178,7 +190,7 @@ function startLevel(level) {
   const randIndex = Math.floor(Math.random() * available.length);
   const q = available[randIndex];
 
-  seen.add(q.id);
+  seen.add(qs.indexOf(q));
   saveSeenQuestions(currentTheme, seen);
 
   qCount++;
@@ -235,64 +247,81 @@ function buyItem(item) {
   }
 }
 
-function getQuestions(theme) {
-  return questions[theme] || [];
+function sendBotMsg() {
+  let text = $("bot-message").value.trim();
+  if (!text) return;
+  let time = new Date().toLocaleString("uk-UA");
+  let msg = document.createElement("div");
+  msg.className = "bot-msg";
+  msg.innerHTML = `<strong>БОТ</strong> <small>(${time})</small><br>${text}`;
+  $("bot-chat-box").appendChild(msg);
+  $("bot-chat-box").scrollTop = $("bot-chat-box").scrollHeight;
+  $("bot-message").value = "";
 }
 
-// Повна база з усіх 10 тем (скорочено для прикладу — додай решту питань сам)
+function clearBotChat() {
+  if (!confirm("Очистити чат?")) return;
+  $("bot-chat-box").innerHTML = "";
+}
+
+function loadPlayersList() {
+  show('players');
+  // Тут код для завантаження учасників, як у попередній версії
+  const list = $("players-list");
+  list.innerHTML = 'Завантаження...';
+  // Приклад (заміни на реальний fetch, якщо є DB)
+  list.innerHTML = '<div class="player-entry">Гравець 1 - 1000 очок</div><div class="player-entry">Гравець 2 - 500 очок</div>';
+}
+
+// База питань з 10 тем (заповнена прикладами — додай повні)
 const questions = {
   vydminy: [
-    {id:1, t:"До якої відміни належить слово «книга»?", cor:"перша відміна", inc:"друга відміна"},
-    {id:2, t:"До якої відміни належить слово «стіл»?", cor:"друга відміна", inc:"перша відміна"},
-    {id:3, t:"До якої відміни належить слово «мати»?", cor:"третя відміна", inc:"перша відміна"},
-    // ... додай ще 47 питань з id 4–50
+    { t: "До якої відміни належить слово «книга»?", cor: "перша відміна", inc: "друга відміна" },
+    // ... додай ще 49
   ],
   chasyslova: [
-    {id:1, t:"Який час дієслова «читати» у реченні «Я читав книгу»?", cor:"минулий час", inc:"теперішній час"},
-    {id:2, t:"Який час дієслова «писати» у реченні «Він пише листа»?", cor:"теперішній час", inc:"майбутній час"},
+    { t: "Який час дієслова в реченні «Я читаю книгу»?", cor: "теперішній час", inc: "минулий час" },
     // ... додай ще
   ],
   prykmetnyky: [
-    {id:1, t:"Який рід прикметника «гарний» у реченні «гарна дівчина»?", cor:"жіночий рід", inc:"чоловічий рід"},
+    { t: "Який рід прикметника «гарна»?", cor: "жіночий", inc: "чоловічий" },
     // ... додай ще
   ],
   pryslinniky: [
-    {id:1, t:"Який прислівник часу в реченні «Вчора я був у кіно»?", cor:"вчора", inc:"завтра"},
+    { t: "Прислівник в реченні «Він швидко біг»?", cor: "швидко", inc: "повільно" },
     // ... додай ще
   ],
   synonimy: [
-    {id:1, t:"Синонім до слова «великий»?", cor:"огромний", inc:"маленький"},
+    { t: "Синонім до слова «великий»?", cor: "огромний", inc: "маленький" },
     // ... додай ще
   ],
   chyslyvnyky: [
-    {id:1, t:"Форма числівника «один» в родовому відмінку?", cor:"одного", inc:"один"},
+    { t: "Форма числівника «один» в родовому відмінку?", cor: "одного", inc: "один" },
     // ... додай ще
   ],
   stupeni: [
-    {id:1, t:"Вищий ступінь прикметника «гарний»?", cor:"гарніший", inc:"найгарніший"},
+    { t: "Вищий ступінь прикметника «гарний»?", cor: "гарніший", inc: "найгарніший" },
     // ... додай ще
   ],
   pravopys: [
-    {id:1, t:"Як пишеться «південь»?", cor:"разом", inc:"окремо"},
+    { t: "Як пишеться «південь»?", cor: "разом", inc: "окремо" },
     // ... додай ще
   ],
   punktyatsiya: [
-    {id:1, t:"Який знак ставиться після прямої мови?", cor:"двокрапка", inc:"кома"},
+    { t: "Який знак ставиться після прямої мови?", cor: "двокрапка", inc: "кома" },
     // ... додай ще
   ],
   frazeolohizmy: [
-    {id:1, t:"Що означає «бити байдики»?", cor:"нічого не робити", inc:"працювати багато"},
+    { t: "Що означає «бити байдики»?", cor: "нічого не робити", inc: "працювати багато" },
     // ... додай ще
   ]
 };
 
-// Автозаповнення тестових питань до 50 в кожній темі (щоб можна було тестувати)
+// Автозаповнення до 50 питань у кожній темі (видали, коли заповниш реальні)
 Object.keys(questions).forEach(theme => {
   while (questions[theme].length < 50) {
-    let id = questions[theme].length + 1;
     questions[theme].push({
-      id,
-      t: `Питання ${id} теми ${theme}`,
+      t: "Тестове питання",
       cor: "Правильна",
       inc: "Неправильна"
     });
