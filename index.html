@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>UkrMova Pro</title>
 <style>
 :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
@@ -44,12 +44,11 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 
 <div id="menu" class="screen">
   <div class="card">
-    <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
+    <h3 id="menu-title" onclick="admClick()" style="cursor:pointer">МЕНЮ</h3>
     <div class="nickname" id="playerNick"></div>
     <div class="money"><span id="mon">0</span> ₴</div>
-
     <button class="btn" onclick="showThemes()">ГРАТИ</button>
-    <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
+    <button class="btn" style="background:#333" onclick="loadTop()">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
 
     <div id="admin-panel">
@@ -82,9 +81,6 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
     <div class="shop-grid">
       <div class="shop-item" id="gold_frame" onclick="buyItem('gold_frame')">Золота рамка — 1000 ₴</div>
       <div class="shop-item" id="crown" onclick="buyItem('crown')">Корона — 2000 ₴</div>
-      <div class="shop-item" id="fire" onclick="buyItem('fire')">Полум'я — 1500 ₴</div>
-      <div class="shop-item" id="shield" onclick="buyItem('shield')">Щит — 2500 ₴</div>
-      <div class="shop-item" id="vip" onclick="buyItem('vip')">ВІП — 5000 ₴</div>
     </div>
     <button class="btn" onclick="show('menu')">НАЗАД</button>
   </div>
@@ -92,16 +88,9 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 
 <div id="themes" class="screen">
   <div class="card">
-    <h2>Оберіть тему</h2>
+    <h2>Обери тему</h2>
     <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
     <button class="btn theme-btn" onclick="startTheme('chasyslova')">Часи дієслів</button>
-    <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
-    <button class="btn theme-btn" onclick="startTheme('pryslinniky')">Прислівники</button>
-    <button class="btn theme-btn" onclick="startTheme('synonimy')">Синоніми / Антоніми</button>
-    <button class="btn theme-btn" onclick="startTheme('vydminy2')">Відміни іменників 2</button>
-    <button class="btn theme-btn" onclick="startTheme('chasyslova2')">Часи дієслів 2</button>
-    <button class="btn theme-btn" onclick="startTheme('prykmetnyky2')">Прикметники 2</button>
-    <button class="btn theme-btn" onclick="startTheme('pryslinniky2')">Прислівники 2</button>
     <button class="btn red" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
@@ -109,34 +98,68 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 <div id="game" class="screen">
   <div class="card">
     <h3 id="qtext"></h3>
-    <div id="abox"></div>
+    <button class="btn" id="showAnswer" onclick="showAnswerFunc()">Показати відповідь</button>
+    <div id="answer" style="margin-top:10px;font-weight:bold"></div>
+    <button class="btn" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
+
+<div id="top" class="screen">
+  <div class="card">
+    <h3>ТОП 1000</h3>
+    <div id="tlist"></div>
     <button class="btn" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
 
 <script>
-let users = [{nick:"admin",pass:"12345"}];
-let user = null;
+let users = [
+  {nick:"admin", pass:"1234", money:1000, admin:true},
+  {nick:"player1", pass:"1111", money:500, admin:false}
+];
+
+let currentUser = null;
 let clickCount = 0;
-let currentTheme = '';
-let currentQuestion = 0;
-let themes = {
-  vydminy:[{t:"Слово 'книга' належить до якої відміни?",cor:"перша",inc:"друга"},{t:"Слово 'стіл' належить до якої відміни?",cor:"друга",inc:"перша"}],
-  chasyslova:[{t:"Який час дієслова 'читати' у реченні 'Я читав книгу'?",cor:"минулий",inc:"теперішній"}],
-  prykmetnyky:[{t:"Який рід прикметника 'гарний' у реченні 'гарна дівчина'?",cor:"жіночий",inc:"чоловічий"}],
-  pryslinniky:[{t:"Який прислівник часу в реченні 'Вчора я був у кіно'?",cor:"вчора",inc:"завтра"}],
-  synonimy:[{t:"Синонім до слова 'великий'?",cor:"огромний",inc:"малий"}],
-  vydminy2:[{t:"Слово 'дитина' належить до якої відміни?",cor:"перша",inc:"друга"}],
-  chasyslova2:[{t:"Який час дієслова 'писати' у реченні 'Він пише листа'?",cor:"теперішній",inc:"майбутній"}],
-  prykmetnyky2:[{t:"Який рід прикметника 'великий' у реченні 'велике поле'?",cor:"середній",inc:"жіночий"}],
-  pryslinniky2:[{t:"Який прислівник способу в реченні 'Він швидко біг'?",cor:"швидко",inc:"повільно"}]
+
+let questions = {
+  vydminy:[
+    {question:"До якої відміни належить слово 'книга'?", answer:"Перша відміна"},
+    {question:"До якої відміни належить слово 'стіл'?", answer:"Друга відміна"},
+    {question:"До якої відміни належить слово 'ніч'?", answer:"Третя відміна"},
+    {question:"До якої відміни належить слово 'поле'?", answer:"Друга відміна"},
+    {question:"До якої відміни належать іменники жіночого роду на -а/-я?", answer:"Перша відміна"},
+    {question:"До якої відміни належить слово 'мати'?", answer:"Третя відміна"},
+    {question:"До якої відміни належить слово 'ім'я'?", answer:"Четверта відміна"},
+    {question:"До якої відміни належить слово 'любов'?", answer:"Третя відміна"},
+    {question:"До якої відміни належить слово 'земля'?", answer:"Перша відміна"},
+    {question:"До якої відміни належить слово 'день'?", answer:"Друга відміна"}
+  ],
+  chasyslova:[
+    {question:"Який час дієслова 'читати' у реченні 'Я читав книгу'?", answer:"Минулий"},
+    {question:"Який час дієслова 'писати' у реченні 'Він пише листа'?", answer:"Теперішній"},
+    {question:"Який час дієслова 'йти' у реченні 'Я йду додому'?", answer:"Теперішній"},
+    {question:"Який час дієслова 'будувати' у реченні 'Ми побудуємо будинок'?", answer:"Майбутній"},
+    {question:"Який час дієслова 'співати' у реченні 'Вона співала пісню'?", answer:"Минулий"},
+    {question:"Який час дієслова 'говорити' у реченні 'Вони говорять швидко'?", answer:"Теперішній"},
+    {question:"Який час дієслова 'їсти' у реченні 'Я їв борщ'?", answer:"Минулий"},
+    {question:"Який час дієслова 'дивитися' у реченні 'Ми будемо дивитися фільм'?", answer:"Майбутній"},
+    {question:"Який час дієслова 'малювати' у реченні 'Дитина малює'?", answer:"Теперішній"},
+    {question:"Який час дієслова 'грати' у реченні 'Він грав у футбол'?", answer:"Минулий"}
+  ]
 };
 
 function auth(){
-  let nick=document.getElementById('nick').value;
-  let pass=document.getElementById('pass').value;
-  let u=users.find(x=>x.nick===nick && x.pass===pass);
-  if(u){user=u;document.getElementById('playerNick').innerText=user.nick;show('menu');} else alert("Невірний логін або пароль");
+  let nick = document.getElementById('nick').value;
+  let pass = document.getElementById('pass').value;
+  let u = users.find(x=>x.nick===nick && x.pass===pass);
+  if(u){
+    currentUser = u;
+    document.getElementById('playerNick').innerText = currentUser.nick;
+    document.getElementById('mon').innerText = currentUser.money;
+    show('menu');
+  } else {
+    alert("Невірний нік або пароль");
+  }
 }
 
 function show(id){
@@ -144,22 +167,69 @@ function show(id){
   document.getElementById(id).classList.add('active');
 }
 
-function showThemes(){show('themes');}
-function startTheme(theme){currentTheme=theme;currentQuestion=0;showQuestion();}
-function showQuestion(){
-  let q=themes[currentTheme][currentQuestion];
-  if(!q){show('menu');return;}
-  document.getElementById('qtext').innerText=q.t;
-  let abox=document.getElementById('abox');
-  abox.innerHTML="";
-  ["cor","inc"].forEach(k=>{
-    let btn=document.createElement('button');btn.className='btn';btn.innerText=q[k==='cor'?'cor':'inc'];btn.onclick=()=>{currentQuestion++;showQuestion();};
-    abox.appendChild(btn);
-  });
+function showThemes(){
+  show('themes');
 }
 
-function admT(){clickCount++;if(clickCount>=5){document.getElementById('admin-panel').style.display='block';clickCount=0;}}
-function closeAdm(){document.getElementById('admin-panel').style.display='none';}
+let currentTheme = '';
+let currentIndex = 0;
+
+function startTheme(theme){
+  currentTheme = theme;
+  currentIndex = 0;
+  showQuestion();
+  show('game');
+}
+
+function showQuestion(){
+  let q = questions[currentTheme][currentIndex];
+  document.getElementById('qtext').innerText = q.question;
+  document.getElementById('answer').innerText = '';
+}
+
+function showAnswerFunc(){
+  let q = questions[currentTheme][currentIndex];
+  document.getElementById('answer').innerText = q.answer;
+}
+
+function admClick(){
+  clickCount++;
+  if(clickCount>=5 && currentUser && currentUser.admin){
+    document.getElementById('admin-panel').style.display='block';
+    clickCount=0;
+  }
+}
+
+function closeAdm(){
+  document.getElementById('admin-panel').style.display='none';
+}
+
+// --- Магазин ---
+function buyItem(id){
+  let cost = id==="gold_frame"?1000:2000;
+  if(currentUser.money>=cost){
+    currentUser.money-=cost;
+    document.getElementById('mon').innerText=currentUser.money;
+    alert("Куплено!");
+  } else alert("Недостатньо грошей");
+}
+
+// --- ТОП ---
+function loadTop(){
+  let tlist = document.getElementById('tlist');
+  tlist.innerHTML = users.sort((a,b)=>b.money-a.money).map(u=>`<div>${u.nick}: ${u.money} ₴</div>`).join('');
+  show('top');
+}
+
+// Заглушки для адмінки
+function toggleP(){alert("Штрафи вкл/викл");}
+function edO(add){if(add) currentUser.money+=100; else currentUser.money-=100; document.getElementById('mon').innerText=currentUser.money;}
+function delU(){alert("Видалено");}
+function loadPlayers(){alert("Гравці завантажено");}
+function clearAdminLogs(){alert("Очистити лог");}
+function loadUserLog(){alert("Оновлено");}
+function clearUserLog(){alert("Очистити");}
 </script>
+
 </body>
 </html>
