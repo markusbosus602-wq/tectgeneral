@@ -5,7 +5,7 @@
 <title>Тестова система</title>
 <style>
 body{font-family:Arial,sans-serif;background:#f0f0f0;margin:0;padding:0;}
-#login,#mainMenu,#quizContainer,#adminPanel{display:none;padding:20px;}
+#login,#mainMenu,#quizContainer{display:none;padding:20px;}
 button{margin:5px;padding:10px 20px;font-size:16px;}
 h2{margin-top:0;}
 input[type=text],input[type=password]{padding:5px;font-size:16px;width:200px;margin:5px 0;}
@@ -23,187 +23,98 @@ input[type=text],input[type=password]{padding:5px;font-size:16px;width:200px;mar
 
 <div id="mainMenu">
 <h2>Головне меню</h2>
-<div id="topicButtons"></div>
+<div id="themesButtons"></div>
 <button onclick="logout()">Вийти</button>
-<p style="font-size:12px;">(Натисни 5 разів на меню для адмінки)</p>
 </div>
 
 <div id="quizContainer">
 <h2 id="quizTitle"></h2>
 <p id="questionText"></p>
-<div id="answerButtons"></div>
+<div id="optionsButtons"></div>
 <button onclick="backToMenu()">Назад</button>
 </div>
 
-<div id="adminPanel">
-<h2>Адмінка</h2>
-<p>Тут можна змінювати питання та теми.</p>
-<button onclick="closeAdmin()">Закрити</button>
-</div>
-
 <script>
-// --- Дані для авторизації ---
-let users=[{username:"user1",password:"123"},{username:"user2",password:"abc"}];
-let adminClicks=0;
-
-// --- Теми і питання ---
-let topics=[
-{
-  name:"Тема 1",
-  questions:[]
-},
-{
-  name:"Тема 2",
-  questions:[]
-},
-{
-  name:"Тема 3",
-  questions:[]
-},
-{
-  name:"Тема 4",
-  questions:[]
-},
-{
-  name:"Тема 5",
-  questions:[]
-},
-{
-  name:"Тема 6",
-  questions:[]
-},
-{
-  name:"Тема 7",
-  questions:[]
-},
-{
-  name:"Тема 8",
-  questions:[]
-},
-{
-  name:"Тема 9",
-  questions:[]
-},
-{
-  name:"Тема 10",
-  questions:[]
-}
-];
-
-// --- Генерація 50 унікальних питань на тему ---
-for(let t=0;t<topics.length;t++){
-  for(let i=1;i<=50;i++){
-    topics[t].questions.push({
-      question:`${topics[t].name} – Питання ${i}?`,
-      answers:[
-        `Варіант A${i}`,
-        `Варіант B${i}`,
-        `Варіант C${i}`,
-        `Варіант D${i}`
-      ],
-      correct:0
-    });
-  }
+const users = {"user1":"pass1","admin":"admin123"};
+let currentUser = null;
+let adminClicks = 0;
+const themes = {};
+for(let t=1;t<=10;t++){
+    const questions=[];
+    for(let q=1;q<=50;q++){
+        questions.push({
+            question:`Тема ${t} Вопрос ${q}: Що верно?`,
+            options:[`А${q}`,`Б${q}`,`В${q}`,`Г${q}`],
+            answer:`А${q}`
+        });
+    }
+    themes[`Тема ${t}`]=questions;
 }
 
-let currentUser="";
-let currentTopic=null;
-let currentQIndex=0;
-
-// --- Показати логін ---
 document.getElementById("login").style.display="block";
 
 function login(){
-  let u=document.getElementById("username").value;
-  let p=document.getElementById("password").value;
-  let found=false;
-  for(let user of users){
-    if(user.username===u && user.password===p){
-      found=true;
-      currentUser=u;
-      break;
+    const u=document.getElementById("username").value;
+    const p=document.getElementById("password").value;
+    if(users[u] && users[u]===p){
+        currentUser=u;
+        document.getElementById("login").style.display="none";
+        showMainMenu();
+    }else{
+        document.getElementById("loginMsg").innerText="Невірний логін або пароль";
     }
-  }
-  if(found){
-    document.getElementById("login").style.display="none";
-    showMainMenu();
-  }else{
-    document.getElementById("loginMsg").innerText="Невірний нік або пароль";
-  }
-}
-
-function logout(){
-  currentUser="";
-  document.getElementById("mainMenu").style.display="none";
-  document.getElementById("login").style.display="block";
 }
 
 function showMainMenu(){
-  document.getElementById("mainMenu").style.display="block";
-  let container=document.getElementById("topicButtons");
-  container.innerHTML="";
-  topics.forEach((t,index)=>{
-    let btn=document.createElement("button");
-    btn.innerText=t.name;
-    btn.onclick=()=>startQuiz(index);
-    btn.ondblclick=()=>{}; // для адмінки натискання
-    btn.addEventListener("click",()=>{
-      adminClicks++;
-      if(adminClicks>=5){
-        document.getElementById("adminPanel").style.display="block";
-        adminClicks=0;
-      }
+    document.getElementById("mainMenu").style.display="block";
+    const container=document.getElementById("themesButtons");
+    container.innerHTML="";
+    Object.keys(themes).forEach(theme=>{
+        const btn=document.createElement("button");
+        btn.innerText=theme;
+        btn.onclick=()=>showTheme(theme);
+        container.appendChild(btn);
     });
-    container.appendChild(btn);
-  });
+    adminClicks=0;
+    document.getElementById("mainMenu").onclick=()=>{adminClicks++; if(adminClicks>=5){alert("Відкрито адмінку!"); adminClicks=0;}}
 }
 
-function startQuiz(topicIndex){
-  currentTopic=topics[topicIndex];
-  currentQIndex=0;
-  document.getElementById("mainMenu").style.display="none";
-  showQuestion();
-}
+function showTheme(themeName){
+    document.getElementById("mainMenu").style.display="none";
+    const quiz=document.getElementById("quizContainer");
+    quiz.style.display="block";
+    const title=document.getElementById("quizTitle");
+    const questionText=document.getElementById("questionText");
+    const optionsButtons=document.getElementById("optionsButtons");
+    let currentIndex=0;
 
-function showQuestion(){
-  document.getElementById("quizContainer").style.display="block";
-  document.getElementById("quizTitle").innerText=currentTopic.name;
-  let q=currentTopic.questions[currentQIndex];
-  document.getElementById("questionText").innerText=q.question;
-  let container=document.getElementById("answerButtons");
-  container.innerHTML="";
-  q.answers.forEach((a,index)=>{
-    let btn=document.createElement("button");
-    btn.innerText=a;
-    btn.onclick=()=>nextQuestion(index);
-    container.appendChild(btn);
-  });
-}
+    function loadQuestion(index){
+        const q=themes[themeName][index];
+        title.innerText=themeName;
+        questionText.innerText=q.question;
+        optionsButtons.innerHTML="";
+        q.options.forEach(opt=>{
+            const btn=document.createElement("button");
+            btn.innerText=opt;
+            btn.onclick=()=>{alert(opt===q.answer?"Правильно!":`Неправильно! Правильна: ${q.answer}`);}
+            optionsButtons.appendChild(btn);
+        });
+    }
 
-function nextQuestion(selected){
-  let q=currentTopic.questions[currentQIndex];
-  if(selected===q.correct){
-    console.log("Правильно!");
-  }else{
-    console.log("Неправильно!");
-  }
-  currentQIndex++;
-  if(currentQIndex<currentTopic.questions.length){
-    showQuestion();
-  }else{
-    alert("Тема завершена!");
-    backToMenu();
-  }
+    loadQuestion(currentIndex);
 }
 
 function backToMenu(){
-  document.getElementById("quizContainer").style.display="none";
-  document.getElementById("mainMenu").style.display="block";
+    document.getElementById("quizContainer").style.display="none";
+    showMainMenu();
 }
 
-function closeAdmin(){
-  document.getElementById("adminPanel").style.display="none";
+function logout(){
+    currentUser=null;
+    document.getElementById("mainMenu").style.display="none";
+    document.getElementById("login").style.display="block";
 }
 </script>
+
 </body>
 </html>
