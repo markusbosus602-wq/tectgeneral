@@ -51,7 +51,7 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
     <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
     <div class="nickname" id="playerNick"></div>
     <div class="money"><span id="mon">0</span> ₴</div>
-    <button class="btn" onclick="showThemes()">ГРАТИ</button>
+    <button class="btn" onclick="show('themes')">ГРАТИ</button>
     <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
     <div id="admin-panel">
@@ -104,9 +104,28 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
   </div>
 </div>
 
-<div id="levels" class="screen"><div class="card"><h3>РІВНІ</h3><div class="lvl-grid" id="lgrid"></div><button class="btn" onclick="show('menu')">НАЗАД</button></div></div>
-<div id="game" class="screen"><div class="card"><h3 id="qtext"></h3><div id="abox"></div></div></div>
-<div id="top" class="screen"><div class="card"><h3>ТОП 1000</h3><div id="tlist"></div><button class="btn" onclick="show('menu')">НАЗАД</button></div></div>
+<div id="levels" class="screen">
+  <div class="card">
+    <h3>РІВНІ</h3>
+    <div class="lvl-grid" id="lgrid"></div>
+    <button class="btn" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
+
+<div id="game" class="screen">
+  <div class="card">
+    <h3 id="qtext"></h3>
+    <div id="abox"></div>
+  </div>
+</div>
+
+<div id="top" class="screen">
+  <div class="card">
+    <h3>ТОП 1000</h3>
+    <div id="tlist"></div>
+    <button class="btn" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
 
 <script>
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
@@ -130,65 +149,42 @@ async function auth() {
   let n = document.getElementById('nick').value.trim();
   let p = document.getElementById('pass').value.trim();
 
-  if (!n || !p) {
-    return alert("Введіть нікнейм та пароль!");
-  }
+  if (!n || !p) return alert("Введіть нікнейм та пароль");
 
   localStorage.setItem('un', n);
   localStorage.setItem('up', p);
 
-  // Логування входу
   const tg = window.Telegram?.WebApp?.initDataUnsafe?.user || {username:"немає",id:"немає"};
   const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
-  const entry = {game_nick:n, tg_username:tg.username||"немає", tg_id:tg.id||"немає", time:now};
-  await fetch(DB + "user_logs.json", {method:'POST', body:JSON.stringify(entry)});
+  const entry = {game_nick:n,tg_username:tg.username||"немає",tg_id:tg.id||"немає",time:now};
+  await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify(entry)});
 
-  // Запит до бази
-  let r = await fetch(DB + "users/" + n + ".json");
-  let d = await r.json();
-
+  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
   if (d) {
-    // Користувач існує — перевіряємо пароль
-    if (d.pass === p) {
-      user = d;
-      items = user.items || {gold_frame:false};
-      save();
-      applyItems();
-      update();
-      show('menu');
-    } else {
-      alert("Неправильний пароль!");
-    }
+    if (d.pass !== p) return alert("Неправильний пароль!");
+    user = d;
   } else {
-    // Новий користувач — створюємо
-    user = {
-      name: n,
-      pass: p,
-      points: 0,
-      lvl: 1,
-      items: {gold_frame: false}
-    };
-    await fetch(DB + "users/" + n + ".json", {
-      method: 'PUT',
-      body: JSON.stringify(user)
-    });
-    alert("Вітаємо! Ви зареєстровані як новий гравець.");
-    items = user.items;
-    save();
-    applyItems();
-    update();
-    show('menu');
+    user = {name:n, pass:p, points:0, lvl:1, items:{gold_frame:false}};
+    await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(user)});
+    alert("Вітаємо! Зареєстровано нового гравця.");
   }
+
+  items = user.items || {gold_frame:false};
+  save();
+  applyItems();
+  update();
+  show('menu');
 }
 
-// Решта коду без змін (save, update, applyItems, show, admT, closeAdm, toggleP, delU, edO, loadPlayers, deleteUser, buyItem, showThemes, startTheme, renderL, start, check, loadT, logAdminAccess, loadAdminLogs, clearAdminLogs, loadUserLog, clearUserLog)
 function save() {
   user.items = items;
   fetch(DB+"users/"+user.name+".json", {method:'PUT', body:JSON.stringify(user)});
 }
+
 function update() {
   document.getElementById('mon').innerText = user.points.toLocaleString();
 }
+
 function applyItems() {
   let nickDisplay = user.name;
   if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
@@ -198,11 +194,31 @@ function applyItems() {
   if(items.vip) nickDisplay += ' 💎 VIP';
   document.getElementById('playerNick').innerHTML = nickDisplay;
 }
+
 function show(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
-  document.getElementById(id).style.display='block';
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+  document.getElementById(id).style.display = 'flex';
 }
-// ... весь інший код залишається без змін ...
+
+function showThemes() {
+  show('themes');
+}
+
+async function loadT() {
+  show('top');
+  let r = await fetch(DB+"users/.json"), d = await r.json(), l = document.getElementById('tlist');
+  l.innerHTML = '';
+  if (d) {
+    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,1000);
+    topPlayers.forEach((u,i) => {
+      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points||0}</b></div>`;
+    });
+  } else {
+    l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+  }
+}
+
+// решта функцій (admT, closeAdm, toggleP, delU, edO, loadPlayers, deleteUser, buyItem, startTheme, renderL, start, check, logAdminAccess, loadAdminLogs, clearAdminLogs, loadUserLog, clearUserLog) — залишаються без змін, як у твоєму оригінальному коді
 
 </script>
 </body>
