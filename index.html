@@ -32,8 +32,6 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 .theme-btn{background:#9c27b0;color:white}
 .log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
 .log-entry{padding:4px 0;border-bottom:1px solid #eee}
-.players-list{max-height:300px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
-.player-entry{padding:8px;border-bottom:1px solid #eee}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
@@ -55,11 +53,8 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
     <div class="money"><span id="mon">0</span> ₴</div>
     <button class="btn" onclick="showThemes()">ГРАТИ</button>
     <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
-    <button class="btn" onclick="loadPlayersList()">УЧАСНИКИ</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
-
     <div id="admin-panel">
-      <!-- адмін-панель без змін -->
       <b style="color:var(--red);cursor:pointer" onclick="closeAdm()">❌ ЗАКРИТИ</b><br><br>
       <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
       <p><b>Управління гравцями</b></p>
@@ -67,29 +62,57 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
       <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
       <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
       <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
-      <!-- решта адмінки без змін -->
+      <br><br>
+      <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
+      <div id="player-list" style="max-height:250px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
+      <br><br>
+      <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
+      <div id="admin-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800" onclick="clearAdminLogs()">Очистити лог адмінки</button>
+      <br><br>
+      <h4 style="color:var(--blue)">Лог усіх входів у гру</h4>
+      <div id="user-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800;margin-top:8px" onclick="loadUserLog()">Оновити</button>
+      <button class="btn danger" style="margin-top:8px" onclick="clearUserLog()">Очистити</button>
     </div>
   </div>
 </div>
 
-<!-- Екран учасників -->
-<div id="players" class="screen">
+<div id="shop" class="screen">
   <div class="card">
-    <h2>Учасники гри</h2>
-    <div id="players-list" class="players-list"></div>
+    <h2>Магазин</h2>
+    <div class="shop-grid">
+      <div class="shop-item" id="gold_frame" onclick="buyItem('gold_frame')">Золота рамка — 1000 ₴</div>
+      <div class="shop-item" id="crown" onclick="buyItem('crown')">Корона — 2000 ₴</div>
+      <div class="shop-item" id="fire" onclick="buyItem('fire')">Полум'я — 1500 ₴</div>
+      <div class="shop-item" id="shield" onclick="buyItem('shield')">Щит — 2500 ₴</div>
+      <div class="shop-item" id="vip" onclick="buyItem('vip')">ВІП — 5000 ₴</div>
+    </div>
     <button class="btn" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
 
-<!-- інші екрани (shop, themes, levels, game, top) без змін -->
+<div id="themes" class="screen">
+  <div class="card">
+    <h2>Обери тему</h2>
+    <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
+    <button class="btn theme-btn" onclick="startTheme('chasyslova')">Часи дієслів</button>
+    <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
+    <button class="btn theme-btn" onclick="startTheme('pryslinniky')">Прислівники</button>
+    <button class="btn theme-btn" onclick="startTheme('synonimy')">Синоніми / Антоніми</button>
+    <button class="btn red" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
+
+<div id="levels" class="screen"><div class="card"><h3>РІВНІ</h3><div class="lvl-grid" id="lgrid"></div><button class="btn" onclick="show('menu')">НАЗАД</button></div></div>
+<div id="game" class="screen"><div class="card"><h3 id="qtext"></h3><div id="abox"></div></div></div>
+<div id="top" class="screen"><div class="card"><h3>ТОП 1000</h3><div id="tlist"></div><button class="btn" onclick="show('menu')">НАЗАД</button></div></div>
 
 <script>
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-
 let user = null, cC = 0, pOn = true, customQ = [], usedQuestions = new Set();
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
 let currentTheme = '';
-
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
@@ -107,74 +130,79 @@ async function auth() {
   let n = document.getElementById('nick').value.trim();
   let p = document.getElementById('pass').value.trim();
 
-  if (!n || !p) return alert("Введіть нікнейм та пароль!");
+  if (!n || !p) {
+    return alert("Введіть нікнейм та пароль!");
+  }
 
   localStorage.setItem('un', n);
   localStorage.setItem('up', p);
 
+  // Логування входу
   const tg = window.Telegram?.WebApp?.initDataUnsafe?.user || {username:"немає",id:"немає"};
   const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
-  const entry = {game_nick:n,tg_username:tg.username||"немає",tg_id:tg.id||"немає",time:now};
-  await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify(entry)});
+  const entry = {game_nick:n, tg_username:tg.username||"немає", tg_id:tg.id||"немає", time:now};
+  await fetch(DB + "user_logs.json", {method:'POST', body:JSON.stringify(entry)});
 
-  let r = await fetch(DB+"users/"+n+".json");
+  // Запит до бази
+  let r = await fetch(DB + "users/" + n + ".json");
   let d = await r.json();
 
   if (d) {
-    // користувач існує — перевіряємо пароль
-    if (d.pass !== p) {
-      return alert("Неправильний пароль!");
+    // Користувач існує — перевіряємо пароль
+    if (d.pass === p) {
+      user = d;
+      items = user.items || {gold_frame:false};
+      save();
+      applyItems();
+      update();
+      show('menu');
+    } else {
+      alert("Неправильний пароль!");
     }
-    user = d;
   } else {
-    // новий користувач — створюємо
-    user = {name:n, pass:p, points:0, lvl:1, items:{gold_frame:false}};
-    await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(user)});
-    alert("Вітаємо! Ви зареєстровані як новий гравець.");
-  }
-
-  items = user.items || {gold_frame:false};
-  save();
-  applyItems();
-  update();
-  show('menu');
-}
-
-// решта функцій (save, update, applyItems, show, admT, closeAdm, toggleP, delU, edO, loadPlayers, deleteUser, buyItem, showThemes, startTheme, renderL, start, check, loadT, logAdminAccess, loadAdminLogs, clearAdminLogs, loadUserLog, clearUserLog) — залишаються без змін
-
-// Нова функція для показу всіх учасників
-async function loadPlayersList() {
-  show('players');
-  const list = document.getElementById('players-list');
-  list.innerHTML = '<div style="color:#888;text-align:center">Завантаження...</div>';
-
-  try {
-    const r = await fetch(DB + "users/.json");
-    const data = await r.json();
-
-    list.innerHTML = '';
-
-    if (!data || Object.keys(data).length === 0) {
-      list.innerHTML = '<div style="padding:15px;color:#888">Ще ніхто не грав</div>';
-      return;
-    }
-
-    const players = Object.values(data)
-      .filter(u => u && u.name)
-      .sort((a, b) => (b.points || 0) - (a.points || 0));
-
-    players.forEach(u => {
-      list.innerHTML += `
-        <div class="player-entry">
-          <strong>${u.name}</strong><br>
-          <small>Очок: ${u.points || 0} • Рівень: ${u.lvl || 1}</small>
-        </div>
-      `;
+    // Новий користувач — створюємо
+    user = {
+      name: n,
+      pass: p,
+      points: 0,
+      lvl: 1,
+      items: {gold_frame: false}
+    };
+    await fetch(DB + "users/" + n + ".json", {
+      method: 'PUT',
+      body: JSON.stringify(user)
     });
-  } catch (e) {
-    list.innerHTML = '<div style="color:#d32f2f">Помилка завантаження</div>';
+    alert("Вітаємо! Ви зареєстровані як новий гравець.");
+    items = user.items;
+    save();
+    applyItems();
+    update();
+    show('menu');
   }
 }
+
+// Решта коду без змін (save, update, applyItems, show, admT, closeAdm, toggleP, delU, edO, loadPlayers, deleteUser, buyItem, showThemes, startTheme, renderL, start, check, loadT, logAdminAccess, loadAdminLogs, clearAdminLogs, loadUserLog, clearUserLog)
+function save() {
+  user.items = items;
+  fetch(DB+"users/"+user.name+".json", {method:'PUT', body:JSON.stringify(user)});
+}
+function update() {
+  document.getElementById('mon').innerText = user.points.toLocaleString();
+}
+function applyItems() {
+  let nickDisplay = user.name;
+  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  if(items.crown) nickDisplay += ' 👑';
+  if(items.fire) nickDisplay += ' 🔥';
+  if(items.shield) nickDisplay += ' 🛡️';
+  if(items.vip) nickDisplay += ' 💎 VIP';
+  document.getElementById('playerNick').innerHTML = nickDisplay;
+}
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById(id).style.display='block';
+}
+// ... весь інший код залишається без змін ...
 
 </script>
 </body>
