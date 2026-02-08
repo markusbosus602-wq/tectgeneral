@@ -5,23 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UkrMova Pro</title>
 <style>
-body{background:#f5f5f5;color:#000;font-family:sans-serif;margin:0;text-align:center}
+:root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
+body{background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;background-size:160px;color:#000;font-family:sans-serif;margin:0;text-align:center}
 .screen{display:none;padding:20px;flex-direction:column;min-height:100vh;box-sizing:border-box}
-.active{display:flex}
-.card{background:#fff;padding:20px;border-radius:15px;margin:auto;width:100%;max-width:450px;box-shadow:0 0 15px rgba(0,0,0,.3)}
-.btn{background:#00a2ff;color:#fff;border:none;padding:12px;border-radius:10px;width:100%;margin:6px 0;cursor:pointer}
-.btn.green{background:#2ecc71}
-.btn.red{background:#f44336}
-.lvl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-height:40vh;overflow-y:auto}
-.lvl{background:#ccc;padding:10px 0;border-radius:8px;opacity:.7}
-.lvl.open{opacity:1;background:#00a2ff;color:#fff}
+.active{display:flex;animation:fadeIn .3s ease}
+.card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3)}
+.btn{background:var(--blue);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;width:100%;margin:6px 0;cursor:pointer;text-transform:uppercase;transition:all .2s}
+.btn:hover{transform:scale(1.02);box-shadow:0 0 15px rgba(0,162,255,.6)}
+.btn.green{background:var(--green)}
+.btn.danger{background:var(--dark)}
+.money{font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 10px #f1c40f}
+.nickname{font-size:28px;font-weight:bold;margin:10px 0;cursor:pointer}
+.gold-nick{color:var(--gold);text-shadow:0 0 10px var(--gold)}
+.lvl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-height:40vh;overflow-y:auto;padding:10px}
+.lvl{background:rgba(51,51,51,0.7);padding:12px 0;border-radius:10px;opacity:0.6;transition:all .3s;border:1px solid #ccc}
+.lvl.open{opacity:1;background:var(--blue);border:2px solid white;box-shadow:0 0 15px var(--blue);color:white}
+#admin-panel{border:2px dashed var(--red);padding:15px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px}
+input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;color:#000;width:90%;margin-bottom:8px}
+.shop-item{background:#eee;padding:12px;margin:8px 0;border-radius:10px;cursor:pointer}
+.shop-item.bought{background:#c8e6c9}
+.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.theme-btn{background:#9c27b0;color:white}
+.log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
+.log-entry{padding:4px 0;border-bottom:1px solid #eee}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 </style>
 </head>
 <body>
 
 <div id="auth-screen" class="screen active">
   <div class="card">
-    <h2>UKRMOVA PRO</h2>
+    <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
     <input type="text" id="nick" placeholder="Нікнейм">
     <input type="password" id="pass" placeholder="Пароль">
     <button class="btn" onclick="auth()">УВІЙТИ</button>
@@ -30,18 +44,34 @@ body{background:#f5f5f5;color:#000;font-family:sans-serif;margin:0;text-align:ce
 
 <div id="menu" class="screen">
   <div class="card">
-    <h3 onclick="admT()">МЕНЮ</h3>
-    <div id="playerNick"></div>
-    <div><span id="mon">0</span> ₴</div>
+    <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
+    <div class="nickname" id="playerNick"></div>
+    <div class="money"><span id="mon">0</span> ₴</div>
+
     <button class="btn" onclick="showThemes()">ГРАТИ</button>
+    <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
-    <div id="admin-panel" style="display:none">
-      <button class="btn red" onclick="closeAdm()">ЗАКРИТИ</button>
+
+    <div id="admin-panel">
+      <b style="color:var(--red);cursor:pointer" onclick="closeAdm()">❌ ЗАКРИТИ</b><br><br>
+      <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
+      <p><b>Управління гравцями</b></p>
       <input type="text" id="a-n" placeholder="Нік гравця">
-      <button class="btn green" onclick="edO(true)">+ ГРОШІ</button>
-      <button class="btn red" onclick="edO(false)">- ГРОШІ</button>
-      <button class="btn red" onclick="delU()">ВИДАЛИТИ</button>
-      <div id="player-list" style="max-height:200px;overflow-y:auto"></div>
+      <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
+      <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
+      <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
+      <br><br>
+      <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
+      <div id="player-list" style="max-height:250px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
+      <br><br>
+      <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
+      <div id="admin-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800" onclick="clearAdminLogs()">Очистити лог адмінки</button>
+      <br><br>
+      <h4 style="color:var(--blue)">Лог усіх входів у гру</h4>
+      <div id="user-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800;margin-top:8px" onclick="loadUserLog()">Оновити</button>
+      <button class="btn danger" style="margin-top:8px" onclick="clearUserLog()">Очистити</button>
     </div>
   </div>
 </div>
@@ -49,15 +79,29 @@ body{background:#f5f5f5;color:#000;font-family:sans-serif;margin:0;text-align:ce
 <div id="shop" class="screen">
   <div class="card">
     <h2>Магазин</h2>
-    <div id="shop-items"></div>
+    <div class="shop-grid">
+      <div class="shop-item" id="gold_frame" onclick="buyItem('gold_frame')">Золота рамка — 1000 ₴</div>
+      <div class="shop-item" id="crown" onclick="buyItem('crown')">Корона — 2000 ₴</div>
+      <div class="shop-item" id="fire" onclick="buyItem('fire')">Полум'я — 1500 ₴</div>
+      <div class="shop-item" id="shield" onclick="buyItem('shield')">Щит — 2500 ₴</div>
+      <div class="shop-item" id="vip" onclick="buyItem('vip')">ВІП — 5000 ₴</div>
+    </div>
     <button class="btn" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
 
 <div id="themes" class="screen">
   <div class="card">
-    <h2>Обери тему</h2>
-    <div id="theme-buttons"></div>
+    <h2>Оберіть тему</h2>
+    <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
+    <button class="btn theme-btn" onclick="startTheme('chasyslova')">Часи дієслів</button>
+    <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
+    <button class="btn theme-btn" onclick="startTheme('pryslinniky')">Прислівники</button>
+    <button class="btn theme-btn" onclick="startTheme('synonimy')">Синоніми / Антоніми</button>
+    <button class="btn theme-btn" onclick="startTheme('vydminy2')">Відміни іменників 2</button>
+    <button class="btn theme-btn" onclick="startTheme('chasyslova2')">Часи дієслів 2</button>
+    <button class="btn theme-btn" onclick="startTheme('prykmetnyky2')">Прикметники 2</button>
+    <button class="btn theme-btn" onclick="startTheme('pryslinniky2')">Прислівники 2</button>
     <button class="btn red" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
@@ -71,66 +115,51 @@ body{background:#f5f5f5;color:#000;font-family:sans-serif;margin:0;text-align:ce
 </div>
 
 <script>
-let user=null, clickCount=0;
-let usersDB={};
-let items={gold_frame:false,crown:false,fire:false,shield:false,vip:false};
-let themesData={};
-for(let i=1;i<=10;i++){themesData["Тема "+i]=[];for(let j=1;j<=50;j++)themesData["Тема "+i].push({t:"Питання "+j,cor:"Вірно "+j,inc:"Невірно "+j})}
+let users = [{nick:"admin",pass:"12345"}];
+let user = null;
+let clickCount = 0;
+let currentTheme = '';
+let currentQuestion = 0;
+let themes = {
+  vydminy:[{t:"Слово 'книга' належить до якої відміни?",cor:"перша",inc:"друга"},{t:"Слово 'стіл' належить до якої відміни?",cor:"друга",inc:"перша"}],
+  chasyslova:[{t:"Який час дієслова 'читати' у реченні 'Я читав книгу'?",cor:"минулий",inc:"теперішній"}],
+  prykmetnyky:[{t:"Який рід прикметника 'гарний' у реченні 'гарна дівчина'?",cor:"жіночий",inc:"чоловічий"}],
+  pryslinniky:[{t:"Який прислівник часу в реченні 'Вчора я був у кіно'?",cor:"вчора",inc:"завтра"}],
+  synonimy:[{t:"Синонім до слова 'великий'?",cor:"огромний",inc:"малий"}],
+  vydminy2:[{t:"Слово 'дитина' належить до якої відміни?",cor:"перша",inc:"друга"}],
+  chasyslova2:[{t:"Який час дієслова 'писати' у реченні 'Він пише листа'?",cor:"теперішній",inc:"майбутній"}],
+  prykmetnyky2:[{t:"Який рід прикметника 'великий' у реченні 'велике поле'?",cor:"середній",inc:"жіночий"}],
+  pryslinniky2:[{t:"Який прислівник способу в реченні 'Він швидко біг'?",cor:"швидко",inc:"повільно"}]
+};
 
-const show=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
-
-const showThemes=()=>{
-  let html=''; for(let t in themesData) html+=`<button class="btn" onclick="startTheme('${t}')">${t}</button>`;
-  document.getElementById('theme-buttons').innerHTML=html; show('themes')
+function auth(){
+  let nick=document.getElementById('nick').value;
+  let pass=document.getElementById('pass').value;
+  let u=users.find(x=>x.nick===nick && x.pass===pass);
+  if(u){user=u;document.getElementById('playerNick').innerText=user.nick;show('menu');} else alert("Невірний логін або пароль");
 }
 
-const startTheme=t=>{
-  currentTheme=t; askQuestion(0)
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-let currentTheme='';
-const askQuestion=idx=>{
-  if(idx>=themesData[currentTheme].length){show('menu'); return;}
-  let q=themesData[currentTheme][idx];
-  document.getElementById('qtext').innerHTML=q.t;
-  document.getElementById('abox').innerHTML=`
-  <button class="btn" onclick="checkAnswer('${q.cor}',${idx})">${q.cor}</button>
-  <button class="btn" onclick="checkAnswer('${q.inc}',${idx})">${q.inc}</button>`
-  show('game')
+function showThemes(){show('themes');}
+function startTheme(theme){currentTheme=theme;currentQuestion=0;showQuestion();}
+function showQuestion(){
+  let q=themes[currentTheme][currentQuestion];
+  if(!q){show('menu');return;}
+  document.getElementById('qtext').innerText=q.t;
+  let abox=document.getElementById('abox');
+  abox.innerHTML="";
+  ["cor","inc"].forEach(k=>{
+    let btn=document.createElement('button');btn.className='btn';btn.innerText=q[k==='cor'?'cor':'inc'];btn.onclick=()=>{currentQuestion++;showQuestion();};
+    abox.appendChild(btn);
+  });
 }
 
-const checkAnswer=(ans,idx)=>{
-  if(ans.includes("Вірно")){user.money+=10;document.getElementById('mon').innerText=user.money}
-  askQuestion(idx+1)
-}
-
-const auth=()=>{
-  let n=document.getElementById('nick').value;
-  let p=document.getElementById('pass').value;
-  if(!n||!p){alert("Введіть нік та пароль"); return;}
-  if(!usersDB[n]) usersDB[n]={pass:p,money:0};
-  if(usersDB[n].pass!==p){alert("Невірний пароль"); return;}
-  user={nick:n,money:usersDB[n].money};
-  document.getElementById('playerNick').innerText=user.nick;
-  document.getElementById('mon').innerText=user.money;
-  show('menu')
-}
-
-const shopItems=["gold_frame","crown","fire","shield","vip"];
-const shopPrices=[1000,2000,1500,2500,5000];
-let shopDiv=document.getElementById('shop-items');
-shopDiv.innerHTML=shopItems.map((i,idx)=>`<div class="btn" id="${i}" onclick="buyItem('${i}',${idx})">${i} - ${shopPrices[idx]} ₴</div>`).join('');
-
-const buyItem=(id,idx)=>{
-  if(user.money>=shopPrices[idx]){user.money-=shopPrices[idx];items[id]=true;document.getElementById('mon').innerText=user.money;document.getElementById(id).style.background="#2ecc71"}
-  else alert("Недостатньо грошей")
-}
-
-const admT=()=>{clickCount++;if(clickCount>=5){document.getElementById('admin-panel').style.display='block';clickCount=0}}
-const closeAdm=()=>document.getElementById('admin-panel').style.display='none';
-const edO=add=>{let n=document.getElementById('a-n').value;if(usersDB[n]){add?usersDB[n].money+=100:usersDB[n].money-=100}}
-const delU=()=>{let n=document.getElementById('a-n').value; delete usersDB[n];}
+function admT(){clickCount++;if(clickCount>=5){document.getElementById('admin-panel').style.display='block';clickCount=0;}}
+function closeAdm(){document.getElementById('admin-panel').style.display='none';}
 </script>
-
 </body>
 </html>
