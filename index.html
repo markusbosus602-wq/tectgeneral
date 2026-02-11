@@ -539,8 +539,8 @@ function showThemes() {
 function startTheme(theme) {
   currentTheme = theme;
   currentIndex = 0;
-  correctCount = 0;  // скидаємо лічильник правильних
-  wrongCount = 0;    // скидаємо лічильник неправильних
+  correctCount = 0;
+  wrongCount = 0;
   show('game');
   loadQuestion();
 }
@@ -548,7 +548,6 @@ function startTheme(theme) {
 function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
-    // Підсумок після завершення теми
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
@@ -560,7 +559,7 @@ function loadQuestion() {
       </div>
       <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
     `;
-    save(); // ще раз зберігаємо, щоб точно зафіксувати фінальний баланс
+    save();
     return;
   }
 
