@@ -28,7 +28,7 @@
     #feedback{text-align:center;font-size:48px;font-weight:bold;margin:20px 0;min-height:60px}
     .correct {color:#2ecc71;}
     .wrong   {color:#ff4d4d;}
-    .summary {font-size:24px; line-height:1.6; margin:30px 0;}
+    .summary {font-size:24px; line-height:1.6; margin:30px 0; text-align:center;}
     .summary strong {font-size:28px;}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   </style>
@@ -378,7 +378,6 @@ async function auth() {
   }
 }
 
-// Автологін при завантаженні сторінки
 window.onload = function() {
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
@@ -549,7 +548,7 @@ function startTheme(theme) {
 function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
-    // Підсумок після завершення теми
+    // Підсумок після завершення теми — завжди показуємо правильні/неправильні та баланс
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
@@ -561,6 +560,8 @@ function loadQuestion() {
       </div>
       <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
     `;
+    // Зберігаємо оновлений баланс ще раз на всяк випадок
+    save();
     return;
   }
 
@@ -585,7 +586,6 @@ function loadQuestion() {
 }
 
 function checkAnswer(selected, correct, button) {
-  // Вимикаємо всі кнопки після вибору
   document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
 
   if (selected === correct) {
@@ -606,10 +606,11 @@ function checkAnswer(selected, correct, button) {
     wrongSound.play().catch(()=>{});
   }
 
+  // Оновлюємо баланс на екрані та зберігаємо в базу
   document.getElementById('mon').innerText = user.points.toLocaleString();
   save();
 
-  // Автоматичний перехід через 1 секунду
+  // Перехід до наступного питання через 1 секунду
   setTimeout(() => {
     currentIndex++;
     loadQuestion();
