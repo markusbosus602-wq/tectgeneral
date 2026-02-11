@@ -28,6 +28,8 @@
     #feedback{text-align:center;font-size:48px;font-weight:bold;margin:20px 0;min-height:60px}
     .correct {color:#2ecc71;}
     .wrong   {color:#ff4d4d;}
+    .summary {font-size:24px; line-height:1.6; margin:30px 0;}
+    .summary strong {font-size:28px;}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   </style>
 </head>
@@ -284,9 +286,24 @@ const themes = {
     {q:"До якої групи належить «братів» (братів телефон)?", a:"присвійний", w:["якісний","відносний"]}
   ],
   orudnyi_1vidmina: [
-    {q:"Орудний відмінок слова «книжка»?", a:"-ою", w:["-ею","-єю"]},
-    {q:"Орудний відмінок слова «мама»?", a:"-ою", w:["-ею","-єю"]},
-    {q:"Орудний відмінок слова «земля»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «книжка»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «душа»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «свіча»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «миша»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «площа»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «тиша»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «зброя»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «ніч»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «армія»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «сім'я»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «надія»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «ідея»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «лінія»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «фотографія»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «історія»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «традиція»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «революція»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «станція»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «вода»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «рука»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «річка»?", a:"-ою", w:["-ею","-єю"]},
@@ -303,16 +320,6 @@ const themes = {
     {q:"Орудний відмінок слова «зірка»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «машина»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «хвилина»?", a:"-ою", w:["-ею","-єю"]},
-    {q:"Орудний відмінок слова «армія»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «сім'я»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «надія»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «ідея»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «лінія»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «фотографія»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «історія»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «традиція»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «революція»?", a:"-ею", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «станція»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «акція»?", a:"-єю", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «функція»?", a:"-єю", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «секція»?", a:"-єю", w:["-ою","-ею"]},
@@ -343,13 +350,10 @@ async function auth() {
     document.getElementById('auth-error').textContent = "Введіть нікнейм та пароль";
     return;
   }
-
   document.getElementById('auth-error').textContent = "Завантаження...";
-
   try {
     let r = await fetch(DB + "users/" + n + ".json");
     let d = await r.json();
-
     if (d) {
       if (d.pass !== p) {
         document.getElementById('auth-error').textContent = "Неправильний пароль!";
@@ -360,14 +364,11 @@ async function auth() {
       user = {name:n, pass:p, points:0, items:{gold_frame:false}};
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
-
     localStorage.setItem('un', n);
     localStorage.setItem('up', p);
-
     const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
     const entry = {game_nick:n, time:now};
     await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify(entry)});
-
     items = user.items || {gold_frame:false};
     save(); applyItems(); update(); show('menu');
     document.getElementById('auth-error').textContent = "";
@@ -548,15 +549,15 @@ function startTheme(theme) {
 function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
+    // Підсумок після завершення теми
     document.getElementById('qtext').textContent = "Тема завершена!";
-    document.getElementById('abox').innerHTML = '';
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
-      <div style="font-size:22px; margin:20px 0;">
-        Гравець: <b>${user.name}</b><br>
-        <span style="color:var(--green)">Правильних: ${correct}</span><br>
-        <span style="color:var(--red)">Неправильних: ${wrong}</span><br><br>
-        Баланс: <b>${user.points} ₴</b>
+      <div class="summary">
+        <strong>Гравець:</strong> ${user ? user.name : '—'}<br><br>
+        <strong style="color:var(--green)">Правильних відповідей:</strong> ${correct}<br>
+        <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrong}<br><br>
+        <strong>Поточний баланс:</strong> ${user ? user.points.toLocaleString() : 0} ₴
       </div>
       <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
     `;
