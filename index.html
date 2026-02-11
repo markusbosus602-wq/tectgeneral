@@ -27,7 +27,7 @@
     #admin-panel{border:2px dashed var(--red);padding:15px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px}
     #feedback{text-align:center;font-size:48px;font-weight:bold;margin:20px 0;min-height:60px}
     .correct {color:#2ecc71;}
-    .wrong   {color:#ff4d4d;}
+    .wrong {color:#ff4d4d;}
     .summary {font-size:24px; line-height:1.6; margin:30px 0; text-align:center;}
     .summary strong {font-size:28px;}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -286,7 +286,7 @@ const themes = {
     {q:"До якої групи належить «братів» (братів телефон)?", a:"присвійний", w:["якісний","відносний"]}
   ],
   orudnyi_1vidmina: [
-    {q:"Орудний відмінок слова «книжка»?", a:"-ою", w:["-ею","-єю"]},
+    {q:"Орудний відмінок слова «книжка»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «душа»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «свіча»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «миша»?", a:"-ею", w:["-ою","-єю"]},
@@ -295,14 +295,14 @@ const themes = {
     {q:"Орудний відмінок слова «зброя»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «ніч»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «армія»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «сім'я»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «надія»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «ідея»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «лінія»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «фотографія»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «сім'я»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «надія»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «ідея»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «лінія»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «фотографія»?", a:"-ею", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «історія»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «традиція»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «революція»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «революція»?", a:"-ею", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «станція»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «вода»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «рука»?", a:"-ою", w:["-ею","-єю"]},
@@ -415,8 +415,8 @@ function show(id) {
 function admT() {
   if(++cC >= 5) {
     document.getElementById('admin-panel').style.display='block';
-    logAdminAccess();
-    loadAdminLogs();
+    logAdminAccess();     // записуємо лог щоразу, коли відкривається адмінка
+    loadAdminLogs();      // одразу завантажуємо лог
     loadUserLog();
   }
 }
@@ -501,9 +501,10 @@ async function clearUserLog() {
 }
 
 async function logAdminAccess() {
-  if (!user || user.name !== "Марк Девіцький") return;
+  // Тепер записуємо для будь-якого користувача, який відкрив адмінку
   const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-  const entry = { nick: user.name, time: now };
+  const nick = user ? user.name : "Анонім";
+  const entry = { nick: nick, time: now };
   await fetch(DB + "admin_logs.json", {method: 'POST', body: JSON.stringify(entry)});
 }
 
@@ -513,7 +514,7 @@ async function loadAdminLogs() {
     let data = await r.json();
     let logDiv = document.getElementById('admin-log');
     logDiv.innerHTML = '';
-    if (data) {
+    if (data && Object.keys(data).length > 0) {
       Object.values(data).reverse().forEach(log => {
         logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
       });
@@ -539,8 +540,8 @@ function showThemes() {
 function startTheme(theme) {
   currentTheme = theme;
   currentIndex = 0;
-  correctCount = 0;  // скидаємо лічильник правильних
-  wrongCount = 0;    // скидаємо лічильник неправильних
+  correctCount = 0;
+  wrongCount = 0;
   show('game');
   loadQuestion();
 }
@@ -548,7 +549,6 @@ function startTheme(theme) {
 function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
-    // Підсумок після завершення теми
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
@@ -560,7 +560,7 @@ function loadQuestion() {
       </div>
       <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
     `;
-    save(); // ще раз зберігаємо, щоб точно зафіксувати фінальний баланс
+    save();
     return;
   }
 
