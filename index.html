@@ -124,7 +124,7 @@
 <script>
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
 let user = null, cC = 0, pOn = true;
-let currentTheme = '', currentIndex = 0, correct = 0, wrong = 0;
+let currentTheme = '', currentIndex = 0, correctCount = 0, wrongCount = 0;
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
 let currentCorrectAnswer = '';
 
@@ -539,8 +539,8 @@ function showThemes() {
 function startTheme(theme) {
   currentTheme = theme;
   currentIndex = 0;
-  correct = 0;
-  wrong = 0;
+  correctCount = 0;  // скидаємо лічильник правильних
+  wrongCount = 0;    // скидаємо лічильник неправильних
   show('game');
   loadQuestion();
 }
@@ -548,20 +548,19 @@ function startTheme(theme) {
 function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
-    // Підсумок після завершення теми — завжди показуємо правильні/неправильні та баланс
+    // Підсумок після завершення теми
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
       <div class="summary">
         <strong>Гравець:</strong> ${user ? user.name : '—'}<br><br>
-        <strong style="color:var(--green)">Правильних відповідей:</strong> ${correct}<br>
-        <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrong}<br><br>
+        <strong style="color:var(--green)">Правильних відповідей:</strong> ${correctCount}<br>
+        <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrongCount}<br><br>
         <strong>Поточний баланс:</strong> ${user ? user.points.toLocaleString() : 0} ₴
       </div>
       <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
     `;
-    // Зберігаємо оновлений баланс ще раз на всяк випадок
-    save();
+    save(); // ще раз зберігаємо, щоб точно зафіксувати фінальний баланс
     return;
   }
 
@@ -589,7 +588,7 @@ function checkAnswer(selected, correct, button) {
   document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
 
   if (selected === correct) {
-    correct++;
+    correctCount++;
     user.points += 100;
     button.style.background = 'var(--green)';
     button.style.color = 'white';
@@ -597,7 +596,7 @@ function checkAnswer(selected, correct, button) {
     correctSound.currentTime = 0;
     correctSound.play().catch(()=>{});
   } else {
-    wrong++;
+    wrongCount++;
     user.points = Math.max(0, user.points - 30);
     button.style.background = 'var(--red)';
     button.style.color = 'white';
@@ -606,11 +605,9 @@ function checkAnswer(selected, correct, button) {
     wrongSound.play().catch(()=>{});
   }
 
-  // Оновлюємо баланс на екрані та зберігаємо в базу
   document.getElementById('mon').innerText = user.points.toLocaleString();
   save();
 
-  // Перехід до наступного питання через 1 секунду
   setTimeout(() => {
     currentIndex++;
     loadQuestion();
