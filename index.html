@@ -109,10 +109,15 @@
       <input type="text" id="a-n" placeholder="Нік гравця" />
       <button class="btn" style="background:var(--green);color:#000" onclick="editPoints(true)">+ ГРОШІ</button>
       <button class="btn" style="background:var(--red)" onclick="editPoints(false)">- ГРОШІ</button>
-      <button class="btn danger" onclick="deleteUser()">ВИДАЛИТИ</button>
+      <button class="btn danger" onclick="deleteUser()">ВИДАЛИТИ ЗА НІКОМ</button>
       <br><br>
       <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
       <div id="player-list" style="max-height:220px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
+
+      <h4 style="color:var(--blue); margin-top:20px;">Лог усіх входів гравців у гру</h4>
+      <div id="user-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800; margin-top:8px;" onclick="loadUserLog()">Оновити</button>
+      <button class="btn danger" style="margin-top:8px;" onclick="clearUserLog()">Очистити</button>
 
       <h4 style="color:var(--blue); margin-top:20px;">Лог входів в адмінку</h4>
       <div id="admin-log" class="log-box">Завантаження...</div>
@@ -398,7 +403,7 @@ async function auth() {
     return;
   }
 
-  errorEl.textContent = "Завантаження...";
+  errorEl.textContent = "Перевірка...";
 
   try {
     let res = await fetch(`${DB}users/${nick}.json`);
@@ -419,6 +424,17 @@ async function auth() {
       });
     }
 
+    // Логування входу гравця
+    const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+    const entry = {
+      game_nick: nick,
+      time: now
+    };
+    await fetch(DB + "user_logs/.json", {
+      method: 'POST',
+      body: JSON.stringify(entry)
+    });
+
     localStorage.setItem('un', nick);
     localStorage.setItem('up', pass);
 
@@ -428,12 +444,12 @@ async function auth() {
     show('menu');
     errorEl.textContent = "";
   } catch (err) {
-    errorEl.textContent = "Помилка підключення до бази";
+    errorEl.textContent = "Помилка підключення до бази даних";
     console.error(err);
   }
 }
 
-// Автологін
+// Автологін при завантаженні сторінки
 window.addEventListener('load', () => {
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
@@ -455,6 +471,7 @@ function admT() {
     document.getElementById('admin-panel').style.display = 'block';
     logAdminAccess();
     loadAdminLogs();
+    loadUserLog();
   }
 }
 
@@ -491,6 +508,31 @@ async function clearAdminLogs() {
   await fetch(DB + "admin_logs/.json", { method: 'DELETE' });
   loadAdminLogs();
   alert("Лог адмінки очищено");
+}
+
+async function loadUserLog() {
+  try {
+    let res = await fetch(DB + "user_logs/.json");
+    let data = await res.json();
+    let logDiv = document.getElementById('user-log');
+    logDiv.innerHTML = '';
+    if (data) {
+      Object.values(data).reverse().slice(0, 100).forEach(entry => {
+        logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${entry.game_nick}</b></div>`;
+      });
+    } else {
+      logDiv.innerHTML = 'Лог порожній';
+    }
+  } catch (e) {
+    document.getElementById('user-log').innerHTML = 'Помилка завантаження';
+  }
+}
+
+async function clearUserLog() {
+  if (!confirm("Очистити лог усіх входів гравців?")) return;
+  await fetch(DB + "user_logs/.json", { method: 'DELETE' });
+  loadUserLog();
+  alert("Лог входів гравців очищено");
 }
 
 function closeAdm() {
@@ -599,13 +641,13 @@ async function loadTop() {
 // Магазин (простий приклад)
 function buyItem(item) {
   const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
-  if (user.points >= prices[item]) {
+  if (user && user.points >= prices[item]) {
     user.points -= prices[item];
     alert(`Куплено: ${item}`);
     saveUser();
     document.getElementById('mon').textContent = user.points.toLocaleString();
   } else {
-    alert("Недостатньо коштів!");
+    alert("Недостатньо коштів або не авторизовано!");
   }
 }
 </script>
