@@ -25,6 +25,9 @@
     .log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
     .log-entry{padding:4px 0;border-bottom:1px solid #eee}
     #admin-panel{border:2px dashed var(--red);padding:15px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px}
+    #feedback{text-align:center;font-size:48px;font-weight:bold;margin:20px 0;min-height:60px}
+    .correct {color:#2ecc71;}
+    .wrong   {color:#ff4d4d;}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   </style>
 </head>
@@ -102,6 +105,7 @@
 <div id="game" class="screen">
   <div class="card">
     <h3 id="qtext"></h3>
+    <div id="feedback"></div>
     <div id="abox"></div>
     <button class="btn red" style="margin-top:20px;" onclick="show('themes')">НАЗАД</button>
   </div>
@@ -120,6 +124,7 @@ const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/
 let user = null, cC = 0, pOn = true;
 let currentTheme = '', currentIndex = 0, correct = 0, wrong = 0;
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
+let currentCorrectAnswer = '';
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
@@ -280,23 +285,8 @@ const themes = {
   ],
   orudnyi_1vidmina: [
     {q:"Орудний відмінок слова «книжка»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «душа»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «свіча»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «миша»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «площа»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «тиша»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «зброя»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «ніч»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «армія»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «сім'я»?", a:"-ею", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «надія»?", a:"-ею", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «ідея»?", a:"-ею", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «лінія»?", a:"-ею", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «фотографія»?", a:"-ею", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «історія»?", a:"-ею", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «традиція»?", a:"-ею", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «революція»?", a:"-ею", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «станція»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «мама»?", a:"-ою", w:["-ею","-єю"]},
+    {q:"Орудний відмінок слова «земля»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «вода»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «рука»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «річка»?", a:"-ою", w:["-ею","-єю"]},
@@ -313,6 +303,16 @@ const themes = {
     {q:"Орудний відмінок слова «зірка»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «машина»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «хвилина»?", a:"-ою", w:["-ею","-єю"]},
+    {q:"Орудний відмінок слова «армія»?", a:"-єю", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «сім'я»?", a:"-єю", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «надія»?", a:"-єю", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «ідея»?", a:"-єю", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «лінія»?", a:"-єю", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «фотографія»?", a:"-єю", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «історія»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «традиція»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «революція»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «станція»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «акція»?", a:"-єю", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «функція»?", a:"-єю", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «секція»?", a:"-єю", w:["-ою","-ею"]},
@@ -338,9 +338,7 @@ const themes = {
 };
 
 async function auth() {
-  let n = document.getElementById('nick').value.trim(), 
-      p = document.getElementById('pass').value.trim();
-  
+  let n = document.getElementById('nick').value.trim(), p = document.getElementById('pass').value.trim();
   if(!n || !p) {
     document.getElementById('auth-error').textContent = "Введіть нікнейм та пароль";
     return;
@@ -359,30 +357,19 @@ async function auth() {
       }
       user = d;
     } else {
-      user = {name: n, pass: p, points: 0, items: {gold_frame: false}};
-      await fetch(DB + "users/" + n + ".json", {
-        method: 'PUT',
-        body: JSON.stringify(user)
-      });
+      user = {name:n, pass:p, points:0, items:{gold_frame:false}};
+      await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
 
-    // Зберігаємо дані для автологіну
     localStorage.setItem('un', n);
     localStorage.setItem('up', p);
 
-    // Логування входу
-    const now = new Date().toLocaleString('uk-UA', {timeZone: 'Europe/Kyiv'});
-    const entry = {game_nick: n, time: now};
-    await fetch(DB + "user_logs.json", {
-      method: 'POST',
-      body: JSON.stringify(entry)
-    });
+    const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
+    const entry = {game_nick:n, time:now};
+    await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify(entry)});
 
-    items = user.items || {gold_frame: false};
-    save();
-    applyItems();
-    update();
-    show('menu');
+    items = user.items || {gold_frame:false};
+    save(); applyItems(); update(); show('menu');
     document.getElementById('auth-error').textContent = "";
   } catch(e) {
     document.getElementById('auth-error').textContent = "Помилка підключення";
@@ -390,24 +377,20 @@ async function auth() {
   }
 }
 
-// Автоматичний вхід при завантаженні сторінки
+// Автологін при завантаженні сторінки
 window.onload = function() {
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
-
-  if (savedNick && savedPass) {
+  if(savedNick && savedPass) {
     document.getElementById('nick').value = savedNick;
     document.getElementById('pass').value = savedPass;
-    auth();  // автоматично запускаємо авторизацію
+    auth();
   }
 };
 
 function save() {
   user.items = items;
-  fetch(DB + "users/" + user.name + ".json", {
-    method: 'PUT',
-    body: JSON.stringify(user)
-  });
+  fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
 }
 
 function update() {
@@ -416,32 +399,29 @@ function update() {
 
 function applyItems() {
   let nickDisplay = user.name;
-  if (items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
-  if (items.crown) nickDisplay += ' 👑';
-  if (items.fire) nickDisplay += ' 🔥';
-  if (items.shield) nickDisplay += ' 🛡️';
-  if (items.vip) nickDisplay += ' 💎 VIP';
+  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  if(items.crown) nickDisplay += ' 👑';
+  if(items.fire) nickDisplay += ' 🔥';
+  if(items.shield) nickDisplay += ' 🛡️';
+  if(items.vip) nickDisplay += ' 💎 VIP';
   document.getElementById('playerNick').innerHTML = nickDisplay;
 }
 
 function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-  document.getElementById(id).style.display = 'block';
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById(id).style.display='block';
 }
 
 function admT() {
-  if (++cC >= 5) {
-    document.getElementById('admin-panel').style.display = 'block';
+  if(++cC >= 5) {
+    document.getElementById('admin-panel').style.display='block';
     logAdminAccess();
     loadAdminLogs();
     loadUserLog();
   }
 }
 
-function closeAdm() {
-  document.getElementById('admin-panel').style.display = 'none';
-  cC = 0;
-}
+function closeAdm() { document.getElementById('admin-panel').style.display='none'; cC = 0; }
 
 function toggleP() {
   pOn = !pOn;
@@ -451,9 +431,9 @@ function toggleP() {
 
 async function delU() {
   let n = document.getElementById('a-n').value.trim();
-  if (!n) return alert("Введіть нікнейм");
-  if (confirm(`Видалити ${n}?`)) {
-    await fetch(DB + "users/" + n + ".json", {method: 'DELETE'});
+  if(!n) return alert("Введіть нікнейм");
+  if(confirm(`Видалити ${n}?`)) {
+    await fetch(DB+"users/"+n+".json", {method:'DELETE'});
     alert("Видалено");
     loadPlayers();
   }
@@ -461,22 +441,21 @@ async function delU() {
 
 async function edO(add) {
   let n = document.getElementById('a-n').value.trim();
-  if (!n) return alert("Введіть ник");
+  if(!n) return alert("Введіть ник");
   let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
-  if (isNaN(amt) || amt <= 0) return alert("Невірна сума");
+  if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
   amt = parseInt(amt);
-  let r = await fetch(DB + "users/" + n + ".json"), d = await r.json();
-  if (!d) return alert("Гравця не знайдено");
+  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
+  if(!d) return alert("Гравця не знайдено");
   d.points += add ? amt : -amt;
   d.points = Math.max(0, d.points);
-  await fetch(DB + "users/" + n + ".json", {method: 'PUT', body: JSON.stringify(d)});
+  await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(d)});
   alert("Гроші оновлено");
   loadPlayers();
 }
 
 async function loadPlayers() {
-  let r = await fetch(DB + "users/.json"), d = await r.json();
-  let list = document.getElementById('player-list');
+  let r = await fetch(DB + "users/.json"), d = await r.json(), list = document.getElementById('player-list');
   list.innerHTML = '';
   if (!d || !Object.keys(d).length) {
     list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
@@ -484,10 +463,13 @@ async function loadPlayers() {
   }
   for (let key in d) {
     let u = d[key];
+    let displayNick = u.name || key;
     list.innerHTML += `
-      <div style="padding:10px; border-bottom:1px solid #ddd;">
-        <strong>${u.name || key}</strong><br>
-        Баланс: ${u.points || 0} ₴ | Пароль: ${u.pass || '—'}
+      <div style="padding:10px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <strong>${displayNick}</strong><br>
+          <small>Баланс: ${u.points || 0} ₴ | Пароль: ${u.pass || '—'}</small>
+        </div>
       </div>
     `;
   }
@@ -567,6 +549,8 @@ function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
     document.getElementById('qtext').textContent = "Тема завершена!";
+    document.getElementById('abox').innerHTML = '';
+    document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
       <div style="font-size:22px; margin:20px 0;">
         Гравець: <b>${user.name}</b><br>
@@ -580,7 +564,9 @@ function loadQuestion() {
   }
 
   const q = qs[currentIndex];
+  currentCorrectAnswer = q.a;
   document.getElementById('qtext').textContent = `Питання ${currentIndex+1}/${qs.length}: ${q.q}`;
+  document.getElementById('feedback').innerHTML = '';
 
   const abox = document.getElementById('abox');
   abox.innerHTML = '';
@@ -592,36 +578,50 @@ function loadQuestion() {
     let btn = document.createElement('button');
     btn.className = 'btn';
     btn.innerText = o;
-    btn.onclick = () => check(o, q.a);
+    btn.onclick = () => checkAnswer(o, q.a, btn);
     abox.appendChild(btn);
   });
 }
 
-function check(p, c) {
-  if (p === c) {
+function checkAnswer(selected, correct, button) {
+  // Вимикаємо всі кнопки після вибору
+  document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
+
+  if (selected === correct) {
     correct++;
     user.points += 100;
+    button.style.background = 'var(--green)';
+    button.style.color = 'white';
+    document.getElementById('feedback').innerHTML = '<span class="correct">ПРАВИЛЬНО!</span>';
     correctSound.currentTime = 0;
     correctSound.play().catch(()=>{});
   } else {
     wrong++;
     user.points = Math.max(0, user.points - 30);
+    button.style.background = 'var(--red)';
+    button.style.color = 'white';
+    document.getElementById('feedback').innerHTML = '<span class="wrong">❌</span>';
     wrongSound.currentTime = 0;
     wrongSound.play().catch(()=>{});
   }
+
   document.getElementById('mon').innerText = user.points.toLocaleString();
   save();
-  currentIndex++;
-  loadQuestion();
+
+  // Автоматичний перехід через 1 секунду
+  setTimeout(() => {
+    currentIndex++;
+    loadQuestion();
+  }, 1000);
 }
 
 async function loadT() {
   show('top');
-  let r = await fetch(DB + "users/.json"), d = await r.json();
+  let r = await fetch(DB+"users/.json"), d = await r.json();
   let l = document.getElementById('tlist');
   l.innerHTML = '';
-  if (d) {
-    let topPlayers = Object.values(d).sort((a,b) => (b.points||0) - (a.points||0)).slice(0,1000);
+  if(d) {
+    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,1000);
     topPlayers.forEach((u,i) => {
       l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px">
         <span>${i+1}. ${u.name}</span><b>${u.points||0}</b>
@@ -634,16 +634,13 @@ async function loadT() {
 
 function buyItem(item) {
   const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
-  if (user.points >= prices[item]) {
+  if(user.points >= prices[item]){
     user.points -= prices[item];
     items[item] = true;
     applyItems();
-    save();
-    update();
+    save(); update();
     alert("Куплено: " + item);
-  } else {
-    alert("Недостатньо грошей!");
-  }
+  } else alert("Недостатньо грошей!");
 }
 </script>
 </body>
