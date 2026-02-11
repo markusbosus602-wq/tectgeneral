@@ -30,28 +30,24 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 </head>
 <body>
 
-<!-- Авторизація -->
 <div id="auth-screen" class="screen active">
   <div class="card">
     <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
-    <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
-    <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
+    <input type="text" id="nick" placeholder="Нікнейм">
+    <input type="password" id="pass" placeholder="Пароль">
     <button class="btn" onclick="auth()">УВІЙТИ</button>
-    <p id="auth-error" style="color:red; margin-top:10px;"></p>
   </div>
 </div>
 
-<!-- Головне меню -->
 <div id="menu" class="screen">
   <div class="card">
     <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
     <div class="nickname" id="playerNick"></div>
     <div class="money"><span id="mon">0</span> ₴</div>
-    <button class="btn" onclick="show('themes')">ГРАТИ</button>
+    <button class="btn" onclick="showThemes()">ГРАТИ</button>
     <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
 
-    <!-- Адмін-панель -->
     <div id="admin-panel">
       <b style="color:var(--red);cursor:pointer" onclick="closeAdm()">❌ ЗАКРИТИ</b><br><br>
       <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
@@ -76,7 +72,6 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
   </div>
 </div>
 
-<!-- Магазин -->
 <div id="shop" class="screen">
   <div class="card">
     <h2>Магазин</h2>
@@ -91,7 +86,6 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
   </div>
 </div>
 
-<!-- Вибір теми -->
 <div id="themes" class="screen">
   <div class="card">
     <h2>Обери тему</h2>
@@ -103,7 +97,6 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
   </div>
 </div>
 
-<!-- Гра -->
 <div id="game" class="screen">
   <div class="card">
     <h3 id="qtext"></h3>
@@ -112,10 +105,9 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
   </div>
 </div>
 
-<!-- Топ -->
 <div id="top" class="screen">
   <div class="card">
-    <h3>ТОП</h3>
+    <h3>ТОП 1000</h3>
     <div id="tlist">Завантаження...</div>
     <button class="btn" onclick="show('menu')">НАЗАД</button>
   </div>
@@ -125,6 +117,7 @@ input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;co
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
 let user = null, cC = 0, pOn = true;
 let currentTheme = '', currentIndex = 0, correct = 0, wrong = 0;
+let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
@@ -344,43 +337,41 @@ const themes = {
 
 async function auth() {
   let n = document.getElementById('nick').value.trim(), p = document.getElementById('pass').value.trim();
-  const err = document.getElementById('auth-error');
-
-  if(!n || !p) {
-    err.textContent = "Введіть нікнейм та пароль";
-    return;
-  }
-
-  err.textContent = "Завантаження...";
-
-  try {
-    let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
-    if(d && d.pass !== p) {
-      err.textContent = "Неправильний пароль!";
-      return;
-    }
-    user = d || {name:n, pass:p, points:0, items:{gold_frame:false}};
-    localStorage.setItem('un', n); localStorage.setItem('up', p);
-    document.getElementById('playerNick').textContent = user.name;
-    document.getElementById('mon').textContent = user.points;
-    show('menu');
-    err.textContent = "";
-  } catch(e) {
-    err.textContent = "Помилка підключення";
-    console.error(e);
-  }
+  if(!n || !p) return alert("Введіть нікнейм та пароль");
+  localStorage.setItem('un', n); localStorage.setItem('up', p);
+  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
+  if(d && d.pass !== p) return alert("Неправильний пароль!");
+  user = d || {name:n, pass:p, points:0, items:{gold_frame:false}};
+  items = user.items || {gold_frame:false};
+  save(); applyItems(); update(); show('menu');
 }
 
-function logout() {
-  localStorage.removeItem('un');
-  localStorage.removeItem('up');
-  user = null;
-  show('auth-screen');
+function save() {
+  user.items = items;
+  fetch(DB+"users/"+user.name+".json", {method:'PUT', body:JSON.stringify(user)});
+}
+
+function update() {
+  document.getElementById('mon').innerText = user.points.toLocaleString();
+}
+
+function applyItems() {
+  let nickDisplay = user.name;
+  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  if(items.crown) nickDisplay += ' 👑';
+  if(items.fire) nickDisplay += ' 🔥';
+  if(items.shield) nickDisplay += ' 🛡️';
+  if(items.vip) nickDisplay += ' 💎 VIP';
+  document.getElementById('playerNick').innerHTML = nickDisplay;
 }
 
 function show(id) {
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   document.getElementById(id).style.display='block';
+}
+
+function showThemes() {
+  show('themes');
 }
 
 function startTheme(theme) {
@@ -446,39 +437,126 @@ function checkAnswer(selected, correctAns) {
   loadQuestion();
 }
 
-function save() {
-  fetch(DB+"users/"+user.name+".json", {
-    method:'PUT',
-    body:JSON.stringify(user)
-  }).catch(e => console.error(e));
+function buyItem(item) {
+  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
+  if(user.points >= prices[item]){
+    user.points -= prices[item];
+    items[item] = true;
+    applyItems();
+    save(); update();
+    alert("Куплено: " + item);
+  } else alert("Недостатньо грошей!");
 }
 
-// Адмін-функції (залишено без змін)
-function admT() {
-  if(++cC >= 5) {
-    document.getElementById('admin-panel').style.display='block';
+async function loadT() {
+  show('top');
+  let r = await fetch(DB+"users/.json"), d = await r.json();
+  let l = document.getElementById('tlist');
+  l.innerHTML = '';
+  if(d) {
+    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,1000);
+    topPlayers.forEach((u,i) => {
+      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points||0}</b></div>`;
+    });
+  } else {
+    l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
   }
 }
+
+// Адмін-функції
+function admT() {
+  if(++cC >= 5) {
+    document.getElementById('admin-panel').style.display = 'block';
+  }
+}
+
 function closeAdm() {
-  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('admin-panel').style.display = 'none';
   cC = 0;
 }
+
 function toggleP() {
   pOn = !pOn;
   document.getElementById('pen-btn').innerText = pOn ? "ШТРАФИ: ВКЛ" : "ШТРАФИ: ВИКЛ";
   document.getElementById('pen-btn').style.background = pOn ? "var(--red)" : "var(--green)";
 }
-// ... (решта адмін-функцій: delU, edO, loadPlayers тощо — можна додати, якщо потрібно)
 
-window.onload = () => {
-  const un = localStorage.getItem('un');
-  const up = localStorage.getItem('up');
-  if(un && up) {
-    document.getElementById('nick').value = un;
-    document.getElementById('pass').value = up;
-    auth();
+async function delU() {
+  let n = document.getElementById('a-n').value.trim();
+  if(!n) return alert("Введіть нікнейм");
+  if(confirm(`Видалити ${n}?`)) {
+    await fetch(DB+"users/"+n+".json", {method:'DELETE'});
+    alert("Видалено");
+    loadPlayers();
   }
-};
+}
+
+async function edO(add) {
+  let n = document.getElementById('a-n').value.trim();
+  if(!n) return alert("Введіть ник");
+  let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
+  if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
+  amt = parseInt(amt);
+  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
+  if(!d) return alert("Гравця не знайдено");
+  d.points += add ? amt : -amt;
+  d.points = Math.max(0, d.points);
+  await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(d)});
+  alert("Гроші оновлено");
+  loadPlayers();
+}
+
+async function loadPlayers() {
+  let r = await fetch(DB + "users/.json"), d = await r.json();
+  let list = document.getElementById('player-list');
+  list.innerHTML = '';
+  if (!d || !Object.keys(d).length) {
+    list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
+    return;
+  }
+  for (let key in d) {
+    let u = d[key];
+    list.innerHTML += `
+      <div style="padding:10px; border-bottom:1px solid #ddd;">
+        <strong>${u.name || key}</strong><br>
+        Баланс: ${u.points || 0} ₴ | Пароль: ${u.pass || '—'}
+      </div>
+    `;
+  }
+}
+
+async function loadUserLog() {
+  let r = await fetch(DB + "user_logs.json"), data = await r.json();
+  let logDiv = document.getElementById('user-log');
+  logDiv.innerHTML = '';
+  if (data) {
+    Object.values(data).reverse().slice(0,50).forEach(entry => {
+      logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${entry.game_nick}</b></div>`;
+    });
+  } else {
+    logDiv.innerHTML = 'Лог порожній';
+  }
+}
+
+async function clearUserLog() {
+  if (!confirm("Очистити лог усіх входів?")) return;
+  await fetch(DB + "user_logs.json", {method: 'DELETE'});
+  loadUserLog();
+  alert("Лог очищено");
+}
+
+// інші адмін-функції (clearAdminLogs, logAdminAccess тощо) можна додати аналогічно за потреби
+
+function buyItem(item) {
+  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
+  if(user.points >= prices[item]){
+    user.points -= prices[item];
+    items[item] = true;
+    applyItems();
+    save(); update();
+    alert("Куплено: " + item);
+  } else alert("Недостатньо грошей!");
+}
 </script>
 </body>
 </html>
