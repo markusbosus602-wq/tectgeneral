@@ -5,92 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>UkrMova Pro</title>
   <style>
-    :root {
-      --blue: #00a2ff;
-      --red: #ff4d4d;
-      --green: #2ecc71;
-      --gold: #f1c40f;
-      --dark: #d32f2f;
-    }
-    body {
-      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;
-      background-size: 160px;
-      color: #000;
-      font-family: sans-serif;
-      margin: 0;
-      text-align: center;
-    }
-    .screen { display: none; padding: 20px; flex-direction: column; min-height: 100vh; box-sizing: border-box; }
-    .active { display: flex; animation: fadeIn 0.3s ease; }
-    .card {
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(10px);
-      padding: 20px;
-      border-radius: 20px;
-      border: 1px solid #444;
-      margin: auto;
-      width: 100%;
-      max-width: 450px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    }
-    .btn {
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 700;
-      width: 100%;
-      margin: 6px 0;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all .2s;
-    }
-    .btn:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(0,162,255,.6); }
-    .btn.green { background: var(--green); }
-    .btn.danger { background: var(--dark); }
-    .money { font-size: 32px; font-weight: 900; color: var(--gold); text-shadow: 0 0 10px #f1c40f; }
-    .nickname { font-size: 28px; font-weight: bold; margin: 10px 0; cursor: pointer; }
-    .gold-nick { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
-    input {
-      background: #f5f5f5;
-      border: 1px solid #444;
-      padding: 10px;
-      border-radius: 8px;
-      color: #000;
-      width: 90%;
-      margin-bottom: 8px;
-    }
-    .shop-item {
-      background: #eee;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    .shop-item.bought { background: #c8e6c9; }
-    .shop-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
-    .theme-btn { background: #9c27b0; color: white; }
-    .log-box {
-      max-height: 220px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 10px 0;
-      background: #f8f8f8;
-      border-radius: 8px;
-    }
-    .log-entry { padding: 4px 0; border-bottom: 1px solid #eee; }
-    #admin-panel {
-      border: 2px dashed var(--red);
-      padding: 15px;
-      margin-top: 15px;
-      display: none;
-      background: rgba(255,255,255,0.92);
-      text-align: left;
-      border-radius: 15px;
-    }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
+    body{background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;background-size:160px;color:#000;font-family:sans-serif;margin:0;text-align:center}
+    .screen{display:none;padding:20px;flex-direction:column;min-height:100vh;box-sizing:border-box}
+    .active{display:flex;animation:fadeIn .3s ease}
+    .card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3)}
+    .btn{background:var(--blue);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;width:100%;margin:6px 0;cursor:pointer;text-transform:uppercase;transition:all .2s}
+    .btn:hover{transform:scale(1.02);box-shadow:0 0 15px rgba(0,162,255,.6)}
+    .btn.green{background:var(--green)}
+    .btn.danger{background:var(--dark)}
+    .money{font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 10px #f1c40f}
+    .nickname{font-size:28px;font-weight:bold;margin:10px 0;cursor:pointer}
+    .gold-nick{color:var(--gold);text-shadow:0 0 10px var(--gold)}
+    input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;color:#000;width:90%;margin-bottom:8px}
+    .shop-item{background:#eee;padding:12px;margin:8px 0;border-radius:10px;cursor:pointer}
+    .shop-item.bought{background:#c8e6c9}
+    .shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .theme-btn{background:#9c27b0;color:white}
+    .log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
+    .log-entry{padding:4px 0;border-bottom:1px solid #eee}
+    #admin-panel{border:2px dashed var(--red);padding:15px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   </style>
 </head>
 <body>
@@ -98,9 +33,10 @@
 <div id="auth-screen" class="screen active">
   <div class="card">
     <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
-    <input type="text" id="nick" placeholder="Нікнейм">
-    <input type="password" id="pass" placeholder="Пароль">
-    <button class="btn" onclick="auth()">УВІЙТИ</button>
+    <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
+    <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
+    <button class="btn" onclick="auth()">УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ</button>
+    <p id="auth-error" style="color:red; margin-top:10px; min-height:24px;"></p>
   </div>
 </div>
 
@@ -343,9 +279,24 @@ const themes = {
     {q:"До якої групи належить «братів» (братів телефон)?", a:"присвійний", w:["якісний","відносний"]}
   ],
   orudnyi_1vidmina: [
-    {q:"Орудний відмінок слова «книга»?", a:"-ею", w:["-ою","-єю"]},
-    {q:"Орудний відмінок слова «мама»?", a:"-ою", w:["-ею","-єю"]},
-    {q:"Орудний відмінок слова «земля»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «книжка»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «душа»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «свіча»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «миша»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «площа»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «тиша»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «зброя»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «ніч»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «армія»?", a:"-ею", w:["-ою","-єю"]},
+    {q:"Орудний відмінок слова «сім'я»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «надія»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «ідея»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «лінія»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «фотографія»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «історія»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «традиція»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «революція»?", a:"-ею", w:["-ою","-ею"]},
+    {q:"Орудний відмінок слова «станція»?", a:"-ею", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «вода»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «рука»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «річка»?", a:"-ою", w:["-ею","-єю"]},
@@ -362,16 +313,6 @@ const themes = {
     {q:"Орудний відмінок слова «зірка»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «машина»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «хвилина»?", a:"-ою", w:["-ею","-єю"]},
-    {q:"Орудний відмінок слова «армія»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «сім'я»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «надія»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «ідея»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «лінія»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «фотографія»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «історія»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «традиція»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «революція»?", a:"-єю", w:["-ою","-ею"]},
-    {q:"Орудний відмінок слова «станція»?", a:"-єю", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «акція»?", a:"-єю", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «функція»?", a:"-єю", w:["-ою","-ею"]},
     {q:"Орудний відмінок слова «секція»?", a:"-єю", w:["-ою","-ею"]},
@@ -397,22 +338,76 @@ const themes = {
 };
 
 async function auth() {
-  let n = document.getElementById('nick').value.trim(), p = document.getElementById('pass').value.trim();
-  if(!n || !p) return alert("Введіть нікнейм та пароль");
-  localStorage.setItem('un', n); localStorage.setItem('up', p);
-  const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
-  const entry = {game_nick:n,time:now};
-  await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify(entry)});
-  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
-  if(d && d.pass !== p) return alert("Неправильний пароль!");
-  user = d || {name:n, pass:p, points:0, items:{gold_frame:false}};
-  items = user.items || {gold_frame:false};
-  save(); applyItems(); update(); show('menu');
+  let n = document.getElementById('nick').value.trim(), 
+      p = document.getElementById('pass').value.trim();
+  
+  if(!n || !p) {
+    document.getElementById('auth-error').textContent = "Введіть нікнейм та пароль";
+    return;
+  }
+
+  document.getElementById('auth-error').textContent = "Завантаження...";
+
+  try {
+    let r = await fetch(DB + "users/" + n + ".json");
+    let d = await r.json();
+
+    if (d) {
+      if (d.pass !== p) {
+        document.getElementById('auth-error').textContent = "Неправильний пароль!";
+        return;
+      }
+      user = d;
+    } else {
+      user = {name: n, pass: p, points: 0, items: {gold_frame: false}};
+      await fetch(DB + "users/" + n + ".json", {
+        method: 'PUT',
+        body: JSON.stringify(user)
+      });
+    }
+
+    // Зберігаємо дані для автологіну
+    localStorage.setItem('un', n);
+    localStorage.setItem('up', p);
+
+    // Логування входу
+    const now = new Date().toLocaleString('uk-UA', {timeZone: 'Europe/Kyiv'});
+    const entry = {game_nick: n, time: now};
+    await fetch(DB + "user_logs.json", {
+      method: 'POST',
+      body: JSON.stringify(entry)
+    });
+
+    items = user.items || {gold_frame: false};
+    save();
+    applyItems();
+    update();
+    show('menu');
+    document.getElementById('auth-error').textContent = "";
+  } catch(e) {
+    document.getElementById('auth-error').textContent = "Помилка підключення";
+    console.error(e);
+  }
 }
+
+// Автоматичний вхід при завантаженні сторінки
+window.onload = function() {
+  const savedNick = localStorage.getItem('un');
+  const savedPass = localStorage.getItem('up');
+
+  if (savedNick && savedPass) {
+    document.getElementById('nick').value = savedNick;
+    document.getElementById('pass').value = savedPass;
+    auth();  // автоматично запускаємо авторизацію
+  }
+};
 
 function save() {
   user.items = items;
-  fetch(DB+"users/"+user.name+".json", {method:'PUT', body:JSON.stringify(user)});
+  fetch(DB + "users/" + user.name + ".json", {
+    method: 'PUT',
+    body: JSON.stringify(user)
+  });
 }
 
 function update() {
@@ -421,29 +416,32 @@ function update() {
 
 function applyItems() {
   let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
-  if(items.crown) nickDisplay += ' 👑';
-  if(items.fire) nickDisplay += ' 🔥';
-  if(items.shield) nickDisplay += ' 🛡️';
-  if(items.vip) nickDisplay += ' 💎 VIP';
+  if (items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  if (items.crown) nickDisplay += ' 👑';
+  if (items.fire) nickDisplay += ' 🔥';
+  if (items.shield) nickDisplay += ' 🛡️';
+  if (items.vip) nickDisplay += ' 💎 VIP';
   document.getElementById('playerNick').innerHTML = nickDisplay;
 }
 
 function show(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
-  document.getElementById(id).style.display='block';
+  document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
 }
 
 function admT() {
-  if(++cC >= 5) {
-    document.getElementById('admin-panel').style.display='block';
+  if (++cC >= 5) {
+    document.getElementById('admin-panel').style.display = 'block';
     logAdminAccess();
     loadAdminLogs();
     loadUserLog();
   }
 }
 
-function closeAdm() { document.getElementById('admin-panel').style.display='none'; cC = 0; }
+function closeAdm() {
+  document.getElementById('admin-panel').style.display = 'none';
+  cC = 0;
+}
 
 function toggleP() {
   pOn = !pOn;
@@ -453,9 +451,9 @@ function toggleP() {
 
 async function delU() {
   let n = document.getElementById('a-n').value.trim();
-  if(!n) return alert("Введіть нікнейм");
-  if(confirm(`Видалити ${n}?`)) {
-    await fetch(DB+"users/"+n+".json", {method:'DELETE'});
+  if (!n) return alert("Введіть нікнейм");
+  if (confirm(`Видалити ${n}?`)) {
+    await fetch(DB + "users/" + n + ".json", {method: 'DELETE'});
     alert("Видалено");
     loadPlayers();
   }
@@ -463,21 +461,22 @@ async function delU() {
 
 async function edO(add) {
   let n = document.getElementById('a-n').value.trim();
-  if(!n) return alert("Введіть ник");
+  if (!n) return alert("Введіть ник");
   let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
-  if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
+  if (isNaN(amt) || amt <= 0) return alert("Невірна сума");
   amt = parseInt(amt);
-  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
-  if(!d) return alert("Гравця не знайдено");
+  let r = await fetch(DB + "users/" + n + ".json"), d = await r.json();
+  if (!d) return alert("Гравця не знайдено");
   d.points += add ? amt : -amt;
   d.points = Math.max(0, d.points);
-  await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(d)});
+  await fetch(DB + "users/" + n + ".json", {method: 'PUT', body: JSON.stringify(d)});
   alert("Гроші оновлено");
   loadPlayers();
 }
 
 async function loadPlayers() {
-  let r = await fetch(DB + "users/.json"), d = await r.json(), list = document.getElementById('player-list');
+  let r = await fetch(DB + "users/.json"), d = await r.json();
+  let list = document.getElementById('player-list');
   list.innerHTML = '';
   if (!d || !Object.keys(d).length) {
     list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
@@ -485,10 +484,9 @@ async function loadPlayers() {
   }
   for (let key in d) {
     let u = d[key];
-    let displayNick = u.name || key;
     list.innerHTML += `
       <div style="padding:10px; border-bottom:1px solid #ddd;">
-        <strong>${displayNick}</strong><br>
+        <strong>${u.name || key}</strong><br>
         Баланс: ${u.points || 0} ₴ | Пароль: ${u.pass || '—'}
       </div>
     `;
@@ -567,7 +565,7 @@ function startTheme(theme) {
 
 function loadQuestion() {
   const qs = themes[currentTheme];
-  if(currentIndex >= qs.length) {
+  if (currentIndex >= qs.length) {
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('abox').innerHTML = `
       <div style="font-size:22px; margin:20px 0;">
@@ -584,8 +582,8 @@ function loadQuestion() {
   const q = qs[currentIndex];
   document.getElementById('qtext').textContent = `Питання ${currentIndex+1}/${qs.length}: ${q.q}`;
 
-  const b = document.getElementById('abox');
-  b.innerHTML = '';
+  const abox = document.getElementById('abox');
+  abox.innerHTML = '';
 
   let answers = [q.a, ...q.w];
   answers.sort(() => Math.random() - 0.5);
@@ -595,12 +593,12 @@ function loadQuestion() {
     btn.className = 'btn';
     btn.innerText = o;
     btn.onclick = () => check(o, q.a);
-    b.appendChild(btn);
+    abox.appendChild(btn);
   });
 }
 
 function check(p, c) {
-  if(p === c) {
+  if (p === c) {
     correct++;
     user.points += 100;
     correctSound.currentTime = 0;
@@ -619,27 +617,33 @@ function check(p, c) {
 
 async function loadT() {
   show('top');
-  let r = await fetch(DB+"users/.json"), d = await r.json(), l = document.getElementById('tlist');
+  let r = await fetch(DB + "users/.json"), d = await r.json();
+  let l = document.getElementById('tlist');
   l.innerHTML = '';
-  if(d) {
-    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,1000);
-    topPlayers.forEach((u,i)=> {
+  if (d) {
+    let topPlayers = Object.values(d).sort((a,b) => (b.points||0) - (a.points||0)).slice(0,1000);
+    topPlayers.forEach((u,i) => {
       l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px">
         <span>${i+1}. ${u.name}</span><b>${u.points||0}</b>
       </div>`;
     });
-  } else l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+  } else {
+    l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+  }
 }
 
 function buyItem(item) {
   const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
-  if(user.points >= prices[item]){
+  if (user.points >= prices[item]) {
     user.points -= prices[item];
     items[item] = true;
     applyItems();
-    save(); update();
+    save();
+    update();
     alert("Куплено: " + item);
-  } else alert("Недостатньо грошей!");
+  } else {
+    alert("Недостатньо грошей!");
+  }
 }
 </script>
 </body>
