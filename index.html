@@ -30,19 +30,21 @@
     .wrong {color:#ff4d4d;}
     .summary {font-size:24px; line-height:1.6; margin:30px 0; text-align:center;}
     .summary strong {font-size:28px;}
-    #splash-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column}
-    #splash-video{width:100%;max-width:100%;height:auto;max-height:100vh;object-fit:contain}
+    #splash-screen{position:fixed;inset:0;width:100%;height:100%;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column}
+    #splash-video{width:100%;height:100%;object-fit:cover}
+    #splash-btn{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);padding:16px 32px;font-size:20px;background:var(--blue);color:white;border:none;border-radius:12px;cursor:pointer;z-index:10000}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   </style>
 </head>
 <body>
 
-<!-- Заставка з відео (зі звуком) -->
+<!-- Заставка з відео -->
 <div id="splash-screen">
-  <video id="splash-video" autoplay playsinline>
+  <video id="splash-video" playsinline>
     <source src="https://files.catbox.moe/a9zzmt.mp4" type="video/mp4">
     Ваш браузер не підтримує відео.
   </video>
+  <button id="splash-btn">Почати гру зі звуком</button>
 </div>
 
 <div id="auth-screen" class="screen">
@@ -414,13 +416,22 @@ async function auth() {
 window.onload = function() {
   const splash = document.getElementById('splash-screen');
   const video = document.getElementById('splash-video');
+  const startBtn = document.getElementById('splash-btn');
 
-  // Дозволяємо відтворення зі звуком після взаємодії (якщо браузер блокує autoplay зі звуком)
-  video.play().catch(() => {
-    // Якщо браузер заблокував autoplay зі звуком — можна додати кнопку "Запустити звук", але для простоти просто продовжуємо
-    console.log("Автозапуск зі звуком заблоковано браузером");
-  });
+  // Запускаємо відео тільки після натискання кнопки (щоб обійти блокування браузера)
+  startBtn.onclick = function() {
+    startBtn.style.display = 'none';
+    video.play().catch(err => {
+      console.log("Помилка відтворення:", err);
+      // Якщо все одно не грає — переходимо через 2 секунди
+      setTimeout(() => {
+        splash.style.display = 'none';
+        document.getElementById('auth-screen').classList.add('active');
+      }, 2000);
+    });
+  };
 
+  // Коли відео закінчилося — переходимо на авторизацію
   video.onended = function() {
     splash.style.display = 'none';
     document.getElementById('auth-screen').classList.add('active');
@@ -434,7 +445,7 @@ window.onload = function() {
     }
   };
 
-  // Запасний варіант: якщо відео не закінчилося (проблеми з завантаженням) — через 20 секунд переходимо
+  // Запасний таймер: якщо щось пішло не так — через 20 секунд переходимо
   setTimeout(() => {
     if (splash.style.display !== 'none') {
       splash.style.display = 'none';
@@ -544,4 +555,150 @@ async function loadUserLog() {
       logDiv.innerHTML = 'Лог порожній';
     }
   } catch (e) {
-    document.getElementBy
+    document.getElementById('user-log').innerHTML = 'Помилка завантаження';
+  }
+}
+
+async function clearUserLog() {
+  if (!confirm("Очистити лог усіх входів?")) return;
+  await fetch(DB + "user_logs.json", {method: 'DELETE'});
+  loadUserLog();
+  alert("Лог входів очищено");
+}
+
+async function logAdminAccess() {
+  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+  const nick = user ? user.name : "Анонім";
+  const entry = { nick: nick, time: now };
+  await fetch(DB + "admin_logs.json", {method: 'POST', body: JSON.stringify(entry)});
+}
+
+async function loadAdminLogs() {
+  try {
+    let r = await fetch(DB + "admin_logs.json");
+    let data = await r.json();
+    let logDiv = document.getElementById('admin-log');
+    logDiv.innerHTML = '';
+    if (data && Object.keys(data).length > 0) {
+      Object.values(data).reverse().forEach(log => {
+        logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
+      });
+    } else {
+      logDiv.innerHTML = 'Лог порожній';
+    }
+  } catch (e) {
+    document.getElementById('admin-log').innerHTML = 'Помилка завантаження логу';
+  }
+}
+
+async function clearAdminLogs() {
+  if (!confirm("Очистити лог адмінки?")) return;
+  await fetch(DB + "admin_logs.json", {method: 'DELETE'});
+  loadAdminLogs();
+  alert("Лог адмінки очищено");
+}
+
+function showThemes() {
+  show('themes');
+}
+
+function startTheme(theme) {
+  currentTheme = theme;
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  show('game');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const qs = themes[currentTheme];
+  if (currentIndex >= qs.length) {
+    document.getElementById('qtext').textContent = "Тема завершена!";
+    document.getElementById('feedback').innerHTML = '';
+    document.getElementById('abox').innerHTML = `
+      <div class="summary">
+        <strong>Гравець:</strong> ${user ? user.name : '—'}<br><br>
+        <strong style="color:var(--green)">Правильних відповідей:</strong> ${correctCount}<br>
+        <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrongCount}<br><br>
+        <strong>Поточний баланс:</strong> ${user ? user.points.toLocaleString() : 0} ₴
+      </div>
+      <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
+    `;
+    save();
+    return;
+  }
+  const q = qs[currentIndex];
+  currentCorrectAnswer = q.a;
+  document.getElementById('qtext').textContent = `Питання ${currentIndex+1}/${qs.length}: ${q.q}`;
+  document.getElementById('feedback').innerHTML = '';
+  const abox = document.getElementById('abox');
+  abox.innerHTML = '';
+  let answers = [q.a, ...q.w];
+  answers.sort(() => Math.random() - 0.5);
+  answers.forEach(o => {
+    let btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.innerText = o;
+    btn.onclick = () => checkAnswer(o, q.a, btn);
+    abox.appendChild(btn);
+  });
+}
+
+function checkAnswer(selected, correct, button) {
+  document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    correctCount++;
+    user.points += 100;
+    button.style.background = 'var(--green)';
+    button.style.color = 'white';
+    document.getElementById('feedback').innerHTML = '<span class="correct">ПРАВИЛЬНО!</span>';
+    correctSound.currentTime = 0;
+    correctSound.play().catch(()=>{});
+  } else {
+    wrongCount++;
+    user.points = Math.max(0, user.points - 30);
+    button.style.background = 'var(--red)';
+    button.style.color = 'white';
+    document.getElementById('feedback').innerHTML = '<span class="wrong">❌</span>';
+    wrongSound.currentTime = 0;
+    wrongSound.play().catch(()=>{});
+  }
+  document.getElementById('mon').innerText = user.points.toLocaleString();
+  save();
+  setTimeout(() => {
+    currentIndex++;
+    loadQuestion();
+  }, 1000);
+}
+
+async function loadT() {
+  show('top');
+  let r = await fetch(DB+"users/.json"), d = await r.json();
+  let l = document.getElementById('tlist');
+  l.innerHTML = '';
+  if(d) {
+    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,1000);
+    topPlayers.forEach((u,i) => {
+      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px">
+        <span>${i+1}. ${u.name}</span><b>${u.points||0}</b>
+      </div>`;
+    });
+  } else {
+    l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+  }
+}
+
+function buyItem(item) {
+  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
+  if(user.points >= prices[item]){
+    user.points -= prices[item];
+    items[item] = true;
+    applyItems();
+    save(); update();
+    alert("Куплено: " + item);
+  } else alert("Недостатньо грошей!");
+}
+</script>
+</body>
+</html>
