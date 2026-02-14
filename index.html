@@ -6,7 +6,7 @@
   <title>UkrMova Pro</title>
   <style>
     :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
-    body{background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;background-size:160px;color:#000;font-family:sans-serif;margin:0;text-align:center}
+    body{background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;background-size:160px;color:#000;font-family:sans-serif;margin:0;text-align:center;overflow:hidden}
     .screen{display:none;padding:20px;flex-direction:column;min-height:100vh;box-sizing:border-box}
     .active{display:flex;animation:fadeIn .3s ease}
     .card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3)}
@@ -30,12 +30,22 @@
     .wrong {color:#ff4d4d;}
     .summary {font-size:24px; line-height:1.6; margin:30px 0; text-align:center;}
     .summary strong {font-size:28px;}
+    #splash-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column}
+    #splash-video{width:100%;max-width:100%;height:auto;max-height:100vh;object-fit:contain}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   </style>
 </head>
 <body>
 
-<div id="auth-screen" class="screen active">
+<!-- Заставка з відео (зі звуком) -->
+<div id="splash-screen">
+  <video id="splash-video" autoplay playsinline>
+    <source src="https://files.catbox.moe/a9zzmt.mp4" type="video/mp4">
+    Ваш браузер не підтримує відео.
+  </video>
+</div>
+
+<div id="auth-screen" class="screen">
   <div class="card">
     <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
     <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
@@ -185,7 +195,6 @@ const themes = {
     {q:"До якої відміни належить слово «руки»?", a:"перша відміна", w:["друга відміна","третя відміна","четверта відміна"]},
     {q:"До якої відміни належить слово «очі»?", a:"друга відміна", w:["перша відміна","третя відміна","четверта відміна"]}
   ],
-
   prykmetnyky: [
     {q:"Який рід прикметника «гарна дівчина»?", a:"жіночий рід", w:["чоловічий рід"]},
     {q:"Який рід прикметника «велике поле»?", a:"середній рід", w:["жіночий рід"]},
@@ -236,7 +245,6 @@ const themes = {
     {q:"Який рід прикметника «довге волосся»?", a:"середній рід", w:["чоловічий рід"]},
     {q:"Який рід прикметника «короткий шлях»?", a:"чоловічий рід", w:["жіночий рід"]}
   ],
-
   grupy_prykmetnykiv: [
     {q:"До якої групи за значенням належить прикметник «гарна» (гарна дівчина)?", a:"якісний", w:["відносний","присвійний"]},
     {q:"До якої групи належить «дерев’яний» (дерев’яний стіл)?", a:"відносний", w:["якісний","присвійний"]},
@@ -288,7 +296,6 @@ const themes = {
     {q:"До якої групи належить «золотий» (золота осінь – переносне значення)?", a:"якісний", w:["відносний","присвійний"]},
     {q:"До якої групи належить «братів» (братів телефон)?", a:"присвійний", w:["якісний","відносний"]}
   ],
-
   orudnyi_1vidmina: [
     {q:"Орудний відмінок слова «книжка»?", a:"-ою", w:["-ею","-єю"]},
     {q:"Орудний відмінок слова «душа»?", a:"-ею", w:["-ою","-єю"]},
@@ -346,7 +353,6 @@ const themes = {
     {q:"Орудний відмінок слова «спальня»?", a:"-ею", w:["-ою","-єю"]},
     {q:"Орудний відмінок слова «вітальня»?", a:"-ею", w:["-ою","-єю"]}
   ],
-
   prykmetnyky_stupeni: [
     { q: "найвеселіший — який це ступінь порівняння прикметника?", a: "найвищий", w: ["нульовий", "вищий"] },
     { q: "веселий — який це ступінь порівняння прикметника?", a: "нульовий", w: ["вищий", "найвищий"] },
@@ -368,7 +374,7 @@ const themes = {
     { q: "глибокий — який це ступінь порівняння прикметника?", a: "нульовий", w: ["вищий", "найвищий"] },
     { q: "щасливий — який це ступінь порівняння прикметника?", a: "нульовий", w: ["вищий", "найвищий"] },
     { q: "цікавий — який це ступінь порівняння прикметника?", a: "нульовий", w: ["вищий", "найвищий"] }
-  ].sort(() => Math.random() - 0.5)  // рандомне перемішування питань
+  ].sort(() => Math.random() - 0.5) // рандомне перемішування питань
 };
 
 async function auth() {
@@ -406,13 +412,35 @@ async function auth() {
 }
 
 window.onload = function() {
-  const savedNick = localStorage.getItem('un');
-  const savedPass = localStorage.getItem('up');
-  if(savedNick && savedPass) {
-    document.getElementById('nick').value = savedNick;
-    document.getElementById('pass').value = savedPass;
-    auth();
-  }
+  const splash = document.getElementById('splash-screen');
+  const video = document.getElementById('splash-video');
+
+  // Дозволяємо відтворення зі звуком після взаємодії (якщо браузер блокує autoplay зі звуком)
+  video.play().catch(() => {
+    // Якщо браузер заблокував autoplay зі звуком — можна додати кнопку "Запустити звук", але для простоти просто продовжуємо
+    console.log("Автозапуск зі звуком заблоковано браузером");
+  });
+
+  video.onended = function() {
+    splash.style.display = 'none';
+    document.getElementById('auth-screen').classList.add('active');
+
+    const savedNick = localStorage.getItem('un');
+    const savedPass = localStorage.getItem('up');
+    if(savedNick && savedPass) {
+      document.getElementById('nick').value = savedNick;
+      document.getElementById('pass').value = savedPass;
+      auth();
+    }
+  };
+
+  // Запасний варіант: якщо відео не закінчилося (проблеми з завантаженням) — через 20 секунд переходимо
+  setTimeout(() => {
+    if (splash.style.display !== 'none') {
+      splash.style.display = 'none';
+      document.getElementById('auth-screen').classList.add('active');
+    }
+  }, 20000);
 };
 
 function save() {
@@ -516,150 +544,4 @@ async function loadUserLog() {
       logDiv.innerHTML = 'Лог порожній';
     }
   } catch (e) {
-    document.getElementById('user-log').innerHTML = 'Помилка завантаження';
-  }
-}
-
-async function clearUserLog() {
-  if (!confirm("Очистити лог усіх входів?")) return;
-  await fetch(DB + "user_logs.json", {method: 'DELETE'});
-  loadUserLog();
-  alert("Лог входів очищено");
-}
-
-async function logAdminAccess() {
-  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-  const nick = user ? user.name : "Анонім";
-  const entry = { nick: nick, time: now };
-  await fetch(DB + "admin_logs.json", {method: 'POST', body: JSON.stringify(entry)});
-}
-
-async function loadAdminLogs() {
-  try {
-    let r = await fetch(DB + "admin_logs.json");
-    let data = await r.json();
-    let logDiv = document.getElementById('admin-log');
-    logDiv.innerHTML = '';
-    if (data && Object.keys(data).length > 0) {
-      Object.values(data).reverse().forEach(log => {
-        logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
-      });
-    } else {
-      logDiv.innerHTML = 'Лог порожній';
-    }
-  } catch (e) {
-    document.getElementById('admin-log').innerHTML = 'Помилка завантаження логу';
-  }
-}
-
-async function clearAdminLogs() {
-  if (!confirm("Очистити лог адмінки?")) return;
-  await fetch(DB + "admin_logs.json", {method: 'DELETE'});
-  loadAdminLogs();
-  alert("Лог адмінки очищено");
-}
-
-function showThemes() {
-  show('themes');
-}
-
-function startTheme(theme) {
-  currentTheme = theme;
-  currentIndex = 0;
-  correctCount = 0;
-  wrongCount = 0;
-  show('game');
-  loadQuestion();
-}
-
-function loadQuestion() {
-  const qs = themes[currentTheme];
-  if (currentIndex >= qs.length) {
-    document.getElementById('qtext').textContent = "Тема завершена!";
-    document.getElementById('feedback').innerHTML = '';
-    document.getElementById('abox').innerHTML = `
-      <div class="summary">
-        <strong>Гравець:</strong> ${user ? user.name : '—'}<br><br>
-        <strong style="color:var(--green)">Правильних відповідей:</strong> ${correctCount}<br>
-        <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrongCount}<br><br>
-        <strong>Поточний баланс:</strong> ${user ? user.points.toLocaleString() : 0} ₴
-      </div>
-      <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
-    `;
-    save();
-    return;
-  }
-  const q = qs[currentIndex];
-  currentCorrectAnswer = q.a;
-  document.getElementById('qtext').textContent = `Питання ${currentIndex+1}/${qs.length}: ${q.q}`;
-  document.getElementById('feedback').innerHTML = '';
-  const abox = document.getElementById('abox');
-  abox.innerHTML = '';
-  let answers = [q.a, ...q.w];
-  answers.sort(() => Math.random() - 0.5);
-  answers.forEach(o => {
-    let btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.innerText = o;
-    btn.onclick = () => checkAnswer(o, q.a, btn);
-    abox.appendChild(btn);
-  });
-}
-
-function checkAnswer(selected, correct, button) {
-  document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
-  if (selected === correct) {
-    correctCount++;
-    user.points += 100;
-    button.style.background = 'var(--green)';
-    button.style.color = 'white';
-    document.getElementById('feedback').innerHTML = '<span class="correct">ПРАВИЛЬНО!</span>';
-    correctSound.currentTime = 0;
-    correctSound.play().catch(()=>{});
-  } else {
-    wrongCount++;
-    user.points = Math.max(0, user.points - 30);
-    button.style.background = 'var(--red)';
-    button.style.color = 'white';
-    document.getElementById('feedback').innerHTML = '<span class="wrong">❌</span>';
-    wrongSound.currentTime = 0;
-    wrongSound.play().catch(()=>{});
-  }
-  document.getElementById('mon').innerText = user.points.toLocaleString();
-  save();
-  setTimeout(() => {
-    currentIndex++;
-    loadQuestion();
-  }, 1000);
-}
-
-async function loadT() {
-  show('top');
-  let r = await fetch(DB+"users/.json"), d = await r.json();
-  let l = document.getElementById('tlist');
-  l.innerHTML = '';
-  if(d) {
-    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,1000);
-    topPlayers.forEach((u,i) => {
-      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px">
-        <span>${i+1}. ${u.name}</span><b>${u.points||0}</b>
-      </div>`;
-    });
-  } else {
-    l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
-  }
-}
-
-function buyItem(item) {
-  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
-  if(user.points >= prices[item]){
-    user.points -= prices[item];
-    items[item] = true;
-    applyItems();
-    save(); update();
-    alert("Куплено: " + item);
-  } else alert("Недостатньо грошей!");
-}
-</script>
-</body>
-</html>
+    document.getElementBy
