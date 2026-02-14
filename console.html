@@ -4,65 +4,151 @@
 <meta charset="UTF-8">
 <title>Адмін Консоль — UkrMova PRO</title>
 <style>
-  body {
-    margin:0; padding:20px; background:#000; color:#0f0;
-    font-family:'Courier New',monospace; font-size:16px; line-height:1.4;
-  }
-  h1 { color:#0f0; text-shadow:0 0 10px #0f0; }
-  button {
-    background:#0a0; color:#000; border:2px solid #0f0;
-    padding:8px 16px; margin:6px 2px; font-family:inherit;
-    cursor:pointer; min-width:180px;
-  }
+  body { margin:0; padding:20px; background:#000; color:#0f0; font-family:'Courier New',monospace; font-size:14px; line-height:1.4; }
+  h1 { color:#0f0; text-shadow:0 0 10px #0f0; text-align:center; }
+  h2, h3 { color:#0f0; border-bottom:1px solid #0f0; padding-bottom:5px; }
+  button { background:#0a0; color:#000; border:2px solid #0f0; padding:8px 16px; margin:4px; font-family:inherit; cursor:pointer; min-width:150px; border-radius:4px; }
   button:hover { background:#0f0; color:#000; }
-  input, select {
-    background:#111; color:#0f0; border:1px solid #0f0;
-    padding:6px; margin:4px; font-family:inherit; width:220px;
-  }
-  pre { white-space:pre-wrap; background:#111; padding:12px;
-        border:1px solid #0f0; border-radius:4px; margin:10px 0; }
-  #output { min-height:400px; max-height:70vh; overflow-y:auto; }
-  .section { margin:20px 0; padding:10px; border:1px dashed #0f0; }
+  button.danger { background:#800; color:#fff; border-color:#f00; }
+  button.danger:hover { background:#f00; }
+  input, select { background:#111; color:#0f0; border:1px solid #0f0; padding:6px; margin:4px; font-family:inherit; width:200px; }
+  pre { white-space:pre-wrap; background:#111; padding:12px; border:1px solid #0f0; border-radius:4px; margin:10px 0; font-size:12px; }
+  #output { min-height:400px; max-height:70vh; overflow-y:auto; background:#000; padding:10px; border:1px solid #0f0; }
+  .section { margin:20px 0; padding:15px; border:2px dashed #0f0; border-radius:8px; }
+  .log-entry { margin:5px 0; padding:5px; background:#111; border-left:3px solid #0f0; }
+  .stats-table { width:100%; border-collapse:collapse; margin:10px 0; }
+  .stats-table th, .stats-table td { border:1px solid #0f0; padding:8px; text-align:left; }
+  .stats-table th { background:#0a0; }
+  #admin-login { text-align:center; padding:50px; background:#111; border:2px solid #0f0; margin:50px auto; max-width:400px; border-radius:10px; }
+  #admin-content { display:none; }
 </style>
 </head>
 <body>
 
-<h1>АДМІН КОНСОЛЬ — UKRMOVA PRO</h1>
-
-<div class="section">
-  <h3>Гравці</h3>
-  <button onclick="getPlayers()">Список усіх гравців</button>
-  <br>
-  <input id="nickEdit" placeholder="Нік гравця">
-  <button onclick="deletePlayer()">Видалити гравця</button>
-  <button onclick="editMoney(true)">+ Гроші</button>
-  <button onclick="editMoney(false)">- Гроші</button>
-  <button onclick="editLevel()">Змінити рівень</button>
+<div id="admin-login">
+  <h2>Адмін вхід</h2>
+  <input type="password" id="admin-pass" placeholder="Пароль">
+  <br><br>
+  <button onclick="checkAdminPass()">Увійти</button>
+  <p id="login-error" style="color:#f00; margin-top:10px;"></p>
 </div>
 
-<div class="section">
-  <h3>Чат бота</h3>
-  <button onclick="getBotChat()">Показати чат</button>
-  <button onclick="clearBotChat()">Очистити чат</button>
+<div id="admin-content">
+
+  <h1>АДМІН КОНСОЛЬ — UKRMOVA PRO</h1>
+
+  <div class="section">
+    <h3>Налаштування</h3>
+    <button onclick="toggleRealtime()">Realtime: <span id="realtime-status">Увімкнено</span></button>
+    <button onclick="exportAllData()">Експорт JSON</button>
+    <br><br>
+    <input id="search-nick" placeholder="Пошук за ніком" oninput="filterPlayers()">
+  </div>
+
+  <div class="section">
+    <h3>Гравці</h3>
+    <button onclick="getPlayers()">Оновити список</button>
+    <br>
+    <input id="nickEdit" placeholder="Нік гравця">
+    <button onclick="deletePlayer()">Видалити</button>
+    <button onclick="editMoney(true)">+ Гроші</button>
+    <button onclick="editMoney(false)">- Гроші</button>
+    <button onclick="editLevel()">Змінити рівень</button>
+    <button onclick="resetPassword()">Змінити пароль</button>
+    <button onclick="banPlayer()">Бан / Розбан</button>
+    <div id="players-list" style="max-height:300px; overflow-y:auto; margin:10px 0;"></div>
+  </div>
+
+  <div class="section">
+    <h3>Логи входів гравців</h3>
+    <button onclick="getUserLogs()">Оновити</button>
+    <button class="danger" onclick="clearUserLogs()">Очистити</button>
+    <div id="user-logs" style="max-height:200px; overflow-y:auto;"></div>
+  </div>
+
+  <div class="section">
+    <h3>Логи адмін-дій</h3>
+    <button onclick="getAdminLogs()">Оновити</button>
+    <button class="danger" onclick="clearAdminLogs()">Очистити</button>
+    <div id="admin-logs" style="max-height:200px; overflow-y:auto;"></div>
+  </div>
+
+  <div class="section">
+    <h3>Чат бота</h3>
+    <button onclick="getBotChat()">Показати</button>
+    <button class="danger" onclick="clearBotChat()">Очистити</button>
+    <div id="bot-chat" style="max-height:200px; overflow-y:auto;"></div>
+  </div>
+
+  <div class="section">
+    <h3>Статистика та топ</h3>
+    <button onclick="getStats()">Оновити</button>
+    <div id="stats-output"></div>
+    <div id="top-players" style="max-height:300px; overflow-y:auto; margin-top:15px;"></div>
+  </div>
+
+  <div class="section">
+    <h3>Онлайн (останні 5 хв)</h3>
+    <div id="online-players" style="max-height:150px; overflow-y:auto;"></div>
+  </div>
+
+  <button class="danger" onclick="logoutAdmin()" style="width:100%; margin-top:20px;">Вийти</button>
+
+  <div id="output"><pre>Готовий... (Realtime кожні 5 сек)</pre></div>
 </div>
-
-<div class="section">
-  <h3>Логи</h3>
-  <button onclick="getUserLogs()">Лог входів гравців</button>
-  <button onclick="getAdminLogs()">Лог адмін-дій</button>
-</div>
-
-<div class="section">
-  <h3>Статистика</h3>
-  <button onclick="getStats()">Загальна статистика</button>
-</div>
-
-<button onclick="clearScreen()" style="background:#800;color:#fff;border-color:#f00">Очистити екран</button>
-
-<div id="output"><pre>Готовий до команд... (оновлено 06.02.2026)</pre></div>
 
 <script>
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
+let realtimeInterval = null;
+let isRealtime = true;
+let adminLoggedIn = false;
+const ADMIN_PASS = "зміни_цей_пароль_2026";
+
+function checkAdminPass() {
+  const pass = document.getElementById("admin-pass").value;
+  if (pass === ADMIN_PASS) {
+    document.getElementById("admin-login").style.display = "none";
+    document.getElementById("admin-content").style.display = "block";
+    adminLoggedIn = true;
+    startRealtime();
+    getPlayers();
+    getUserLogs();
+    getAdminLogs();
+    getBotChat();
+    getStats();
+  } else {
+    document.getElementById("login-error").textContent = "Неправильний пароль";
+  }
+}
+
+function logoutAdmin() {
+  if (!confirm("Вийти?")) return;
+  adminLoggedIn = false;
+  document.getElementById("admin-content").style.display = "none";
+  document.getElementById("admin-login").style.display = "block";
+  document.getElementById("admin-pass").value = "";
+  clearInterval(realtimeInterval);
+}
+
+function startRealtime() {
+  if (realtimeInterval) clearInterval(realtimeInterval);
+  realtimeInterval = setInterval(() => {
+    if (isRealtime) {
+      getPlayers();
+      getUserLogs();
+      getAdminLogs();
+      getBotChat();
+      getStats();
+      updateOnlinePlayers();
+    }
+  }, 5000);
+}
+
+function toggleRealtime() {
+  isRealtime = !isRealtime;
+  document.getElementById("realtime-status").textContent = isRealtime ? "Увімкнено" : "Вимкнено";
+  if (isRealtime) startRealtime(); else clearInterval(realtimeInterval);
+}
 
 async function fetchData(path) {
   try {
@@ -73,123 +159,198 @@ async function fetchData(path) {
   }
 }
 
+async function apiCall(path, method = 'GET', body = null) {
+  let options = { method };
+  if (body) options.body = JSON.stringify(body);
+  try {
+    await fetch(DB + path + ".json", options);
+  } catch(e) {}
+}
+
 function print(text) {
   let out = document.getElementById("output");
   let pre = document.createElement("pre");
-  pre.textContent = text;
+  pre.textContent = `[${new Date().toLocaleTimeString('uk-UA')}] ${text}`;
   out.appendChild(pre);
   out.scrollTop = out.scrollHeight;
 }
 
 async function getPlayers() {
   let data = await fetchData("users");
-  print("=== УСІ ГРАВЦІ ===");
-  if (Object.keys(data).length === 0) return print("Гравців немає");
+  let el = document.getElementById("players-list");
+  el.innerHTML = '';
+  if (!Object.keys(data).length) {
+    el.innerHTML = '<pre>Гравців немає</pre>';
+    return;
+  }
+  let html = '<table class="stats-table"><tr><th>Нік</th><th>Гроші</th><th>Рівень</th><th>Пароль</th><th>Предмети</th><th>Бан</th></tr>';
   for (let uid in data) {
     let u = data[uid];
-    print(`Юз: ${uid}\nНік: ${u.name||'—'}\nГроші: ${u.points||0} ₴\nРівень: ${u.lvl||1}\nПароль: ${u.pass||'—'}\n───────────────────────`);
+    let items = JSON.stringify(u.items || {});
+    let ban = u.banned ? 'Так' : 'Ні';
+    html += `<tr><td>${u.name || uid}</td><td>${u.points || 0}</td><td>${u.lvl || 1}</td><td>${u.pass || '—'}</td><td>${items}</td><td>${ban}</td></tr>`;
   }
+  html += '</table>';
+  el.innerHTML = html;
+  filterPlayers();
+}
+
+function filterPlayers() {
+  const val = document.getElementById("search-nick").value.toLowerCase();
+  document.querySelectorAll("#players-list tr").forEach(row => {
+    row.style.display = row.cells[0].textContent.toLowerCase().includes(val) ? '' : 'none';
+  });
 }
 
 async function deletePlayer() {
   let nick = document.getElementById("nickEdit").value.trim();
-  if (!nick) return alert("Введи нік!");
-  if (!confirm(`Видалити гравця ${nick}?`)) return;
-  await fetch(DB + "users/" + nick + ".json", {method: "DELETE"});
-  print(`Гравець ${nick} видалений`);
+  if (!nick || !confirm(`Видалити ${nick}?`)) return;
+  await apiCall("users/" + nick, "DELETE");
+  getPlayers();
 }
 
 async function editMoney(add) {
   let nick = document.getElementById("nickEdit").value.trim();
-  if (!nick) return alert("Введи нік!");
-  let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
-  amt = parseInt(amt);
-  if (isNaN(amt) || amt <= 0) return alert("Невірна сума");
-  
-  let r = await fetch(DB + "users/" + nick + ".json");
-  let u = await r.json();
-  if (!u) return alert("Гравця не знайдено");
-  
-  u.points = (u.points || 0) + (add ? amt : -amt);
-  u.points = Math.max(0, u.points);
-  
-  await fetch(DB + "users/" + nick + ".json", {
-    method: "PUT",
-    body: JSON.stringify(u)
-  });
-  print(`${add ? "+" : "-"} ${amt} ₴ гравцю ${nick}. Новий баланс: ${u.points}`);
+  if (!nick) return alert("Введіть нік");
+  let amt = parseInt(prompt(add ? "Додати:" : "Відняти:"));
+  if (!amt || amt <= 0) return;
+  let u = await fetchData(`users/${nick}`);
+  if (!u) return alert("Гравця немає");
+  u.points = Math.max(0, (u.points || 0) + (add ? amt : -amt));
+  await apiCall(`users/${nick}`, "PUT", u);
+  getPlayers();
 }
 
 async function editLevel() {
   let nick = document.getElementById("nickEdit").value.trim();
-  if (!nick) return alert("Введи нік!");
-  let lvl = prompt("Новий рівень (1–50):");
-  lvl = parseInt(lvl);
-  if (isNaN(lvl) || lvl < 1 || lvl > 50) return alert("Рівень від 1 до 50");
-  
-  let r = await fetch(DB + "users/" + nick + ".json");
-  let u = await r.json();
-  if (!u) return alert("Гравця не знайдено");
-  
+  if (!nick) return alert("Введіть нік");
+  let lvl = parseInt(prompt("Новий рівень (1-50):"));
+  if (isNaN(lvl) || lvl < 1 || lvl > 50) return;
+  let u = await fetchData(`users/${nick}`);
+  if (!u) return alert("Гравця немає");
   u.lvl = lvl;
-  
-  await fetch(DB + "users/" + nick + ".json", {
-    method: "PUT",
-    body: JSON.stringify(u)
-  });
-  print(`Рівень гравця ${nick} змінено на ${lvl}`);
+  await apiCall(`users/${nick}`, "PUT", u);
+  getPlayers();
 }
 
-async function getBotChat() {
-  let data = await fetchData("bot_chat");
-  print("=== ЧАТ БОТА ===");
-  if (Object.keys(data).length === 0) return print("Повідомлень немає");
-  for (let key in data) {
-    let m = data[key];
-    print(`[${m.time}] БОТ: ${m.text}`);
-  }
+async function resetPassword() {
+  let nick = document.getElementById("nickEdit").value.trim();
+  if (!nick) return alert("Введіть нік");
+  let pass = prompt("Новий пароль:");
+  if (!pass) return;
+  let u = await fetchData(`users/${nick}`);
+  if (!u) return alert("Гравця немає");
+  u.pass = pass;
+  await apiCall(`users/${nick}`, "PUT", u);
+  getPlayers();
 }
 
-async function clearBotChat() {
-  if (!confirm("Очистити весь чат бота?")) return;
-  await fetch(DB + "bot_chat.json", {method: "DELETE"});
-  print("Чат бота повністю очищено");
+async function banPlayer() {
+  let nick = document.getElementById("nickEdit").value.trim();
+  if (!nick) return alert("Введіть нік");
+  let u = await fetchData(`users/${nick}`);
+  if (!u) return alert("Гравця немає");
+  u.banned = !u.banned;
+  await apiCall(`users/${nick}`, "PUT", u);
+  getPlayers();
 }
 
 async function getUserLogs() {
   let data = await fetchData("user_logs");
-  print("=== ЛОГ ВХОДІВ ГРАВЦІВ ===");
-  if (Object.keys(data).length === 0) return print("Записів немає");
-  for (let key in data) {
-    let l = data[key];
-    print(`${l.time} → ${l.game_nick} (${l.tg_username||'немає TG'})`);
-  }
+  let el = document.getElementById("user-logs");
+  el.innerHTML = '';
+  if (!Object.keys(data).length) return el.innerHTML = '<pre>Порожньо</pre>';
+  Object.values(data).sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,500).forEach(l => {
+    el.innerHTML += `<div class="log-entry">[${l.time}] ${l.game_nick}</div>`;
+  });
+}
+
+async function clearUserLogs() {
+  if (!confirm("Очистити?")) return;
+  await apiCall("user_logs", "DELETE");
+  getUserLogs();
 }
 
 async function getAdminLogs() {
   let data = await fetchData("admin_logs");
-  print("=== ЛОГ АДМІН ДІЙ ===");
-  if (Object.keys(data).length === 0) return print("Записів немає");
-  for (let key in data) {
-    let l = data[key];
-    print(`${l.time} → ${l.nick}`);
+  let el = document.getElementById("admin-logs");
+  el.innerHTML = '';
+  if (!Object.keys(data).length) return el.innerHTML = '<pre>Порожньо</pre>';
+  Object.values(data).sort((a,b)=>new Date(b.time)-new Date(a.time)).forEach(l => {
+    el.innerHTML += `<div class="log-entry">[${l.time}] ${l.action || l.nick}</div>`;
+  });
+}
+
+async function clearAdminLogs() {
+  if (!confirm("Очистити?")) return;
+  await apiCall("admin_logs", "DELETE");
+  getAdminLogs();
+}
+
+async function getBotChat() {
+  let data = await fetchData("bot_chat");
+  let el = document.getElementById("bot-chat");
+  el.innerHTML = '';
+  if (!Object.keys(data).length) return el.innerHTML = '<pre>Порожньо</pre>';
+  for (let k in data) {
+    let m = data[k];
+    el.innerHTML += `<div class="log-entry">[${m.time || ''}] ${m.text}</div>`;
   }
+}
+
+async function clearBotChat() {
+  if (!confirm("Очистити?")) return;
+  await apiCall("bot_chat", "DELETE");
+  getBotChat();
 }
 
 async function getStats() {
   let users = await fetchData("users");
   let count = Object.keys(users).length;
-  let totalMoney = 0;
-  for (let u in users) totalMoney += users[u].points || 0;
-  
-  print("=== ЗАГАЛЬНА СТАТИСТИКА ===");
-  print(`Кількість гравців: ${count}`);
-  print(`Загальні гроші в грі: ${totalMoney} ₴`);
-  print(`Середній баланс: ${count ? (totalMoney/count).toFixed(0) : 0} ₴`);
+  let total = 0, lvlSum = 0;
+  let top = [];
+  for (let k in users) {
+    let u = users[k];
+    total += u.points || 0;
+    lvlSum += u.lvl || 1;
+    top.push({n: u.name || k, p: u.points || 0});
+  }
+  top.sort((a,b)=>b.p-a.p).slice(0,50);
+
+  document.getElementById("stats-output").innerHTML = `
+    <table class="stats-table">
+      <tr><th>Показник</th><th>Значення</th></tr>
+      <tr><td>Гравців</td><td>${count}</td></tr>
+      <tr><td>Гроші разом</td><td>${total}</td></tr>
+      <tr><td>Середній баланс</td><td>${count ? (total/count|0) : 0}</td></tr>
+      <tr><td>Середній рівень</td><td>${count ? (lvlSum/count).toFixed(1) : 0}</td></tr>
+    </table>
+  `;
+
+  let topHtml = '<table class="stats-table"><tr><th>#</th><th>Нік</th><th>Гроші</th></tr>';
+  top.forEach((p,i) => topHtml += `<tr><td>${i+1}</td><td>${p.n}</td><td>${p.p}</td></tr>`);
+  document.getElementById("top-players").innerHTML = topHtml + '</table>';
 }
 
-function clearScreen() {
-  document.getElementById("output").innerHTML = '<pre>Екран очищено...</pre>';
+async function updateOnlinePlayers() {
+  let logs = await fetchData("user_logs");
+  let now = Date.now();
+  let recent = Object.values(logs||{}).filter(l => {
+    return (now - new Date(l.time).getTime()) < 5*60*1000;
+  });
+  let nicks = [...new Set(recent.map(l => l.game_nick))];
+  document.getElementById("online-players").innerHTML = `<pre>Онлайн: ${nicks.length}\n${nicks.join(', ') || '—'}</pre>`;
+}
+
+function exportAllData() {
+  fetch(DB + ".json").then(r => r.json()).then(data => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  });
 }
 </script>
 </body>
