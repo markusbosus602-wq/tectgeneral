@@ -1,200 +1,64 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<title>Адмін Консоль — UkrMova PRO</title>
-<style>
-  body { margin:0; padding:20px; background:#000; color:#0f0; font-family:'Courier New',monospace; font-size:14px; line-height:1.4; }
-  h1 { color:#0f0; text-shadow:0 0 10px #0f0; text-align:center; }
-  h2, h3 { color:#0f0; border-bottom:1px solid #0f0; padding-bottom:5px; }
-  button { background:#0a0; color:#000; border:2px solid #0f0; padding:8px 16px; margin:4px; font-family:inherit; cursor:pointer; min-width:150px; border-radius:4px; }
-  button:hover { background:#0f0; color:#000; }
-  button.danger { background:#800; color:#fff; border-color:#f00; }
-  button.danger:hover { background:#f00; }
-  input { background:#111; color:#0f0; border:1px solid #0f0; padding:6px; margin:4px; font-family:inherit; width:200px; }
-  pre { white-space:pre-wrap; background:#111; padding:12px; border:1px solid #0f0; border-radius:4px; margin:10px 0; font-size:12px; }
-  #output { min-height:400px; max-height:70vh; overflow-y:auto; background:#000; padding:10px; border:1px solid #0f0; }
-  .section { margin:20px 0; padding:15px; border:2px dashed #0f0; border-radius:8px; }
-  .log-entry { margin:5px 0; padding:5px; background:#111; border-left:3px solid #0f0; }
-  .stats-table { width:100%; border-collapse:collapse; margin:10px 0; font-size:13px; }
-  .stats-table th, .stats-table td { border:1px solid #0f0; padding:6px; text-align:left; }
-  .stats-table th { background:#0a0; }
-  #admin-login { text-align:center; padding:50px; background:#111; border:2px solid #0f0; margin:50px auto; max-width:400px; border-radius:10px; }
-  #admin-content { display:none; }
-</style>
+  <meta charset="UTF-8">
+  <title>Admin - UkrMova</title>
+  <style>
+    body {
+      background:#000;
+      color:#0f0;
+      font-family:monospace;
+      padding:30px;
+      margin:0;
+    }
+    input, button {
+      font-family:monospace;
+      font-size:18px;
+      padding:10px;
+      margin:10px;
+    }
+    button {
+      background:#0a0;
+      color:#000;
+      border:2px solid #0f0;
+      cursor:pointer;
+    }
+    #content { display:none; }
+    #error { color:#f44; }
+  </style>
 </head>
 <body>
 
-<div id="admin-login">
-  <h2>Адмін вхід</h2>
-  <input type="password" id="admin-pass" placeholder="Пароль">
-  <br><br>
-  <button onclick="checkAdminPass()">Увійти</button>
-  <p id="login-error" style="color:#f00; margin-top:10px;"></p>
-</div>
-
-<div id="admin-content">
-
-  <h1>АДМІН КОНСОЛЬ — UKRMOVA PRO</h1>
-
-  <div class="section">
-    <h3>Гравці</h3>
-    <button onclick="getPlayers()">Оновити список</button>
+  <div id="login">
+    <h2>Адмін вхід</h2>
+    <input type="password" id="p" placeholder="Пароль" autocomplete="off">
     <br>
-    <input id="nickEdit" placeholder="Нік гравця">
-    <button onclick="deletePlayer()">Видалити</button>
-    <button onclick="editMoney(true)">+ Гроші</button>
-    <button onclick="editMoney(false)">- Гроші</button>
-    <button onclick="editLevel()">Змінити рівень</button>
-    <div id="players-list" style="max-height:300px; overflow-y:auto; margin:10px 0;"></div>
+    <button onclick="go()">Увійти</button>
+    <div id="error"></div>
   </div>
 
-  <div class="section">
-    <h3>Логи входів (з Telegram username)</h3>
-    <button onclick="getUserLogs()">Оновити</button>
-    <button class="danger" onclick="clearUserLogs()">Очистити</button>
-    <div id="user-logs" style="max-height:250px; overflow-y:auto; margin-top:10px;"></div>
+  <div id="content">
+    <h1>Успішний вхід!</h1>
+    <p>Пароль спрацював правильно.</p>
+    <p>Тепер заміни цей блок на свій повний код адмін-панелі.</p>
+    <button onclick="location.reload()">Перезавантажити сторінку</button>
   </div>
 
-  <div class="section">
-    <h3>Статистика</h3>
-    <button onclick="getStats()">Оновити</button>
-    <div id="stats-output"></div>
-  </div>
+  <script>
+    const PASSWORD = "228ff";
 
-  <button class="danger" onclick="logoutAdmin()" style="width:100%; margin-top:20px;">Вийти</button>
+    function go() {
+      const val = document.getElementById("p").value.trim(); // trim() — видаляє пробіли на початку/кінці
 
-  <div id="output"><pre>Готовий...</pre></div>
-</div>
+      if (val === PASSWORD) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("content").style.display = "block";
+        document.getElementById("error").textContent = "";
+      } else {
+        document.getElementById("error").textContent = "Неправильно. Спробуй ще раз.";
+      }
+    }
+  </script>
 
-<script>
-const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-const ADMIN_PASS = "228ff";
-
-function checkAdminPass() {
-  const pass = document.getElementById("admin-pass").value;
-  if (pass === ADMIN_PASS) {
-    document.getElementById("admin-login").style.display = "none";
-    document.getElementById("admin-content").style.display = "block";
-    getPlayers();
-    getUserLogs();
-    getStats();
-  } else {
-    document.getElementById("login-error").textContent = "Неправильний пароль";
-  }
-}
-
-function logoutAdmin() {
-  if (!confirm("Вийти?")) return;
-  document.getElementById("admin-content").style.display = "none";
-  document.getElementById("admin-login").style.display = "block";
-  document.getElementById("admin-pass").value = "";
-}
-
-async function fetchData(path) {
-  try {
-    let res = await fetch(DB + path + ".json");
-    return await res.json() || {};
-  } catch(e) {
-    return {};
-  }
-}
-
-async function apiCall(path, method = 'GET', body = null) {
-  let options = { method };
-  if (body) options.body = JSON.stringify(body);
-  try {
-    await fetch(DB + path + ".json", options);
-  } catch(e) {}
-}
-
-async function getPlayers() {
-  let data = await fetchData("users");
-  let el = document.getElementById("players-list");
-  el.innerHTML = '';
-  if (!Object.keys(data).length) {
-    el.innerHTML = '<pre>Гравців немає</pre>';
-    return;
-  }
-  let html = '<table class="stats-table"><tr><th>Нік</th><th>Гроші</th><th>Рівень</th><th>Пароль</th></tr>';
-  for (let uid in data) {
-    let u = data[uid];
-    html += `<tr><td>${u.name || uid}</td><td>${u.points || 0}</td><td>${u.lvl || 1}</td><td>${u.pass || '—'}</td></tr>`;
-  }
-  html += '</table>';
-  el.innerHTML = html;
-}
-
-async function deletePlayer() {
-  let nick = document.getElementById("nickEdit").value.trim();
-  if (!nick || !confirm(`Видалити ${nick}?`)) return;
-  await apiCall("users/" + nick, "DELETE");
-  getPlayers();
-}
-
-async function editMoney(add) {
-  let nick = document.getElementById("nickEdit").value.trim();
-  if (!nick) return alert("Введіть нік");
-  let amt = parseInt(prompt(add ? "Скільки додати?" : "Скільки відняти?"));
-  if (!amt || amt <= 0) return;
-  let u = await fetchData(`users/${nick}`);
-  if (!u) return alert("Гравця немає");
-  u.points = Math.max(0, (u.points || 0) + (add ? amt : -amt));
-  await apiCall(`users/${nick}`, "PUT", u);
-  getPlayers();
-}
-
-async function editLevel() {
-  let nick = document.getElementById("nickEdit").value.trim();
-  if (!nick) return alert("Введіть нік");
-  let lvl = parseInt(prompt("Новий рівень (1-50):"));
-  if (isNaN(lvl) || lvl < 1 || lvl > 50) return;
-  let u = await fetchData(`users/${nick}`);
-  if (!u) return alert("Гравця немає");
-  u.lvl = lvl;
-  await apiCall(`users/${nick}`, "PUT", u);
-  getPlayers();
-}
-
-async function getUserLogs() {
-  let data = await fetchData("user_logs");
-  let el = document.getElementById("user-logs");
-  el.innerHTML = '';
-  if (!Object.keys(data).length) {
-    el.innerHTML = '<pre>Логів немає</pre>';
-    return;
-  }
-  let logs = Object.values(data).sort((a,b) => new Date(b.time) - new Date(a.time)).slice(0, 500);
-  let html = '<table class="stats-table"><tr><th>Час</th><th>Нік в грі</th><th>Telegram username</th></tr>';
-  logs.forEach(l => {
-    let tg = l.tg_username ? `@${l.tg_username}` : '—';
-    html += `<tr><td>${l.time}</td><td>${l.game_nick || '—'}</td><td>${tg}</td></tr>`;
-  });
-  html += '</table>';
-  el.innerHTML = html;
-}
-
-async function clearUserLogs() {
-  if (!confirm("Очистити лог входів?")) return;
-  await apiCall("user_logs", "DELETE");
-  getUserLogs();
-}
-
-async function getStats() {
-  let users = await fetchData("users");
-  let count = Object.keys(users).length;
-  let total = 0;
-  for (let k in users) total += users[k].points || 0;
-
-  document.getElementById("stats-output").innerHTML = `
-    <table class="stats-table">
-      <tr><th>Показник</th><th>Значення</th></tr>
-      <tr><td>Гравців</td><td>${count}</td></tr>
-      <tr><td>Гроші разом</td><td>${total}</td></tr>
-      <tr><td>Середній баланс</td><td>${count ? (total / count | 0) : 0}</td></tr>
-    </table>
-  `;
-}
-</script>
 </body>
 </html>
