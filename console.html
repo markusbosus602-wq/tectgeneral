@@ -1,64 +1,293 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin - UkrMova</title>
-  <style>
-    body {
-      background:#000;
-      color:#0f0;
-      font-family:monospace;
-      padding:30px;
-      margin:0;
-    }
-    input, button {
-      font-family:monospace;
-      font-size:18px;
-      padding:10px;
-      margin:10px;
-    }
-    button {
-      background:#0a0;
-      color:#000;
-      border:2px solid #0f0;
-      cursor:pointer;
-    }
-    #content { display:none; }
-    #error { color:#f44; }
-  </style>
+<meta charset="UTF-8">
+<title>Адмін — UkrMova PRO</title>
+<style>
+  body {
+    margin:0; padding:20px; background:#000; color:#0f0;
+    font-family:'Courier New',monospace; font-size:14px; line-height:1.4;
+  }
+  h1 { color:#0f0; text-shadow:0 0 10px #0f0; text-align:center; }
+  h3 { color:#0f0; border-bottom:1px solid #0f0; padding-bottom:4px; }
+  button {
+    background:#0a0; color:#000; border:2px solid #0f0;
+    padding:8px 14px; margin:4px 2px; cursor:pointer; border-radius:4px;
+  }
+  button:hover { background:#0f0; }
+  button.danger { background:#800; border-color:#f00; color:#fff; }
+  button.danger:hover { background:#f00; }
+  input {
+    background:#111; color:#0f0; border:1px solid #0f0;
+    padding:6px; margin:4px; width:200px; font-family:inherit;
+  }
+  table {
+    width:100%; border-collapse:collapse; margin:10px 0; font-size:13px;
+  }
+  th, td {
+    border:1px solid #0f0; padding:6px; text-align:left;
+  }
+  th { background:#0a0; }
+  #login { text-align:center; padding:60px 20px; background:#111; border:2px solid #0f0; margin:40px auto; max-width:420px; border-radius:8px; }
+  #content { display:none; }
+  #error { color:#f44; margin-top:10px; }
+  .section { margin:20px 0; padding:12px; border:1px dashed #0f0; border-radius:6px; }
+  .log-box { max-height:220px; overflow-y:auto; background:#111; padding:8px; border:1px solid #0f0; border-radius:4px; margin-top:8px; }
+  .log-entry { margin:4px 0; padding:4px; border-bottom:1px dashed #0a0; }
+</style>
 </head>
 <body>
 
-  <div id="login">
-    <h2>Адмін вхід</h2>
-    <input type="password" id="p" placeholder="Пароль" autocomplete="off">
-    <br>
-    <button onclick="go()">Увійти</button>
-    <div id="error"></div>
-  </div>
+<div id="login">
+  <h2>Адмін-панель</h2>
+  <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
+  <br><br>
+  <button onclick="login()">Увійти</button>
+  <div id="error"></div>
+</div>
 
-  <div id="content">
-    <h1>Успішний вхід!</h1>
-    <p>Пароль спрацював правильно.</p>
-    <p>Тепер заміни цей блок на свій повний код адмін-панелі.</p>
-    <button onclick="location.reload()">Перезавантажити сторінку</button>
-  </div>
+<div id="content">
 
-  <script>
-    const PASSWORD = "228ff";
+<h1>АДМІН — UKRMOVA PRO</h1>
 
-    function go() {
-      const val = document.getElementById("p").value.trim(); // trim() — видаляє пробіли на початку/кінці
+<div class="section">
+  <h3>Гравці</h3>
+  <button onclick="loadPlayers()">Оновити список</button>
+  <br><br>
+  <input id="nick" placeholder="Нікнейм для дій">
+  <button onclick="delUser()">Видалити</button>
+  <button onclick="addMoney()">+ Гроші</button>
+  <button onclick="subMoney()">- Гроші</button>
+  <button onclick="setLevel()">Змінити рівень</button>
+  <div id="players" style="margin-top:12px;"></div>
+</div>
 
-      if (val === PASSWORD) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("content").style.display = "block";
-        document.getElementById("error").textContent = "";
-      } else {
-        document.getElementById("error").textContent = "Неправильно. Спробуй ще раз.";
-      }
-    }
-  </script>
+<div class="section">
+  <h3>Логи входів (з Telegram)</h3>
+  <button onclick="loadLogs()">Оновити</button>
+  <button class="danger" onclick="clearLogs()">Очистити</button>
+  <div id="logs" class="log-box"></div>
+</div>
 
+<div class="section">
+  <h3>Статистика</h3>
+  <button onclick="loadStats()">Оновити</button>
+  <div id="stats" style="margin-top:10px;"></div>
+</div>
+
+<div class="section">
+  <button onclick="exportData()">Експорт усіх даних (JSON)</button>
+  <button class="danger" onclick="logout()" style="float:right;">Вийти</button>
+</div>
+
+<div id="output" style="margin-top:20px; min-height:100px; background:#111; padding:10px; border:1px solid #0f0; border-radius:4px;">
+  <pre>Готовий...</pre>
+</div>
+
+</div>
+
+<script>
+const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
+const PASSWORD = "228ff";
+
+let interval = null;
+
+function login() {
+  const input = document.getElementById("pass").value.trim();
+  if (input === PASSWORD) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("content").style.display = "block";
+    document.getElementById("error").textContent = "";
+    startAutoUpdate();
+    loadPlayers();
+    loadLogs();
+    loadStats();
+  } else {
+    document.getElementById("error").textContent = "Неправильний пароль";
+  }
+}
+
+function logout() {
+  if (confirm("Вийти?")) {
+    clearInterval(interval);
+    document.getElementById("content").style.display = "none";
+    document.getElementById("login").style.display = "block";
+    document.getElementById("pass").value = "";
+  }
+}
+
+function startAutoUpdate() {
+  if (interval) clearInterval(interval);
+  interval = setInterval(() => {
+    loadPlayers();
+    loadLogs();
+    loadStats();
+  }, 10000);
+}
+
+async function get(path) {
+  try {
+    const r = await fetch(DB + path + ".json");
+    return await r.json() || {};
+  } catch {
+    return {};
+  }
+}
+
+async function put(path, data) {
+  await fetch(DB + path + ".json", {
+    method: "PUT",
+    body: JSON.stringify(data)
+  });
+}
+
+async function del(path) {
+  await fetch(DB + path + ".json", { method: "DELETE" });
+}
+
+async function loadPlayers() {
+  const users = await get("users");
+  const container = document.getElementById("players");
+  container.innerHTML = "";
+
+  if (!Object.keys(users).length) {
+    container.innerHTML = "<pre>Гравців немає</pre>";
+    return;
+  }
+
+  let html = '<table><tr><th>Нік</th><th>Гроші</th><th>Рівень</th><th>Пароль</th></tr>';
+  for (let key in users) {
+    const u = users[key];
+    html += `<tr>
+      <td>${u.name || key}</td>
+      <td>${u.points || 0}</td>
+      <td>${u.lvl || 1}</td>
+      <td>${u.pass || '—'}</td>
+    </tr>`;
+  }
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+async function delUser() {
+  const nick = document.getElementById("nick").value.trim();
+  if (!nick || !confirm(`Видалити ${nick}?`)) return;
+  await del(`users/${nick}`);
+  loadPlayers();
+  logAction(`Видалено гравця: ${nick}`);
+}
+
+async function addMoney() {
+  const nick = document.getElementById("nick").value.trim();
+  if (!nick) return alert("Введіть нік");
+  const amt = Number(prompt("Скільки додати?"));
+  if (!amt || amt <= 0) return;
+  const user = await get(`users/${nick}`);
+  if (!user.name) return alert("Гравця не знайдено");
+  user.points = (user.points || 0) + amt;
+  await put(`users/${nick}`, user);
+  loadPlayers();
+  logAction(`Додано ${amt} гравцю ${nick}`);
+}
+
+async function subMoney() {
+  const nick = document.getElementById("nick").value.trim();
+  if (!nick) return alert("Введіть нік");
+  const amt = Number(prompt("Скільки відняти?"));
+  if (!amt || amt <= 0) return;
+  const user = await get(`users/${nick}`);
+  if (!user.name) return alert("Гравця не знайдено");
+  user.points = Math.max(0, (user.points || 0) - amt);
+  await put(`users/${nick}`, user);
+  loadPlayers();
+  logAction(`Віднято ${amt} у гравця ${nick}`);
+}
+
+async function setLevel() {
+  const nick = document.getElementById("nick").value.trim();
+  if (!nick) return alert("Введіть нік");
+  const lvl = Number(prompt("Новий рівень (1–50):"));
+  if (isNaN(lvl) || lvl < 1 || lvl > 50) return alert("Невірний рівень");
+  const user = await get(`users/${nick}`);
+  if (!user.name) return alert("Гравця не знайдено");
+  user.lvl = lvl;
+  await put(`users/${nick}`, user);
+  loadPlayers();
+  logAction(`Рівень гравця ${nick} → ${lvl}`);
+}
+
+async function loadLogs() {
+  const logs = await get("user_logs");
+  const container = document.getElementById("logs");
+  container.innerHTML = "";
+
+  if (!Object.keys(logs).length) {
+    container.innerHTML = "<pre>Логів немає</pre>";
+    return;
+  }
+
+  let html = '<table><tr><th>Час</th><th>Нік</th><th>Telegram</th></tr>';
+  Object.values(logs)
+    .sort((a,b) => new Date(b.time) - new Date(a.time))
+    .slice(0, 400)
+    .forEach(entry => {
+      const tg = entry.tg_username ? `@${entry.tg_username}` : '—';
+      html += `<tr>
+        <td>${entry.time}</td>
+        <td>${entry.game_nick || '—'}</td>
+        <td>${tg}</td>
+      </tr>`;
+    });
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+async function clearLogs() {
+  if (!confirm("Очистити всі логи входів?")) return;
+  await del("user_logs");
+  loadLogs();
+  logAction("Очищено логи входів");
+}
+
+async function loadStats() {
+  const users = await get("users");
+  let count = Object.keys(users).length;
+  let totalMoney = 0;
+  for (let k in users) totalMoney += users[k].points || 0;
+
+  document.getElementById("stats").innerHTML = `
+    <table>
+      <tr><th>Показник</th><th>Значення</th></tr>
+      <tr><td>Гравців</td><td>${count}</td></tr>
+      <tr><td>Гроші в грі</td><td>${totalMoney}</td></tr>
+      <tr><td>Середній баланс</td><td>${count ? Math.floor(totalMoney / count) : 0}</td></tr>
+    </table>
+  `;
+}
+
+function exportData() {
+  fetch(DB + ".json")
+    .then(r => r.json())
+    .then(data => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ukrmova_backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    })
+    .catch(() => alert("Помилка експорту"));
+}
+
+function logAction(text) {
+  const time = new Date().toLocaleString("uk-UA");
+  const entry = { time, action: text };
+  fetch(DB + "admin_logs.json", {
+    method: "POST",
+    body: JSON.stringify(entry)
+  });
+}
+</script>
 </body>
 </html>
