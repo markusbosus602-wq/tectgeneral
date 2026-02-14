@@ -11,13 +11,13 @@
   button:hover { background:#0f0; color:#000; }
   button.danger { background:#800; color:#fff; border-color:#f00; }
   button.danger:hover { background:#f00; }
-  input, select { background:#111; color:#0f0; border:1px solid #0f0; padding:6px; margin:4px; font-family:inherit; width:200px; }
+  input { background:#111; color:#0f0; border:1px solid #0f0; padding:6px; margin:4px; font-family:inherit; width:200px; }
   pre { white-space:pre-wrap; background:#111; padding:12px; border:1px solid #0f0; border-radius:4px; margin:10px 0; font-size:12px; }
   #output { min-height:400px; max-height:70vh; overflow-y:auto; background:#000; padding:10px; border:1px solid #0f0; }
   .section { margin:20px 0; padding:15px; border:2px dashed #0f0; border-radius:8px; }
   .log-entry { margin:5px 0; padding:5px; background:#111; border-left:3px solid #0f0; }
-  .stats-table { width:100%; border-collapse:collapse; margin:10px 0; }
-  .stats-table th, .stats-table td { border:1px solid #0f0; padding:8px; text-align:left; }
+  .stats-table { width:100%; border-collapse:collapse; margin:10px 0; font-size:13px; }
+  .stats-table th, .stats-table td { border:1px solid #0f0; padding:6px; text-align:left; }
   .stats-table th { background:#0a0; }
   #admin-login { text-align:center; padding:50px; background:#111; border:2px solid #0f0; margin:50px auto; max-width:400px; border-radius:10px; }
   #admin-content { display:none; }
@@ -38,12 +38,6 @@
   <h1>АДМІН КОНСОЛЬ — UKRMOVA PRO</h1>
 
   <div class="section">
-    <h3>Налаштування</h3>
-    <button onclick="toggleRealtime()">Realtime: <span id="realtime-status">Увімкнено</span></button>
-    <button onclick="exportAllData()">Експорт JSON</button>
-  </div>
-
-  <div class="section">
     <h3>Гравці</h3>
     <button onclick="getPlayers()">Оновити список</button>
     <br>
@@ -56,24 +50,16 @@
   </div>
 
   <div class="section">
-    <h3>Логи входів гравців</h3>
+    <h3>Логи входів (з Telegram username)</h3>
     <button onclick="getUserLogs()">Оновити</button>
     <button class="danger" onclick="clearUserLogs()">Очистити</button>
-    <div id="user-logs" style="max-height:200px; overflow-y:auto;"></div>
+    <div id="user-logs" style="max-height:250px; overflow-y:auto; margin-top:10px;"></div>
   </div>
 
   <div class="section">
-    <h3>Логи адмін-дій</h3>
-    <button onclick="getAdminLogs()">Оновити</button>
-    <button class="danger" onclick="clearAdminLogs()">Очистити</button>
-    <div id="admin-logs" style="max-height:200px; overflow-y:auto;"></div>
-  </div>
-
-  <div class="section">
-    <h3>Статистика та топ</h3>
+    <h3>Статистика</h3>
     <button onclick="getStats()">Оновити</button>
     <div id="stats-output"></div>
-    <div id="top-players" style="max-height:300px; overflow-y:auto; margin-top:15px;"></div>
   </div>
 
   <button class="danger" onclick="logoutAdmin()" style="width:100%; margin-top:20px;">Вийти</button>
@@ -83,21 +69,15 @@
 
 <script>
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-let realtimeInterval = null;
-let isRealtime = true;
-
-const ADMIN_PASS = "228ff";     // ← твій пароль
+const ADMIN_PASS = "228ff";
 
 function checkAdminPass() {
   const pass = document.getElementById("admin-pass").value;
-
   if (pass === ADMIN_PASS) {
     document.getElementById("admin-login").style.display = "none";
     document.getElementById("admin-content").style.display = "block";
-    startRealtime();
     getPlayers();
     getUserLogs();
-    getAdminLogs();
     getStats();
   } else {
     document.getElementById("login-error").textContent = "Неправильний пароль";
@@ -109,26 +89,6 @@ function logoutAdmin() {
   document.getElementById("admin-content").style.display = "none";
   document.getElementById("admin-login").style.display = "block";
   document.getElementById("admin-pass").value = "";
-  clearInterval(realtimeInterval);
-}
-
-function startRealtime() {
-  if (realtimeInterval) clearInterval(realtimeInterval);
-  realtimeInterval = setInterval(() => {
-    if (isRealtime) {
-      getPlayers();
-      getUserLogs();
-      getAdminLogs();
-      getStats();
-    }
-  }, 5000);
-}
-
-function toggleRealtime() {
-  isRealtime = !isRealtime;
-  document.getElementById("realtime-status").textContent = isRealtime ? "Увімкнено" : "Вимкнено";
-  if (isRealtime) startRealtime();
-  else clearInterval(realtimeInterval);
 }
 
 async function fetchData(path) {
@@ -200,69 +160,40 @@ async function getUserLogs() {
   let data = await fetchData("user_logs");
   let el = document.getElementById("user-logs");
   el.innerHTML = '';
-  if (!Object.keys(data).length) return el.innerHTML = '<pre>Порожньо</pre>';
-  Object.values(data).sort((a,b)=>new Date(b.time)-new Date(a.time)).slice(0,300).forEach(l => {
-    el.innerHTML += `<div class="log-entry">[${l.time}] ${l.game_nick}</div>`;
+  if (!Object.keys(data).length) {
+    el.innerHTML = '<pre>Логів немає</pre>';
+    return;
+  }
+  let logs = Object.values(data).sort((a,b) => new Date(b.time) - new Date(a.time)).slice(0, 500);
+  let html = '<table class="stats-table"><tr><th>Час</th><th>Нік в грі</th><th>Telegram username</th></tr>';
+  logs.forEach(l => {
+    let tg = l.tg_username ? `@${l.tg_username}` : '—';
+    html += `<tr><td>${l.time}</td><td>${l.game_nick || '—'}</td><td>${tg}</td></tr>`;
   });
+  html += '</table>';
+  el.innerHTML = html;
 }
 
 async function clearUserLogs() {
-  if (!confirm("Очистити?")) return;
+  if (!confirm("Очистити лог входів?")) return;
   await apiCall("user_logs", "DELETE");
   getUserLogs();
-}
-
-async function getAdminLogs() {
-  let data = await fetchData("admin_logs");
-  let el = document.getElementById("admin-logs");
-  el.innerHTML = '';
-  if (!Object.keys(data).length) return el.innerHTML = '<pre>Порожньо</pre>';
-  Object.values(data).sort((a,b)=>new Date(b.time)-new Date(a.time)).forEach(l => {
-    el.innerHTML += `<div class="log-entry">[${l.time}] ${l.action || l.nick}</div>`;
-  });
-}
-
-async function clearAdminLogs() {
-  if (!confirm("Очистити?")) return;
-  await apiCall("admin_logs", "DELETE");
-  getAdminLogs();
 }
 
 async function getStats() {
   let users = await fetchData("users");
   let count = Object.keys(users).length;
   let total = 0;
-  let top = [];
-  for (let k in users) {
-    let p = users[k].points || 0;
-    total += p;
-    top.push({n: users[k].name || k, p});
-  }
-  top.sort((a,b)=>b.p-a.p).slice(0,50);
+  for (let k in users) total += users[k].points || 0;
 
   document.getElementById("stats-output").innerHTML = `
     <table class="stats-table">
       <tr><th>Показник</th><th>Значення</th></tr>
       <tr><td>Гравців</td><td>${count}</td></tr>
       <tr><td>Гроші разом</td><td>${total}</td></tr>
-      <tr><td>Середній баланс</td><td>${count ? (total/count|0) : 0}</td></tr>
+      <tr><td>Середній баланс</td><td>${count ? (total / count | 0) : 0}</td></tr>
     </table>
   `;
-
-  let topHtml = '<table class="stats-table"><tr><th>#</th><th>Нік</th><th>Гроші</th></tr>';
-  top.forEach((p,i) => topHtml += `<tr><td>${i+1}</td><td>${p.n}</td><td>${p.p}</td></tr>`);
-  document.getElementById("top-players").innerHTML = topHtml + '</table>';
-}
-
-function exportAllData() {
-  fetch(DB + ".json").then(r => r.json()).then(data => {
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-  });
 }
 </script>
 </body>
