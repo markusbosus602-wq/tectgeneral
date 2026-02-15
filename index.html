@@ -79,7 +79,7 @@
 </head>
 <body>
 
-<!-- Заставка з відео (автозапуск) -->
+<!-- Заставка з відео – запускається автоматично -->
 <div id="splash">
   <video id="splash-video" autoplay playsinline preload="auto">
     <source src="https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4" type="video/mp4">
@@ -151,17 +151,35 @@
 <!-- Вибір теми -->
 <div id="themes" class="screen">
   <div class="card">
-    <h2>Обери тему</h2>
-    <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
-    <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
-    <button class="btn theme-btn" onclick="startTheme('grupy_prykmetnykiv')">Групи прикметників за значенням</button>
-    <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
-    <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння прикметників</button>
+    <h2>Обери розділ</h2>
+    <button class="btn theme-btn" onclick="show('imennyky')">Іменники</button>
+    <button class="btn theme-btn" onclick="show('prykmetnyky')">Прикметники</button>
     <button class="btn red" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
 
-<!-- Гра -->
+<!-- Теми Іменників -->
+<div id="imennyky" class="screen">
+  <div class="card">
+    <h2>Іменники</h2>
+    <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
+    <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
+    <button class="btn red" onclick="show('themes')">НАЗАД</button>
+  </div>
+</div>
+
+<!-- Теми Прикметників -->
+<div id="prykmetnyky" class="screen">
+  <div class="card">
+    <h2>Прикметники</h2>
+    <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
+    <button class="btn theme-btn" onclick="startTheme('grupy_prykmetnykiv')">Групи прикметників за значенням</button>
+    <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння прикметників</button>
+    <button class="btn red" onclick="show('themes')">НАЗАД</button>
+  </div>
+</div>
+
+<!-- Екран гри -->
 <div id="game" class="screen">
   <div class="card">
     <h3 id="qtext"></h3>
@@ -181,15 +199,26 @@
 </div>
 
 <script>
+// ================================================
+// ГЛОБАЛЬНІ ЗМІННІ
+// ================================================
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-let user = null, cC = 0, pOn = true;
-let currentTheme = '', currentIndex = 0, correctCount = 0, wrongCount = 0;
+let user = null;
+let cC = 0;
+let pOn = true;
+let currentTheme = '';
+let currentIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
 let currentCorrectAnswer = '';
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
+// ================================================
+// ТЕМИ (повні списки)
+// ================================================
 const themes = {
   vydminy: [
     {q:"До якої відміни належить слово «книга»?", a:"перша відміна", w:["друга відміна","третя відміна","четверта відміна"]},
@@ -426,33 +455,24 @@ const themes = {
 };
 
 // ================================================
-// АВТОМАТИЧНИЙ ЗАПУСК ВІДЕО + ПЕРЕВІРКА АВТОЛОГІНУ
+// АВТОЗАПУСК ВІДЕО + АВТОЛОГІН
 // ================================================
 window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
 
-  // Показуємо відео
   splash.style.display = 'flex';
 
-  // Спроба автозапуску зі звуком
   video.muted = false;
   video.play().catch(err => {
     console.log("Автозапуск зі звуком заблоковано:", err);
-    // Якщо заблоковано — звук після будь-якого кліку
-    document.body.addEventListener('click', () => {
-      video.muted = false;
-      video.play().catch(() => {});
-    }, { once: true });
   });
 
-  // Після закінчення відео — переходимо до перевірки автологіну
   video.onended = function() {
     splash.style.display = 'none';
     tryAutoLogin();
   };
 
-  // Якщо відео не закінчилося за 60 секунд — примусово переходимо
   setTimeout(() => {
     if (splash.style.display === 'flex') {
       splash.style.display = 'none';
@@ -461,18 +481,17 @@ window.onload = function() {
   }, 60000);
 };
 
-// Функція перевірки автологіну
 function tryAutoLogin() {
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
 
   if (savedNick && savedPass) {
-    // Є збережені дані — автоматичний вхід
+    // Автоматичний вхід без форми
     document.getElementById('nick').value = savedNick;
     document.getElementById('pass').value = savedPass;
     auth();
   } else {
-    // Немає даних — показуємо форму логіну
+    // Показ форми, якщо немає даних
     show('auth-screen');
   }
 }
@@ -503,7 +522,10 @@ async function auth() {
     const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
     await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
     items = user.items || {gold_frame:false};
-    save(); applyItems(); update(); show('menu');
+    save();
+    applyItems();
+    update();
+    show('menu');
     document.getElementById('auth-error').textContent = "";
   } catch(e) {
     document.getElementById('auth-error').textContent = "Помилка підключення";
@@ -512,7 +534,7 @@ async function auth() {
 }
 
 // ================================================
-// РЕШТА ФУНКЦІЙ (без змін)
+// РЕШТА ФУНКЦІЙ (повністю збережені)
 // ================================================
 function save() {
   user.items = items;
@@ -555,6 +577,109 @@ function toggleP() {
   document.getElementById('pen-btn').style.background = pOn ? "var(--red)" : "var(--green)";
 }
 
+async function delU() {
+  let n = document.getElementById('a-n').value.trim();
+  if(!n) return alert("Введіть нікнейм");
+  if(confirm(`Видалити ${n}?`)) {
+    await fetch(DB+"users/"+n+".json", {method:'DELETE'});
+    alert("Видалено");
+    loadPlayers();
+  }
+}
+
+async function edO(add) {
+  let n = document.getElementById('a-n').value.trim();
+  if(!n) return alert("Введіть ник");
+  let amt = prompt(add ? "Скільки додати?" : "Скільки відняти?");
+  if(isNaN(amt) || amt <= 0) return alert("Невірна сума");
+  amt = parseInt(amt);
+  let r = await fetch(DB+"users/"+n+".json"), d = await r.json();
+  if(!d) return alert("Гравця не знайдено");
+  d.points += add ? amt : -amt;
+  d.points = Math.max(0, d.points);
+  await fetch(DB+"users/"+n+".json", {method:'PUT', body:JSON.stringify(d)});
+  alert("Гроші оновлено");
+  loadPlayers();
+}
+
+async function loadPlayers() {
+  let r = await fetch(DB + "users/.json"), d = await r.json(), list = document.getElementById('player-list');
+  list.innerHTML = '';
+  if (!d || !Object.keys(d).length) {
+    list.innerHTML = '<div style="padding:12px;color:#aaa">Гравців немає</div>';
+    return;
+  }
+  for (let key in d) {
+    let u = d[key];
+    let displayNick = u.name || key;
+    list.innerHTML += `
+      <div style="padding:10px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <strong>${displayNick}</strong><br>
+          <small>Баланс: ${u.points || 0} ₴ | Пароль: ${u.pass || '—'}</small>
+        </div>
+      </div>
+    `;
+  }
+}
+
+async function loadUserLog() {
+  try {
+    let r = await fetch(DB + "user_logs.json");
+    let data = await r.json();
+    let logDiv = document.getElementById('user-log');
+    logDiv.innerHTML = '';
+    if (data) {
+      Object.values(data).reverse().slice(0,100).forEach(entry => {
+        logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${entry.game_nick}</b></div>`;
+      });
+    } else {
+      logDiv.innerHTML = 'Лог порожній';
+    }
+  } catch (e) {
+    document.getElementById('user-log').innerHTML = 'Помилка завантаження';
+  }
+}
+
+async function clearUserLog() {
+  if (!confirm("Очистити лог усіх входів?")) return;
+  await fetch(DB + "user_logs.json", {method: 'DELETE'});
+  loadUserLog();
+  alert("Лог входів очищено");
+}
+
+async function logAdminAccess() {
+  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+  const nick = user ? user.name : "Анонім";
+  const entry = { nick: nick, time: now };
+  await fetch(DB + "admin_logs.json", {method: 'POST', body: JSON.stringify(entry)});
+}
+
+async function loadAdminLogs() {
+  try {
+    let r = await fetch(DB + "admin_logs.json");
+    let data = await r.json();
+    let logDiv = document.getElementById('admin-log');
+    logDiv.innerHTML = '';
+    if (data && Object.keys(data).length > 0) {
+      Object.values(data).reverse().forEach(log => {
+        logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
+      });
+    } else {
+      logDiv.innerHTML = 'Лог порожній';
+    }
+  } catch (e) {
+    document.getElementById('admin-log').innerHTML = 'Помилка завантаження логу';
+  }
+}
+
+async function clearAdminLogs() {
+  if (!confirm("Очистити лог адмінки?")) return;
+  await fetch(DB + "admin_logs.json", {method: 'DELETE'});
+  loadAdminLogs();
+  alert("Лог адмінки очищено");
+}
+
 function startTheme(theme) {
   currentTheme = theme;
   currentIndex = 0;
@@ -564,7 +689,94 @@ function startTheme(theme) {
   loadQuestion();
 }
 
-// ... (всі інші функції: loadQuestion, checkAnswer, loadT, buyItem, delU, edO, loadPlayers тощо — встав сюди з твого оригінального коду)
+function loadQuestion() {
+  const qs = themes[currentTheme];
+  if (currentIndex >= qs.length) {
+    document.getElementById('qtext').textContent = "Тема завершена!";
+    document.getElementById('feedback').innerHTML = '';
+    document.getElementById('abox').innerHTML = `
+      <div class="summary">
+        <strong>Гравець:</strong> ${user ? user.name : '—'}<br><br>
+        <strong style="color:var(--green)">Правильних відповідей:</strong> ${correctCount}<br>
+        <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrongCount}<br><br>
+        <strong>Поточний баланс:</strong> ${user ? user.points.toLocaleString() : 0} ₴
+      </div>
+      <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
+    `;
+    save();
+    return;
+  }
+  const q = qs[currentIndex];
+  currentCorrectAnswer = q.a;
+  document.getElementById('qtext').textContent = `Питання ${currentIndex+1}/${qs.length}: ${q.q}`;
+  document.getElementById('feedback').innerHTML = '';
+  const abox = document.getElementById('abox');
+  abox.innerHTML = '';
+  let answers = [q.a, ...q.w];
+  answers.sort(() => Math.random() - 0.5);
+  answers.forEach(o => {
+    let btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.innerText = o;
+    btn.onclick = () => checkAnswer(o, q.a, btn);
+    abox.appendChild(btn);
+  });
+}
+
+function checkAnswer(selected, correct, button) {
+  document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    correctCount++;
+    user.points += 100;
+    button.style.background = 'var(--green)';
+    button.style.color = 'white';
+    document.getElementById('feedback').innerHTML = '<span class="correct">ПРАВИЛЬНО!</span>';
+    correctSound.currentTime = 0;
+    correctSound.play().catch(()=>{});
+  } else {
+    wrongCount++;
+    user.points = Math.max(0, user.points - 30);
+    button.style.background = 'var(--red)';
+    button.style.color = 'white';
+    document.getElementById('feedback').innerHTML = '<span class="wrong">❌</span>';
+    wrongSound.currentTime = 0;
+    wrongSound.play().catch(()=>{});
+  }
+  document.getElementById('mon').innerText = user.points.toLocaleString();
+  save();
+  setTimeout(() => {
+    currentIndex++;
+    loadQuestion();
+  }, 1000);
+}
+
+async function loadT() {
+  show('top');
+  let r = await fetch(DB+"users/.json"), d = await r.json();
+  let l = document.getElementById('tlist');
+  l.innerHTML = '';
+  if(d) {
+    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,1000);
+    topPlayers.forEach((u,i) => {
+      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px">
+        <span>${i+1}. ${u.name}</span><b>${u.points||0}</b>
+      </div>`;
+    });
+  } else {
+    l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+  }
+}
+
+function buyItem(item) {
+  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
+  if(user.points >= prices[item]){
+    user.points -= prices[item];
+    items[item] = true;
+    applyItems();
+    save(); update();
+    alert("Куплено: " + item);
+  } else alert("Недостатньо грошей!");
+}
 </script>
 </body>
 </html>
