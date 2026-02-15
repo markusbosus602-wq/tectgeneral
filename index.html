@@ -37,7 +37,7 @@
 </head>
 <body>
 
-<!-- Заставка — відео відразу на весь екран -->
+<!-- Заставка з твоїм відео -->
 <div id="splash">
   <video id="splash-video" autoplay muted playsinline>
     <source src="https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4" type="video/mp4">
@@ -415,9 +415,13 @@ window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
 
-  video.play().catch(err => {
-    console.log("Автозапуск заблоковано:", err);
-  });
+  video.play().catch(err => console.log("Автозапуск заблоковано:", err));
+
+  // Увімкнення звуку після першого кліку по сторінці
+  document.body.addEventListener('click', function enableSound() {
+    video.muted = false;
+    document.body.removeEventListener('click', enableSound);
+  }, { once: true });
 
   video.onended = function() {
     splash.style.display = 'none';
@@ -431,7 +435,6 @@ window.onload = function() {
     }
   };
 
-  // Якщо відео не закінчилося за 40 секунд — переходимо
   setTimeout(() => {
     if (splash.style.display !== 'none') {
       splash.style.display = 'none';
