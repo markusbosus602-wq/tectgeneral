@@ -7,8 +7,20 @@
   <style>
     :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
     body{margin:0;padding:0;background:#000;color:#fff;font-family:sans-serif;overflow:hidden}
-    #splash{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center}
-    #splash-video{width:100%;height:100%;object-fit:cover}
+    #splash{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    #splash-video{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
     .screen{display:none;flex-direction:column;min-height:100vh;padding:20px;box-sizing:border-box}
     .active{display:flex}
     .card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3)}
@@ -37,9 +49,9 @@
 </head>
 <body>
 
-<!-- Заставка з відео -->
+<!-- Заставка -->
 <div id="splash">
-  <video id="splash-video" autoplay playsinline>
+  <video id="splash-video" autoplay muted playsinline preload="auto">
     <source src="https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4" type="video/mp4">
     Ваш браузер не підтримує відео.
   </video>
@@ -415,17 +427,17 @@ window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
 
-  // Спроба автозапуску зі звуком
+  // Спроба автозапуску
   video.play().catch(err => {
-    console.log("Автозапуск зі звуком заблоковано:", err);
-    // Якщо заблоковано — вмикаємо звук після першого кліку
-    document.body.addEventListener('click', function enableSound() {
-      video.muted = false;
-      video.play().catch(() => {});
-      document.body.removeEventListener('click', enableSound);
-    }, { once: true });
+    console.log("Автозапуск заблоковано:", err);
   });
 
+  // Якщо відео готове до відтворення — можна вважати, що воно завантажилося
+  video.addEventListener('canplay', () => {
+    console.log("Відео готове до відтворення");
+  }, { once: true });
+
+  // Якщо відео закінчилося — переходимо
   video.onended = function() {
     splash.style.display = 'none';
     document.getElementById('auth-screen').classList.add('active');
@@ -438,12 +450,21 @@ window.onload = function() {
     }
   };
 
+  // Якщо за 12 секунд нічого не сталося — примусово переходимо
   setTimeout(() => {
     if (splash.style.display !== 'none') {
+      console.log("Відео не завантажилося за 12 секунд → примусовий перехід");
       splash.style.display = 'none';
       document.getElementById('auth-screen').classList.add('active');
     }
-  }, 40000);
+  }, 12000);
+
+  // Увімкнення звуку після першого кліку (якщо автозапуск зі звуком заблоковано)
+  document.body.addEventListener('click', function enableSound() {
+    video.muted = false;
+    video.play().catch(() => {});
+    document.body.removeEventListener('click', enableSound);
+  }, { once: true });
 };
 
 function save() {
