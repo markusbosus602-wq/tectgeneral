@@ -6,9 +6,13 @@
   <title>UkrMova Pro</title>
   <style>
     :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
-    body{background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;background-size:160px;color:#000;font-family:sans-serif;margin:0;text-align:center;overflow:hidden}
-    .screen{display:none;padding:20px;flex-direction:column;min-height:100vh;box-sizing:border-box}
-    .active{display:flex;animation:fadeIn .3s ease}
+    body{margin:0;padding:0;background:#000;color:#fff;font-family:sans-serif;overflow:hidden}
+    #splash{position:fixed;inset:0;z-index:10000;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    #splash-video{width:100%;height:100%;object-fit:cover}
+    #start-btn{position:absolute;bottom:15%;left:50%;transform:translateX(-50%);padding:20px 60px;font-size:26px;font-weight:bold;background:var(--blue);color:white;border:none;border-radius:20px;cursor:pointer;box-shadow:0 10px 30px rgba(0,162,255,0.6);z-index:10001;transition:all 0.3s}
+    #start-btn:hover{transform:translateX(-50%) scale(1.1);box-shadow:0 15px 40px rgba(0,162,255,0.8)}
+    .screen{display:none;flex-direction:column;min-height:100vh;padding:20px;box-sizing:border-box}
+    .active{display:flex}
     .card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3)}
     .btn{background:var(--blue);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;width:100%;margin:6px 0;cursor:pointer;text-transform:uppercase;transition:all .2s}
     .btn:hover{transform:scale(1.02);box-shadow:0 0 15px rgba(0,162,255,.6)}
@@ -30,21 +34,18 @@
     .wrong {color:#ff4d4d;}
     .summary {font-size:24px; line-height:1.6; margin:30px 0; text-align:center;}
     .summary strong {font-size:28px;}
-    #splash-screen{position:fixed;inset:0;width:100%;height:100%;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column}
-    #splash-video{width:100%;height:100%;object-fit:cover}
-    #splash-btn{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);padding:16px 32px;font-size:20px;background:var(--blue);color:white;border:none;border-radius:12px;cursor:pointer;z-index:10000}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   </style>
 </head>
 <body>
 
-<!-- Заставка з відео -->
-<div id="splash-screen">
+<!-- Заставка з новим відео -->
+<div id="splash">
   <video id="splash-video" playsinline>
-    <source src="https://files.catbox.moe/a9zzmt.mp4" type="video/mp4">
+    <source src="https://files.limewire.com/file/tAfFd" type="video/mp4">
     Ваш браузер не підтримує відео.
   </video>
-  <button id="splash-btn">Почати гру зі звуком</button>
+  <button id="start-btn">Почати гру зі звуком</button>
 </div>
 
 <div id="auth-screen" class="screen">
@@ -376,7 +377,7 @@ const themes = {
     { q: "глибокий — який це ступінь порівняння прикметника?", a: "нульовий", w: ["вищий", "найвищий"] },
     { q: "щасливий — який це ступінь порівняння прикметника?", a: "нульовий", w: ["вищий", "найвищий"] },
     { q: "цікавий — який це ступінь порівняння прикметника?", a: "нульовий", w: ["вищий", "найвищий"] }
-  ].sort(() => Math.random() - 0.5) // рандомне перемішування питань
+  ].sort(() => Math.random() - 0.5)
 };
 
 async function auth() {
@@ -414,16 +415,17 @@ async function auth() {
 }
 
 window.onload = function() {
-  const splash = document.getElementById('splash-screen');
+  const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
-  const startBtn = document.getElementById('splash-btn');
+  const startBtn = document.getElementById('start-btn');
 
-  // Запускаємо відео тільки після натискання кнопки (щоб обійти блокування браузера)
-  startBtn.onclick = function() {
+  startBtn.onclick = () => {
     startBtn.style.display = 'none';
-    video.play().catch(err => {
-      console.log("Помилка відтворення:", err);
-      // Якщо все одно не грає — переходимо через 2 секунди
+    video.play().then(() => {
+      console.log('Відео запущено зі звуком');
+    }).catch(err => {
+      console.log('Помилка запуску:', err);
+      // Якщо не запустилося — переходимо через 2 секунди
       setTimeout(() => {
         splash.style.display = 'none';
         document.getElementById('auth-screen').classList.add('active');
@@ -431,27 +433,25 @@ window.onload = function() {
     });
   };
 
-  // Коли відео закінчилося — переходимо на авторизацію
-  video.onended = function() {
+  video.onended = () => {
     splash.style.display = 'none';
     document.getElementById('auth-screen').classList.add('active');
-
     const savedNick = localStorage.getItem('un');
     const savedPass = localStorage.getItem('up');
-    if(savedNick && savedPass) {
+    if (savedNick && savedPass) {
       document.getElementById('nick').value = savedNick;
       document.getElementById('pass').value = savedPass;
       auth();
     }
   };
 
-  // Запасний таймер: якщо щось пішло не так — через 20 секунд переходимо
+  // Якщо користувач нічого не натиснув — через 30 секунд переходимо
   setTimeout(() => {
     if (splash.style.display !== 'none') {
       splash.style.display = 'none';
       document.getElementById('auth-screen').classList.add('active');
     }
-  }, 20000);
+  }, 30000);
 };
 
 function save() {
