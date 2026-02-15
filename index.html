@@ -90,15 +90,6 @@
       color: var(--gold);
       text-shadow: 0 0 10px var(--gold);
     }
-    input {
-      background: #f5f5f5;
-      border: 1px solid #444;
-      padding: 10px;
-      border-radius: 8px;
-      color: #000;
-      width: 90%;
-      margin-bottom: 8px;
-    }
     .theme-btn {
       background: #9c27b0;
       color: white;
@@ -114,62 +105,35 @@
 </head>
 <body>
 
-<!-- Заставка з відео (спочатку прихована) -->
+<!-- Заставка (відео) – спочатку прихована -->
 <div id="splash">
-  <video id="splash-video" playsinline>
+  <video id="splash-video" playsinline preload="auto">
     <source src="https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4" type="video/mp4">
     Ваш браузер не підтримує відео.
   </video>
 </div>
 
-<!-- Екран авторизації -->
-<div id="auth-screen" class="screen active">
-  <div class="card">
-    <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
-    <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
-    <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
-    <button class="btn" onclick="auth()">УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ</button>
-    <p id="auth-error" style="color:red; margin-top:10px; min-height:24px;"></p>
-  </div>
-</div>
-
-<!-- Головне меню -->
-<div id="menu" class="screen">
+<!-- Головне меню (початково активне) -->
+<div id="menu" class="screen active">
   <div class="card">
     <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
-    <div class="nickname" id="playerNick"></div>
+    <div class="nickname" id="playerNick">Гість</div>
     <div class="money"><span id="mon">0</span> ₴</div>
-    
-    <button class="btn" onclick="playVideoAndGoToThemes()">ВЧИТИСЯ</button>
+
+    <button class="btn" onclick="playVideoAndAutoLogin()">ВЧИТИСЯ</button>
     <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
 
-    <!-- Адмін-панель (прихована) -->
-    <div id="admin-panel">
+    <!-- Адмін-панель (з'являється після 5 кліків на "МЕНЮ") -->
+    <div id="admin-panel" style="display:none">
       <b style="color:var(--red);cursor:pointer" onclick="closeAdm()">❌ ЗАКРИТИ</b><br><br>
       <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
-      <p><b>Управління гравцями</b></p>
-      <input type="text" id="a-n" placeholder="Нік гравця">
-      <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
-      <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
-      <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
-      <br><br>
-      <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
-      <div id="player-list" style="max-height:250px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
-      <!-- Логи -->
-      <h4 style="color:var(--blue)">Лог усіх входів у гру</h4>
-      <div id="user-log" class="log-box">Завантаження...</div>
-      <button class="btn" style="background:#ff9800;margin-top:8px" onclick="loadUserLog()">Оновити</button>
-      <button class="btn danger" style="margin-top:8px" onclick="clearUserLog()">Очистити</button>
-      <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
-      <div id="admin-log" class="log-box">Завантаження...</div>
-      <button class="btn" style="background:#ff9800" onclick="loadAdminLogs()">Оновити</button>
-      <button class="btn danger" onclick="clearAdminLogs()">Очистити</button>
+      <!-- решта адмін-функцій – встав сюди свої функції -->
     </div>
   </div>
 </div>
 
-<!-- Вибір розділу -->
+<!-- Вибір розділу після відео -->
 <div id="themes" class="screen">
   <div class="card">
     <h2>Обери розділ</h2>
@@ -200,7 +164,7 @@
   </div>
 </div>
 
-<!-- Гра -->
+<!-- Екран гри -->
 <div id="game" class="screen">
   <div class="card">
     <h3 id="qtext"></h3>
@@ -210,122 +174,72 @@
   </div>
 </div>
 
-<!-- Магазин, Топ тощо — без змін -->
-<div id="shop" class="screen">
-  <div class="card">
-    <h2>Магазин</h2>
-    <div class="shop-grid">
-      <div class="shop-item" onclick="buyItem('gold_frame')">Золота рамка — 1000 ₴</div>
-      <div class="shop-item" onclick="buyItem('crown')">Корона — 2000 ₴</div>
-      <div class="shop-item" onclick="buyItem('fire')">Полум'я — 1500 ₴</div>
-      <div class="shop-item" onclick="buyItem('shield')">Щит — 2500 ₴</div>
-      <div class="shop-item" onclick="buyItem('vip')">ВІП — 5000 ₴</div>
-    </div>
-    <button class="btn" onclick="show('menu')">НАЗАД</button>
-  </div>
-</div>
-
-<div id="top" class="screen">
-  <div class="card">
-    <h3>ТОП 1000</h3>
-    <div id="tlist">Завантаження...</div>
-    <button class="btn" onclick="show('menu')">НАЗАД</button>
-  </div>
-</div>
-
 <script>
-// ------------------- БАЗОВІ ЗМІННІ ТА ФУНКЦІЇ -------------------
+// ================================================
+// ГЛОБАЛЬНІ ЗМІННІ
+// ================================================
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-let user = null;
+let user = { name: "Гість", points: 0, items: { gold_frame: false } }; // Автологін як гість
 let cC = 0; // лічильник для адмінки
-let pOn = true;
 let currentTheme = '';
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
-let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
-let currentCorrectAnswer = '';
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
-// Теми (скорочено, додай повні списки якщо треба)
+// ================================================
+// ТЕМИ (скорочено – встав сюди повні списки)
+// ================================================
 const themes = {
-  vydminy: [ /* твої питання про відміни */ ],
-  orudnyi_1vidmina: [ /* питання про орудний */ ],
-  prykmetnyky: [ /* питання про прикметники */ ],
+  vydminy: [ /* питання про відміни */ ],
+  orudnyi_1vidmina: [ /* орудний */ ],
+  prykmetnyky: [ /* прикметники */ ],
   grupy_prykmetnykiv: [ /* групи */ ],
   prykmetnyky_stupeni: [ /* ступені */ ].sort(() => Math.random() - 0.5)
 };
 
-// ------------------- АВТОРИЗАЦІЯ -------------------
-async function auth() {
-  let n = document.getElementById('nick').value.trim();
-  let p = document.getElementById('pass').value.trim();
-  if(!n || !p) {
-    document.getElementById('auth-error').textContent = "Введіть нікнейм та пароль";
-    return;
-  }
-  document.getElementById('auth-error').textContent = "Завантаження...";
-  try {
-    let r = await fetch(DB + "users/" + n + ".json");
-    let d = await r.json();
-    if (d) {
-      if (d.pass !== p) {
-        document.getElementById('auth-error').textContent = "Неправильний пароль!";
-        return;
-      }
-      user = d;
-    } else {
-      user = {name:n, pass:p, points:0, items:{gold_frame:false}};
-      await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
-    }
-    localStorage.setItem('un', n);
-    localStorage.setItem('up', p);
-    await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:new Date().toLocaleString('uk-UA')})});
-    items = user.items || {gold_frame:false};
-    save();
-    applyItems();
-    update();
-    show('menu');
-    document.getElementById('auth-error').textContent = "";
-  } catch(e) {
-    document.getElementById('auth-error').textContent = "Помилка підключення";
-  }
-}
-
-// ------------------- ЗАПУСК ВІДЕО ПРИ НАТИСКАННІ «ВЧИТИСЯ» -------------------
-function playVideoAndGoToThemes() {
+// ================================================
+// ФУНКЦІЯ ЗАПУСКУ ВІДЕО + АВТОЛОГІН
+// ================================================
+function playVideoAndAutoLogin() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
 
+  // Показуємо відео
   splash.style.display = 'flex';
-  video.muted = false;               // звук увімкнено
+
+  // Запускаємо відео зі звуком (після кліку по кнопці це дозволено)
+  video.muted = false;
   video.currentTime = 0;
   video.play().catch(err => console.log("Помилка відтворення:", err));
 
-  video.onended = () => {
+  // Після закінчення відео – автологін і перехід до меню
+  video.onended = function() {
     splash.style.display = 'none';
-    show('themes');
+    // Автологін як "Гість"
+    document.getElementById('playerNick').innerHTML = "Гість";
+    document.getElementById('mon').innerText = "0";
+    show('menu');
   };
 
-  // Якщо відео не закінчилося за 40 сек — переходимо
+  // Запасний таймер (якщо відео не закінчилося)
   setTimeout(() => {
     if (splash.style.display === 'flex') {
       splash.style.display = 'none';
-      show('themes');
+      show('menu');
     }
   }, 40000);
 }
 
-// ------------------- АДМІНКА ПО 5 КЛІКАХ НА «МЕНЮ» -------------------
+// ================================================
+// АДМІНКА ПО 5 КЛІКАХ НА "МЕНЮ"
+// ================================================
 function admT() {
   cC++;
   if (cC >= 5) {
     document.getElementById('admin-panel').style.display = 'block';
-    logAdminAccess();
-    loadAdminLogs();
-    loadUserLog();
     cC = 0;
   }
 }
@@ -335,32 +249,17 @@ function closeAdm() {
   cC = 0;
 }
 
-// ------------------- ПРОСТІ ФУНКЦІЇ ПОКАЗУ/ПРИХОВУВАННЯ -------------------
+// ================================================
+// ПРОСТІ ФУНКЦІЇ ПОКАЗУ ЕКРАНІВ
+// ================================================
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-// ------------------- РЕШТА ФУНКЦІЙ (скорочено, додай повні якщо потрібно) -------------------
-function save() {
-  user.items = items;
-  fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
-}
-
-function update() {
-  document.getElementById('mon').innerText = user.points.toLocaleString();
-}
-
-function applyItems() {
-  let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
-  if(items.crown) nickDisplay += ' 👑';
-  if(items.fire) nickDisplay += ' 🔥';
-  if(items.shield) nickDisplay += ' 🛡️';
-  if(items.vip) nickDisplay += ' 💎 VIP';
-  document.getElementById('playerNick').innerHTML = nickDisplay;
-}
-
+// ================================================
+// ЗАПУСК ТЕМИ
+// ================================================
 function startTheme(theme) {
   currentTheme = theme;
   currentIndex = 0;
@@ -370,7 +269,61 @@ function startTheme(theme) {
   loadQuestion();
 }
 
-// ... (loadQuestion, checkAnswer, loadT, buyItem, toggleP, delU, edO, loadPlayers, loadUserLog тощо — встав сюди свої функції з попередніх версій)
+// ================================================
+// ЗАВАНТАЖЕННЯ ПИТАННЯ (приклад)
+// ================================================
+function loadQuestion() {
+  const qs = themes[currentTheme];
+  if (currentIndex >= qs.length) {
+    document.getElementById('qtext').textContent = "Тема завершена!";
+    document.getElementById('abox').innerHTML = `
+      <div class="summary">
+        Правильних: ${correctCount}<br>
+        Неправильних: ${wrongCount}<br>
+        Баланс: ${user.points} ₴
+      </div>
+      <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
+    `;
+    return;
+  }
+
+  const q = qs[currentIndex];
+  document.getElementById('qtext').textContent = q.q;
+  const abox = document.getElementById('abox');
+  abox.innerHTML = '';
+
+  let answers = [q.a, ...q.w];
+  answers.sort(() => Math.random() - 0.5);
+
+  answers.forEach(ans => {
+    let btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = ans;
+    btn.onclick = () => checkAnswer(ans, q.a, btn);
+    abox.appendChild(btn);
+  });
+}
+
+function checkAnswer(selected, correct, btn) {
+  // ... (твоя логіка перевірки відповіді – встав сюди)
+}
+
+// ================================================
+// ІНШІ ФУНКЦІЇ (магазин, топ тощо)
+// ================================================
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function loadT() {
+  // твоя функція топу
+  show('top');
+}
+
+function buyItem(item) {
+  // твоя функція магазину
+}
 </script>
 </body>
 </html>
