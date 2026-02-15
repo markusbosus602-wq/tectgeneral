@@ -29,13 +29,7 @@
       height:100%;
       object-fit:cover;
     }
-    .screen{
-      display:none;
-      flex-direction:column;
-      min-height:100vh;
-      padding:20px;
-      box-sizing:border-box;
-    }
+    .screen{display:none;flex-direction:column;min-height:100vh;padding:20px;box-sizing:border-box}
     .active{display:flex}
     .card{
       background:rgba(255,255,255,0.92);
@@ -151,8 +145,8 @@
       <br><br>
       <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
       <div id="admin-log" class="log-box">Завантаження...</div>
-      <button class="btn" style="background:#ff9800" onclick="loadAdminLogs()">Оновити</button>
-      <button class="btn danger" onclick="clearAdminLogs()">Очистити</button>
+      <button class="btn" style="background:#ff9800;margin-top:8px" onclick="loadAdminLogs()">Оновити</button>
+      <button class="btn danger" style="margin-top:8px" onclick="clearAdminLogs()">Очистити</button>
     </div>
   </div>
 </div>
@@ -241,7 +235,7 @@ const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-corr
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
 // ================================================
-// ТЕМИ (всі списки)
+// ТЕМИ
 // ================================================
 const themes = {
   vydminy: [
@@ -555,6 +549,32 @@ async function auth() {
   }
 }
 
+// ================================================
+// АДМІНКА – ЛОГУВАННЯ ВХОДУ + ПОКАЗ ЛОГУ
+// ================================================
+function admT() {
+  if(++cC >= 5) {
+    document.getElementById('admin-panel').style.display='block';
+    logAdminAccess();         // логуємо вхід в адмінку
+    loadAdminLogs();          // одразу завантажуємо та показуємо лог
+    loadUserLog();            // також показуємо лог входів у гру
+    cC = 0;
+  }
+}
+
+async function logAdminAccess() {
+  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+  const nick = user ? user.name : "Анонім";
+  const entry = { nick: nick, time: now };
+  await fetch(DB + "admin_logs.json", {
+    method: 'POST',
+    body: JSON.stringify(entry)
+  });
+}
+
+// ================================================
+// ІНШІ ФУНКЦІЇ
+// ================================================
 function save() {
   user.items = items;
   fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
@@ -577,12 +597,6 @@ function applyItems() {
 function show(id) {
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   document.getElementById(id).style.display='block';
-}
-
-function admT() {
-  if(++cC >= 5) {
-    document.getElementById('admin-panel').style.display='block';
-  }
 }
 
 function closeAdm() { 
@@ -665,13 +679,6 @@ async function clearUserLog() {
   await fetch(DB + "user_logs.json", {method: 'DELETE'});
   loadUserLog();
   alert("Лог входів очищено");
-}
-
-async function logAdminAccess() {
-  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-  const nick = user ? user.name : "Анонім";
-  const entry = { nick: nick, time: now };
-  await fetch(DB + "admin_logs.json", {method: 'POST', body: JSON.stringify(entry)});
 }
 
 async function loadAdminLogs() {
