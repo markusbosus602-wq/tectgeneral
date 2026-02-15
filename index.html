@@ -5,162 +5,164 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>UkrMova Pro</title>
   <style>
-    :root {
-      --blue: #00a2ff;
-      --red: #ff4d4d;
-      --green: #2ecc71;
-      --gold: #f1c40f;
-      --dark: #d32f2f;
+    :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
+    body{
+      margin:0;
+      padding:0;
+      background:#000;
+      color:#fff;
+      font-family:sans-serif;
+      overflow:hidden;
     }
-    body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      color: #fff;
-      font-family: sans-serif;
-      overflow: hidden;
+    #splash{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      background:#000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
-    #splash {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: #000;
-      display: none;
-      align-items: center;
-      justify-content: center;
+    #splash-video{
+      width:100%;
+      height:100%;
+      object-fit:cover;
     }
-    #splash-video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .screen{
+      display:none;
+      flex-direction:column;
+      min-height:100vh;
+      padding:20px;
+      box-sizing:border-box;
     }
-    .screen {
-      display: none;
-      flex-direction: column;
-      min-height: 100vh;
-      padding: 20px;
-      box-sizing: border-box;
+    .active{display:flex}
+    .card{
+      background:rgba(255,255,255,0.92);
+      backdrop-filter:blur(10px);
+      padding:20px;
+      border-radius:20px;
+      border:1px solid #444;
+      margin:auto;
+      width:100%;
+      max-width:450px;
+      box-shadow:0 0 20px rgba(0,0,0,0.3);
     }
-    .active {
-      display: flex;
+    .btn{
+      background:var(--blue);
+      color:#fff;
+      border:none;
+      padding:14px;
+      border-radius:12px;
+      font-weight:700;
+      width:100%;
+      margin:6px 0;
+      cursor:pointer;
+      text-transform:uppercase;
+      transition:all .2s;
     }
-    .card {
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(10px);
-      padding: 20px;
-      border-radius: 20px;
-      border: 1px solid #444;
-      margin: auto;
-      width: 100%;
-      max-width: 450px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    .btn:hover{
+      transform:scale(1.02);
+      box-shadow:0 0 15px rgba(0,162,255,.6);
     }
-    .btn {
-      background: var(--blue);
-      color: #fff;
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 700;
-      width: 100%;
-      margin: 6px 0;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: all .2s;
+    .btn.green{background:var(--green)}
+    .btn.danger{background:var(--dark)}
+    .money{font-size:32px;font-weight:900;color:var(--gold);text-shadow:0 0 10px #f1c40f}
+    .nickname{font-size:28px;font-weight:bold;margin:10px 0;cursor:pointer}
+    .gold-nick{color:var(--gold);text-shadow:0 0 10px var(--gold)}
+    input{background:#f5f5f5;border:1px solid #444;padding:10px;border-radius:8px;color:#000;width:90%;margin-bottom:8px}
+    .shop-item{background:#eee;padding:12px;margin:8px 0;border-radius:10px;cursor:pointer}
+    .shop-item.bought{background:#c8e6c9}
+    .shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .theme-btn{background:#9c27b0;color:white}
+    .log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
+    .log-entry{padding:4px 0;border-bottom:1px solid #eee}
+    #admin-panel{
+      border:2px dashed var(--red);
+      padding:15px;
+      margin-top:15px;
+      display:none;
+      background:rgba(255,255,255,0.92);
+      text-align:left;
+      border-radius:15px;
     }
-    .btn:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 15px rgba(0,162,255,.6);
-    }
-    .btn.green { background: var(--green); }
-    .btn.danger { background: var(--dark); }
-    .money {
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--gold);
-      text-shadow: 0 0 10px #f1c40f;
-    }
-    .nickname {
-      font-size: 28px;
-      font-weight: bold;
-      margin: 10px 0;
-      cursor: pointer;
-    }
-    .gold-nick {
-      color: var(--gold);
-      text-shadow: 0 0 10px var(--gold);
-    }
-    .theme-btn {
-      background: #9c27b0;
-      color: white;
-    }
-    .section-title {
-      font-size: 22px;
-      font-weight: bold;
-      color: var(--gold);
-      margin: 20px 0 10px;
-      text-align: center;
-    }
+    #feedback{text-align:center;font-size:48px;font-weight:bold;margin:20px 0;min-height:60px}
+    .correct {color:#2ecc71;}
+    .wrong {color:#ff4d4d;}
+    .summary {font-size:24px; line-height:1.6; margin:30px 0; text-align:center;}
+    .summary strong {font-size:28px;}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   </style>
 </head>
 <body>
 
-<!-- Заставка (відео) – спочатку прихована -->
+<!-- Заставка з відео – запускається автоматично при завантаженні сторінки -->
 <div id="splash">
-  <video id="splash-video" playsinline preload="auto">
+  <video id="splash-video" autoplay playsinline preload="auto">
     <source src="https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4" type="video/mp4">
     Ваш браузер не підтримує відео.
   </video>
 </div>
 
-<!-- Головне меню (початково активне) -->
-<div id="menu" class="screen active">
+<!-- Головне меню -->
+<div id="menu" class="screen">
   <div class="card">
     <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
     <div class="nickname" id="playerNick">Гість</div>
     <div class="money"><span id="mon">0</span> ₴</div>
-
-    <button class="btn" onclick="playVideoAndAutoLogin()">ВЧИТИСЯ</button>
+    <button class="btn" onclick="show('themes')">ГРАТИ</button>
     <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
 
-    <!-- Адмін-панель (з'являється після 5 кліків на "МЕНЮ") -->
-    <div id="admin-panel" style="display:none">
+    <div id="admin-panel">
       <b style="color:var(--red);cursor:pointer" onclick="closeAdm()">❌ ЗАКРИТИ</b><br><br>
       <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
-      <!-- решта адмін-функцій – встав сюди свої функції -->
+      <p><b>Управління гравцями</b></p>
+      <input type="text" id="a-n" placeholder="Нік гравця">
+      <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
+      <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
+      <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
+      <br><br>
+      <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
+      <div id="player-list" style="max-height:250px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
+      <br><br>
+      <h4 style="color:var(--blue)">Лог усіх входів у гру</h4>
+      <div id="user-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800;margin-top:8px" onclick="loadUserLog()">Оновити</button>
+      <button class="btn danger" style="margin-top:8px" onclick="clearUserLog()">Очистити</button>
+      <br><br>
+      <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
+      <div id="admin-log" class="log-box">Завантаження...</div>
+      <button class="btn" style="background:#ff9800" onclick="loadAdminLogs()">Оновити</button>
+      <button class="btn danger" onclick="clearAdminLogs()">Очистити</button>
     </div>
   </div>
 </div>
 
-<!-- Вибір розділу після відео -->
+<!-- Магазин -->
+<div id="shop" class="screen">
+  <div class="card">
+    <h2>Магазин</h2>
+    <div class="shop-grid">
+      <div class="shop-item" onclick="buyItem('gold_frame')">Золота рамка — 1000 ₴</div>
+      <div class="shop-item" onclick="buyItem('crown')">Корона — 2000 ₴</div>
+      <div class="shop-item" onclick="buyItem('fire')">Полум'я — 1500 ₴</div>
+      <div class="shop-item" onclick="buyItem('shield')">Щит — 2500 ₴</div>
+      <div class="shop-item" onclick="buyItem('vip')">ВІП — 5000 ₴</div>
+    </div>
+    <button class="btn" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
+
+<!-- Вибір теми -->
 <div id="themes" class="screen">
   <div class="card">
-    <h2>Обери розділ</h2>
-    <button class="btn theme-btn" onclick="show('imennyky')">Іменники</button>
-    <button class="btn theme-btn" onclick="show('prykmetnyky')">Прикметники</button>
-    <button class="btn red" onclick="show('menu')">НАЗАД</button>
-  </div>
-</div>
-
-<!-- Теми Іменників -->
-<div id="imennyky" class="screen">
-  <div class="card">
-    <h2>Іменники</h2>
+    <h2>Обери тему</h2>
     <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
-    <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
-    <button class="btn red" onclick="show('themes')">НАЗАД</button>
-  </div>
-</div>
-
-<!-- Теми Прикметників -->
-<div id="prykmetnyky" class="screen">
-  <div class="card">
-    <h2>Прикметники</h2>
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
     <button class="btn theme-btn" onclick="startTheme('grupy_prykmetnykiv')">Групи прикметників за значенням</button>
+    <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння прикметників</button>
-    <button class="btn red" onclick="show('themes')">НАЗАД</button>
+    <button class="btn red" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
 
@@ -174,92 +176,121 @@
   </div>
 </div>
 
+<!-- Топ -->
+<div id="top" class="screen">
+  <div class="card">
+    <h3>ТОП 1000</h3>
+    <div id="tlist">Завантаження...</div>
+    <button class="btn" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
+
 <script>
 // ================================================
 // ГЛОБАЛЬНІ ЗМІННІ
 // ================================================
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
-let user = { name: "Гість", points: 0, items: { gold_frame: false } }; // Автологін як гість
-let cC = 0; // лічильник для адмінки
+let user = { name: "Гість", points: 0, items: { gold_frame: false } }; // Автоматичний гість
+let cC = 0;
+let pOn = true;
 let currentTheme = '';
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
+let items = user.items;
+let currentCorrectAnswer = '';
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
 // ================================================
-// ТЕМИ (скорочено – встав сюди повні списки)
+// АВТОМАТИЧНИЙ ЗАПУСК ВІДЕО ПРИ ЗАВАНТАЖЕННІ СТОРІНКИ
 // ================================================
-const themes = {
-  vydminy: [ /* питання про відміни */ ],
-  orudnyi_1vidmina: [ /* орудний */ ],
-  prykmetnyky: [ /* прикметники */ ],
-  grupy_prykmetnykiv: [ /* групи */ ],
-  prykmetnyky_stupeni: [ /* ступені */ ].sort(() => Math.random() - 0.5)
-};
-
-// ================================================
-// ФУНКЦІЯ ЗАПУСКУ ВІДЕО + АВТОЛОГІН
-// ================================================
-function playVideoAndAutoLogin() {
+window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
 
-  // Показуємо відео
+  // Показуємо заставку
   splash.style.display = 'flex';
 
-  // Запускаємо відео зі звуком (після кліку по кнопці це дозволено)
+  // Запускаємо відео зі звуком автоматично
   video.muted = false;
-  video.currentTime = 0;
-  video.play().catch(err => console.log("Помилка відтворення:", err));
+  video.play().then(() => {
+    console.log("Відео запущено автоматично зі звуком");
+  }).catch(err => {
+    console.log("Автозапуск заблоковано браузером:", err);
+    // Якщо заблоковано — залишаємо як є, користувач побачить відео без звуку
+  });
 
-  // Після закінчення відео – автологін і перехід до меню
+  // Після закінчення відео — ховаємо заставку і показуємо меню
   video.onended = function() {
     splash.style.display = 'none';
-    // Автологін як "Гість"
+    show('menu');
     document.getElementById('playerNick').innerHTML = "Гість";
     document.getElementById('mon').innerText = "0";
-    show('menu');
   };
 
-  // Запасний таймер (якщо відео не закінчилося)
+  // Якщо відео не закінчилося за 60 секунд — примусово переходимо в меню
   setTimeout(() => {
     if (splash.style.display === 'flex') {
       splash.style.display = 'none';
       show('menu');
     }
-  }, 40000);
-}
+  }, 60000);
+};
 
 // ================================================
-// АДМІНКА ПО 5 КЛІКАХ НА "МЕНЮ"
+// ІНШІ ФУНКЦІЇ (без змін з твого коду)
 // ================================================
+function save() {
+  user.items = items;
+  fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
+}
+
+function update() {
+  document.getElementById('mon').innerText = user.points.toLocaleString();
+}
+
+function applyItems() {
+  let nickDisplay = user.name;
+  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  if(items.crown) nickDisplay += ' 👑';
+  if(items.fire) nickDisplay += ' 🔥';
+  if(items.shield) nickDisplay += ' 🛡️';
+  if(items.vip) nickDisplay += ' 💎 VIP';
+  document.getElementById('playerNick').innerHTML = nickDisplay;
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
+  document.getElementById(id).style.display='block';
+}
+
 function admT() {
-  cC++;
-  if (cC >= 5) {
-    document.getElementById('admin-panel').style.display = 'block';
-    cC = 0;
+  if(++cC >= 5) {
+    document.getElementById('admin-panel').style.display='block';
+    // тут можна додати logAdminAccess() якщо потрібно
   }
 }
 
-function closeAdm() {
-  document.getElementById('admin-panel').style.display = 'none';
-  cC = 0;
+function closeAdm() { 
+  document.getElementById('admin-panel').style.display='none'; 
+  cC = 0; 
 }
 
-// ================================================
-// ПРОСТІ ФУНКЦІЇ ПОКАЗУ ЕКРАНІВ
-// ================================================
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function toggleP() {
+  pOn = !pOn;
+  document.getElementById('pen-btn').innerText = pOn ? "ШТРАФИ: ВКЛ" : "ШТРАФИ: ВИКЛ";
+  document.getElementById('pen-btn').style.background = pOn ? "var(--red)" : "var(--green)";
 }
 
-// ================================================
-// ЗАПУСК ТЕМИ
-// ================================================
+// решта функцій (delU, edO, loadPlayers, loadUserLog, loadAdminLogs тощо) — встав сюди з твого коду
+// наприклад:
+async function loadT() {
+  show('top');
+  // ... твоя логіка топу
+}
+
 function startTheme(theme) {
   currentTheme = theme;
   currentIndex = 0;
@@ -269,60 +300,16 @@ function startTheme(theme) {
   loadQuestion();
 }
 
-// ================================================
-// ЗАВАНТАЖЕННЯ ПИТАННЯ (приклад)
-// ================================================
 function loadQuestion() {
-  const qs = themes[currentTheme];
-  if (currentIndex >= qs.length) {
-    document.getElementById('qtext').textContent = "Тема завершена!";
-    document.getElementById('abox').innerHTML = `
-      <div class="summary">
-        Правильних: ${correctCount}<br>
-        Неправильних: ${wrongCount}<br>
-        Баланс: ${user.points} ₴
-      </div>
-      <button class="btn" onclick="show('themes')">Обрати іншу тему</button>
-    `;
-    return;
-  }
-
-  const q = qs[currentIndex];
-  document.getElementById('qtext').textContent = q.q;
-  const abox = document.getElementById('abox');
-  abox.innerHTML = '';
-
-  let answers = [q.a, ...q.w];
-  answers.sort(() => Math.random() - 0.5);
-
-  answers.forEach(ans => {
-    let btn = document.createElement('button');
-    btn.className = 'btn';
-    btn.textContent = ans;
-    btn.onclick = () => checkAnswer(ans, q.a, btn);
-    abox.appendChild(btn);
-  });
+  // ... твоя логіка завантаження питань
 }
 
-function checkAnswer(selected, correct, btn) {
-  // ... (твоя логіка перевірки відповіді – встав сюди)
-}
-
-// ================================================
-// ІНШІ ФУНКЦІЇ (магазин, топ тощо)
-// ================================================
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function loadT() {
-  // твоя функція топу
-  show('top');
+function checkAnswer(selected, correct, button) {
+  // ... твоя логіка перевірки відповіді
 }
 
 function buyItem(item) {
-  // твоя функція магазину
+  // ... твоя логіка магазину
 }
 </script>
 </body>
