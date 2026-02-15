@@ -37,9 +37,9 @@
 </head>
 <body>
 
-<!-- Заставка з твоїм відео -->
+<!-- Заставка з відео -->
 <div id="splash">
-  <video id="splash-video" autoplay muted playsinline>
+  <video id="splash-video" autoplay playsinline>
     <source src="https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4" type="video/mp4">
     Ваш браузер не підтримує відео.
   </video>
@@ -415,13 +415,16 @@ window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
 
-  video.play().catch(err => console.log("Автозапуск заблоковано:", err));
-
-  // Увімкнення звуку після першого кліку по сторінці
-  document.body.addEventListener('click', function enableSound() {
-    video.muted = false;
-    document.body.removeEventListener('click', enableSound);
-  }, { once: true });
+  // Спроба автозапуску зі звуком
+  video.play().catch(err => {
+    console.log("Автозапуск зі звуком заблоковано:", err);
+    // Якщо заблоковано — вмикаємо звук після першого кліку
+    document.body.addEventListener('click', function enableSound() {
+      video.muted = false;
+      video.play().catch(() => {});
+      document.body.removeEventListener('click', enableSound);
+    }, { once: true });
+  });
 
   video.onended = function() {
     splash.style.display = 'none';
