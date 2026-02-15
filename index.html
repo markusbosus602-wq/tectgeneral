@@ -29,7 +29,13 @@
       height:100%;
       object-fit:cover;
     }
-    .screen{display:none;flex-direction:column;min-height:100vh;padding:20px;box-sizing:border-box}
+    .screen{
+      display:none;
+      flex-direction:column;
+      min-height:100vh;
+      padding:20px;
+      box-sizing:border-box;
+    }
     .active{display:flex}
     .card{
       background:rgba(255,255,255,0.92);
@@ -66,9 +72,27 @@
     .shop-item.bought{background:#c8e6c9}
     .shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .theme-btn{background:#9c27b0;color:white}
-    .log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
+    .log-box{
+      max-height:220px;
+      overflow-y:auto;
+      border:1px solid #ccc;
+      padding:10px;
+      margin:10px 0;
+      background:#f8f8f8;
+      border-radius:8px;
+    }
     .log-entry{padding:4px 0;border-bottom:1px solid #eee}
-    #admin-panel{border:2px dashed var(--red);padding:15px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px}
+    #admin-panel{
+      border:2px dashed var(--red);
+      padding:15px;
+      margin-top:15px;
+      display:none;
+      background:rgba(255,255,255,0.92);
+      text-align:left;
+      border-radius:15px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
     #feedback{text-align:center;font-size:48px;font-weight:bold;margin:20px 0;min-height:60px}
     .correct {color:#2ecc71;}
     .wrong {color:#ff4d4d;}
@@ -79,7 +103,7 @@
 </head>
 <body>
 
-<!-- Заставка з відео – запускається автоматично -->
+<!-- Заставка з відео – автоматичний запуск -->
 <div id="splash">
   <video id="splash-video" autoplay playsinline preload="auto">
     <source src="https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4" type="video/mp4">
@@ -87,7 +111,7 @@
   </video>
 </div>
 
-<!-- Екран авторизації (показується тільки якщо немає збережених даних) -->
+<!-- Екран авторизації (тільки якщо немає автологіну) -->
 <div id="auth-screen" class="screen">
   <div class="card">
     <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
@@ -148,7 +172,7 @@
   </div>
 </div>
 
-<!-- Вибір теми -->
+<!-- Вибір розділу -->
 <div id="themes" class="screen">
   <div class="card">
     <h2>Обери розділ</h2>
@@ -179,7 +203,7 @@
   </div>
 </div>
 
-<!-- Екран гри -->
+<!-- Гра -->
 <div id="game" class="screen">
   <div class="card">
     <h3 id="qtext"></h3>
@@ -217,7 +241,7 @@ const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-corr
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
 // ================================================
-// ТЕМИ (повні списки)
+// ТЕМИ (всі списки)
 // ================================================
 const themes = {
   vydminy: [
@@ -486,12 +510,10 @@ function tryAutoLogin() {
   const savedPass = localStorage.getItem('up');
 
   if (savedNick && savedPass) {
-    // Автоматичний вхід без форми
     document.getElementById('nick').value = savedNick;
     document.getElementById('pass').value = savedPass;
     auth();
   } else {
-    // Показ форми, якщо немає даних
     show('auth-screen');
   }
 }
@@ -533,9 +555,6 @@ async function auth() {
   }
 }
 
-// ================================================
-// РЕШТА ФУНКЦІЙ (повністю збережені)
-// ================================================
 function save() {
   user.items = items;
   fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
