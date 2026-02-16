@@ -7,10 +7,53 @@
   <style>
     :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
     body{margin:0;padding:0;background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;background-size:160px;color:#000;font-family:sans-serif;overflow:hidden}
-    #splash{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column}
-    #splash-video{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0}
-    #startBtn{position:relative;z-index:10000;padding:20px 40px;font-size:28px;font-weight:bold;background:var(--blue);color:white;border:none;border-radius:12px;cursor:pointer;box-shadow:0 0 20px rgba(0,162,255,0.6);transition:all 0.3s}
-    #startBtn:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(0,162,255,0.9)}
+    
+    /* Український фон для заставки */
+    #splash{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      background: linear-gradient(135deg, rgba(0,91,187,0.88), rgba(255,215,0,0.78)),
+                  url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;
+      background-size: cover, 180px;
+      background-position: center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+    }
+    
+    #splash-video{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      position:absolute;
+      top:0;
+      left:0;
+      opacity:0.82;
+      mix-blend-mode: overlay; /* робить відео гармонійним з фоном */
+    }
+    
+    #startBtn{
+      position:relative;
+      z-index:10000;
+      padding:24px 70px;
+      font-size:36px;
+      font-weight:bold;
+      background:linear-gradient(45deg, #FFD700, #FFEA80);
+      color:#00204A;
+      border:4px solid #FFFFFF;
+      border-radius:60px;
+      cursor:pointer;
+      box-shadow:0 10px 40px rgba(255,215,0,0.7);
+      transition:all 0.4s ease;
+    }
+    
+    #startBtn:hover{
+      transform:scale(1.12) translateY(-6px);
+      box-shadow:0 20px 60px rgba(255,215,0,0.95);
+    }
+    
     .screen{display:none;flex-direction:column;min-height:100vh;padding:20px;box-sizing:border-box}
     .active{display:flex}
     .card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3)}
@@ -39,7 +82,7 @@
 </head>
 <body>
 
-<!-- Заставка з відео + кнопка Почати гру -->
+<!-- Заставка з українським фоном + кнопка Почати гру -->
 <div id="splash">
   <video id="splash-video" playsinline preload="auto"></video>
   <button id="startBtn">Почати гру</button>
@@ -68,9 +111,7 @@
 
     <div id="admin-panel">
       <b style="color:var(--red);cursor:pointer;font-size:18px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
-
       <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
-
       <p><b>Управління гравцями</b></p>
       <input type="text" id="a-n" placeholder="Нік гравця">
       <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
@@ -79,13 +120,11 @@
       <br><br>
       <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
       <div id="player-list" style="max-height:250px;overflow-y:auto;margin:15px 0;background:#fff;padding:10px;border:1px solid #ccc;border-radius:8px"></div>
-
       <br><br>
       <h4 style="color:var(--blue)">Лог усіх входів у гру</h4>
       <div id="user-log" class="log-box">Завантаження...</div>
       <button class="btn" style="background:#ff9800;margin-top:8px;width:48%;margin-right:4%" onclick="loadUserLog()">Оновити</button>
       <button class="btn danger" style="margin-top:8px;width:48%" onclick="clearUserLog()">Очистити</button>
-
       <br><br>
       <h4 style="color:var(--blue)">Лог входів в адмінку</h4>
       <div id="admin-log" class="log-box">Завантаження...</div>
@@ -504,32 +543,6 @@ async function auth() {
   }
 }
 
-// ================================================
-// АДМІНКА – ЛОГУВАННЯ + ОНОВЛЕННЯ / ОЧИЩЕННЯ
-// ================================================
-function admT() {
-  if(++cC >= 5) {
-    document.getElementById('admin-panel').style.display = 'block';
-    logAdminAccess();
-    loadAdminLogs();
-    loadUserLog();
-    cC = 0;
-  }
-}
-
-async function logAdminAccess() {
-  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-  const nick = user ? user.name : "Анонім";
-  const entry = { nick: nick, time: now };
-  await fetch(DB + "admin_logs.json", {
-    method: 'POST',
-    body: JSON.stringify(entry)
-  });
-}
-
-// ================================================
-// РЕШТА ФУНКЦІЙ
-// ================================================
 function save() {
   user.items = items;
   fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
@@ -552,6 +565,26 @@ function applyItems() {
 function show(id) {
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   document.getElementById(id).style.display='block';
+}
+
+function admT() {
+  if(++cC >= 5) {
+    document.getElementById('admin-panel').style.display='block';
+    logAdminAccess();
+    loadAdminLogs();
+    loadUserLog();
+    cC = 0;
+  }
+}
+
+async function logAdminAccess() {
+  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+  const nick = user ? user.name : "Анонім";
+  const entry = { nick: nick, time: now };
+  await fetch(DB + "admin_logs.json", {
+    method: 'POST',
+    body: JSON.stringify(entry)
+  });
 }
 
 function closeAdm() { 
