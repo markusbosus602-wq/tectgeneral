@@ -6,41 +6,15 @@
   <title>UkrMova Pro</title>
   <style>
     :root{--blue:#00a2ff;--red:#ff4d4d;--green:#2ecc71;--gold:#f1c40f;--dark:#d32f2f}
-    body{
-      margin:0;
-      padding:0;
-      background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;
-      background-size:160px;
-      color:#000;
-      font-family:sans-serif;
-      overflow:hidden;
-    }
+    body{margin:0;padding:0;background:url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Ukrainian_ornament.svg/800px-Ukrainian_ornament.svg.png') repeat;background-size:160px;color:#000;font-family:sans-serif;overflow:hidden}
+    #splash{position:fixed;inset:0;z-index:9999;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column}
+    #splash-video{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0}
+    #startBtn{position:relative;z-index:10000;padding:20px 40px;font-size:28px;font-weight:bold;background:var(--blue);color:white;border:none;border-radius:12px;cursor:pointer;box-shadow:0 0 20px rgba(0,162,255,0.6);transition:all 0.3s}
+    #startBtn:hover{transform:scale(1.1);box-shadow:0 0 30px rgba(0,162,255,0.9)}
     .screen{display:none;flex-direction:column;min-height:100vh;padding:20px;box-sizing:border-box}
     .active{display:flex}
-    .card{
-      background:rgba(255,255,255,0.92);
-      backdrop-filter:blur(10px);
-      padding:20px;
-      border-radius:20px;
-      border:1px solid #444;
-      margin:auto;
-      width:100%;
-      max-width:450px;
-      box-shadow:0 0 20px rgba(0,0,0,0.3);
-    }
-    .btn{
-      background:var(--blue);
-      color:#fff;
-      border:none;
-      padding:14px;
-      border-radius:12px;
-      font-weight:700;
-      width:100%;
-      margin:6px 0;
-      cursor:pointer;
-      text-transform:uppercase;
-      transition:all .2s;
-    }
+    .card{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);padding:20px;border-radius:20px;border:1px solid #444;margin:auto;width:100%;max-width:450px;box-shadow:0 0 20px rgba(0,0,0,0.3)}
+    .btn{background:var(--blue);color:#fff;border:none;padding:14px;border-radius:12px;font-weight:700;width:100%;margin:6px 0;cursor:pointer;text-transform:uppercase;transition:all .2s}
     .btn:hover{transform:scale(1.02);box-shadow:0 0 15px rgba(0,162,255,.6)}
     .btn.green{background:var(--green)}
     .btn.danger{background:var(--dark)}
@@ -52,39 +26,27 @@
     .shop-item.bought{background:#c8e6c9}
     .shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .theme-btn{background:#9c27b0;color:white}
-    .log-box{
-      max-height:220px;
-      overflow-y:auto;
-      border:1px solid #ccc;
-      padding:10px;
-      margin:10px 0;
-      background:#f8f8f8;
-      border-radius:8px;
-    }
+    .log-box{max-height:220px;overflow-y:auto;border:1px solid #ccc;padding:10px;margin:10px 0;background:#f8f8f8;border-radius:8px}
     .log-entry{padding:4px 0;border-bottom:1px solid #eee}
-    #admin-panel{
-      border:2px dashed var(--red);
-      padding:20px;
-      margin-top:15px;
-      display:none;
-      background:rgba(255,255,255,0.92);
-      text-align:left;
-      border-radius:15px;
-      max-height:80vh;
-      overflow-y:auto;
-    }
+    #admin-panel{border:2px dashed var(--red);padding:20px;margin-top:15px;display:none;background:rgba(255,255,255,0.92);text-align:left;border-radius:15px;max-height:80vh;overflow-y:auto}
     #feedback{text-align:center;font-size:48px;font-weight:bold;margin:20px 0;min-height:60px}
-    .correct {color:#2ecc71;}
-    .wrong {color:#ff4d4d;}
-    .summary {font-size:24px; line-height:1.6; margin:30px 0; text-align:center;}
-    .summary strong {font-size:28px;}
+    .correct{color:#2ecc71}
+    .wrong{color:#ff4d4d}
+    .summary{font-size:24px;line-height:1.6;margin:30px 0;text-align:center}
+    .summary strong{font-size:28px}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
   </style>
 </head>
 <body>
 
-<!-- Екран авторизації (завжди показується спочатку, якщо немає автологіну) -->
-<div id="auth-screen" class="screen active">
+<!-- Заставка з відео + кнопка Почати гру -->
+<div id="splash">
+  <video id="splash-video" playsinline preload="auto"></video>
+  <button id="startBtn">Почати гру</button>
+</div>
+
+<!-- Екран авторизації -->
+<div id="auth-screen" class="screen">
   <div class="card">
     <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
     <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
@@ -148,16 +110,34 @@
   </div>
 </div>
 
-<!-- Вибір теми -->
+<!-- Вибір розділу -->
 <div id="themes" class="screen">
   <div class="card">
-    <h2>Обери тему</h2>
+    <h2>Обери розділ</h2>
+    <button class="btn theme-btn" onclick="show('imennyky')">Іменники</button>
+    <button class="btn theme-btn" onclick="show('prykmetnyky')">Прикметники</button>
+    <button class="btn red" onclick="show('menu')">НАЗАД</button>
+  </div>
+</div>
+
+<!-- Теми Іменників -->
+<div id="imennyky" class="screen">
+  <div class="card">
+    <h2>Іменники</h2>
     <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
+    <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
+    <button class="btn red" onclick="show('themes')">НАЗАД</button>
+  </div>
+</div>
+
+<!-- Теми Прикметників -->
+<div id="prykmetnyky" class="screen">
+  <div class="card">
+    <h2>Прикметники</h2>
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky')">Прикметники</button>
     <button class="btn theme-btn" onclick="startTheme('grupy_prykmetnykiv')">Групи прикметників за значенням</button>
-    <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння прикметників</button>
-    <button class="btn red" onclick="show('menu')">НАЗАД</button>
+    <button class="btn red" onclick="show('themes')">НАЗАД</button>
   </div>
 </div>
 
@@ -437,21 +417,56 @@ const themes = {
 };
 
 // ================================================
-// АВТОЛОГІН ПРИ ЗАВАНТАЖЕННІ
+// ЗАПУСК ВІДЕО ЧЕРЕЗ КНОПКУ
 // ================================================
 window.onload = function() {
+  const splash = document.getElementById('splash');
+  const video = document.getElementById('splash-video');
+  const startBtn = document.getElementById('startBtn');
+
+  video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+
+  startBtn.onclick = function() {
+    startBtn.style.display = 'none';
+    video.muted = false;
+    video.currentTime = 0;
+    video.play().then(() => {
+      console.log("Відео успішно запущено зі звуком");
+    }).catch(e => {
+      console.error("Помилка відтворення відео:", e);
+      alert("Не вдалося запустити відео. Спробуйте оновити сторінку.");
+    });
+  };
+
+  video.onended = function() {
+    console.log("Відео закінчилося → перехід до меню");
+    splash.style.display = 'none';
+    tryAutoLogin();
+  };
+
+  // Запасний таймер — якщо відео не закінчилося за 70 секунд
+  setTimeout(() => {
+    if (splash.style.display !== 'none') {
+      console.log("Запасний таймер спрацював — примусовий перехід");
+      splash.style.display = 'none';
+      tryAutoLogin();
+    }
+  }, 70000);
+};
+
+function tryAutoLogin() {
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
-  if(savedNick && savedPass) {
+
+  if (savedNick && savedPass) {
     document.getElementById('nick').value = savedNick;
     document.getElementById('pass').value = savedPass;
     auth();
+  } else {
+    show('auth-screen');
   }
-};
+}
 
-// ================================================
-// АВТОРИЗАЦІЯ
-// ================================================
 async function auth() {
   let n = document.getElementById('nick').value.trim();
   let p = document.getElementById('pass').value.trim();
@@ -490,7 +505,30 @@ async function auth() {
 }
 
 // ================================================
-// ОСНОВНІ ФУНКЦІЇ
+// АДМІНКА – ЛОГУВАННЯ + ОНОВЛЕННЯ / ОЧИЩЕННЯ
+// ================================================
+function admT() {
+  if(++cC >= 5) {
+    document.getElementById('admin-panel').style.display = 'block';
+    logAdminAccess();
+    loadAdminLogs();
+    loadUserLog();
+    cC = 0;
+  }
+}
+
+async function logAdminAccess() {
+  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+  const nick = user ? user.name : "Анонім";
+  const entry = { nick: nick, time: now };
+  await fetch(DB + "admin_logs.json", {
+    method: 'POST',
+    body: JSON.stringify(entry)
+  });
+}
+
+// ================================================
+// РЕШТА ФУНКЦІЙ
 // ================================================
 function save() {
   user.items = items;
@@ -514,16 +552,6 @@ function applyItems() {
 function show(id) {
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   document.getElementById(id).style.display='block';
-}
-
-function admT() {
-  if(++cC >= 5) {
-    document.getElementById('admin-panel').style.display='block';
-    logAdminAccess();
-    loadAdminLogs();
-    loadUserLog();
-    cC = 0;
-  }
 }
 
 function closeAdm() { 
@@ -606,13 +634,6 @@ async function clearUserLog() {
   await fetch(DB + "user_logs.json", {method: 'DELETE'});
   loadUserLog();
   alert("Лог входів очищено");
-}
-
-async function logAdminAccess() {
-  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-  const nick = user ? user.name : "Анонім";
-  const entry = { nick: nick, time: now };
-  await fetch(DB + "admin_logs.json", {method: 'POST', body: JSON.stringify(entry)});
 }
 
 async function loadAdminLogs() {
