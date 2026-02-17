@@ -10,7 +10,7 @@
     body{
       margin:0;
       padding:0;
-      background: linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.55)),
+      background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
                   url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat fixed;
       color:#fff;
       font-family:sans-serif;
@@ -21,7 +21,8 @@
       position:fixed;
       inset:0;
       z-index:9999;
-      background:#000; /* на час відео — чорний, щоб малюнок не просвічувався */
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -109,7 +110,7 @@
 </head>
 <body>
 
-<!-- Заставка з відео + кнопка Почати гру -->
+<!-- Заставка з відео + кнопка Почати гру (малюнок під відео) -->
 <div id="splash">
   <video id="splash-video" playsinline preload="auto"></video>
   <button id="startBtn">Почати гру</button>
@@ -570,32 +571,6 @@ async function auth() {
   }
 }
 
-// ================================================
-// АДМІНКА – ЛОГУВАННЯ + ОНОВЛЕННЯ / ОЧИЩЕННЯ
-// ================================================
-function admT() {
-  if(++cC >= 5) {
-    document.getElementById('admin-panel').style.display = 'block';
-    logAdminAccess();
-    loadAdminLogs();
-    loadUserLog();
-    cC = 0;
-  }
-}
-
-async function logAdminAccess() {
-  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-  const nick = user ? user.name : "Анонім";
-  const entry = { nick: nick, time: now };
-  await fetch(DB + "admin_logs.json", {
-    method: 'POST',
-    body: JSON.stringify(entry)
-  });
-}
-
-// ================================================
-// РЕШТА ФУНКЦІЙ
-// ================================================
 function save() {
   user.items = items;
   fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
@@ -618,6 +593,26 @@ function applyItems() {
 function show(id) {
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   document.getElementById(id).style.display='block';
+}
+
+function admT() {
+  if(++cC >= 5) {
+    document.getElementById('admin-panel').style.display='block';
+    logAdminAccess();
+    loadAdminLogs();
+    loadUserLog();
+    cC = 0;
+  }
+}
+
+async function logAdminAccess() {
+  const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
+  const nick = user ? user.name : "Анонім";
+  const entry = { nick: nick, time: now };
+  await fetch(DB + "admin_logs.json", {
+    method: 'POST',
+    body: JSON.stringify(entry)
+  });
 }
 
 function closeAdm() { 
