@@ -21,7 +21,7 @@
       position:fixed;
       inset:0;
       z-index:9999;
-      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+      background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
                   url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
       display:flex;
       align-items:center;
@@ -30,12 +30,14 @@
     }
     
     #splash-video{
-      width:100%;
+      width:70%;               /* зроблено вужчим — 70% ширини */
+      max-width:900px;
       height:100%;
       object-fit:cover;
       position:absolute;
       top:0;
-      left:0;
+      left:50%;
+      transform:translateX(-50%);
       opacity:1;
     }
     
@@ -110,7 +112,7 @@
 </head>
 <body>
 
-<!-- Заставка з відео + кнопка Почати гру (малюнок під відео) -->
+<!-- Заставка з відео + кнопка Почати гру (малюнок світліший під відео) -->
 <div id="splash">
   <video id="splash-video" playsinline preload="auto"></video>
   <button id="startBtn">Почати гру</button>
