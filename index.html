@@ -69,7 +69,7 @@
       border:1px solid #444;
       margin:auto;
       width:100%;
-      max-width:450px;
+      max-width:380px;          /* ← ЗМЕНШЕНО з 450px до 380px */
       box-shadow:0 0 20px rgba(0,0,0,0.4);
       color:#000;
     }
@@ -110,7 +110,7 @@
 </head>
 <body>
 
-<!-- Заставка з відео + кнопка Почати гру (малюнок під відео) -->
+<!-- Заставка з відео + кнопка Почати гру -->
 <div id="splash">
   <video id="splash-video" playsinline preload="auto"></video>
   <button id="startBtn">Почати гру</button>
@@ -511,7 +511,6 @@ window.onload = function() {
     tryAutoLogin();
   };
 
-  // Запасний таймер — якщо відео не закінчилося за 70 секунд
   setTimeout(() => {
     if (splash.style.display !== 'none') {
       console.log("Запасний таймер спрацював — примусовий перехід");
