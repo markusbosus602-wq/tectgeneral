@@ -27,17 +27,15 @@
       align-items:center;
       justify-content:center;
       flex-direction:column;
-      overflow:hidden;
     }
     
     #splash-video{
-      width: 100%;
-      height: 100%;
-      object-fit: contain;               /* ← головна зміна: все відео видно повністю */
-      background: rgba(0,0,0,0.5);       /* темний фон по боках, якщо відео не на весь екран */
-      position: absolute;
-      top: 0;
-      left: 0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      position:absolute;
+      top:0;
+      left:0;
       opacity:1;
     }
     
@@ -71,7 +69,7 @@
       border:1px solid #444;
       margin:auto;
       width:100%;
-      max-width:300px;
+      max-width:300px;           /* ← ще вужче — 300px */
       box-shadow:0 0 20px rgba(0,0,0,0.4);
       color:#000;
     }
@@ -513,7 +511,6 @@ window.onload = function() {
     tryAutoLogin();
   };
 
-  // Запасний таймер — якщо відео не закінчилося за 70 секунд
   setTimeout(() => {
     if (splash.style.display !== 'none') {
       console.log("Запасний таймер спрацював — примусовий перехід");
