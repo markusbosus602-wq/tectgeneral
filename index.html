@@ -522,20 +522,18 @@ window.onload = function() {
 
   video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
 
-  // Спочатку відео приглушене
   video.muted = true;
 
   startBtn.onclick = function() {
     startBtn.style.display = 'none';
-    video.muted = false;           // вмикаємо звук після кліку
+    video.muted = false;
     video.currentTime = 0;
     video.play().then(() => {
       console.log("Відео запущено зі звуком");
     }).catch(e => {
-      console.error("Автовідтворення заблоковано браузером:", e);
-      // Якщо браузер блокує звук — залишаємо muted=false, але відтворюємо
+      console.error("Помилка автозапуску:", e);
       video.muted = false;
-      video.play().catch(() => {});
+      video.play().catch(()=>{});
     });
   };
 
@@ -545,10 +543,9 @@ window.onload = function() {
     tryAutoLogin();
   };
 
-  // Запасний таймер на випадок, якщо відео зависне
   setTimeout(() => {
     if (splash.style.display !== 'none') {
-      console.log("Запасний таймер спрацював — примусовий перехід");
+      console.log("Запасний таймер спрацював");
       splash.style.display = 'none';
       tryAutoLogin();
     }
