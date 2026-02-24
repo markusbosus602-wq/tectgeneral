@@ -519,7 +519,7 @@ const themes = {
 };
 
 // ================================================
-// ЗАПУСК ВІДЕО ЧЕРЕЗ КНОПКУ
+// ЗАПУСК ВІДЕО
 // ================================================
 window.onload = function() {
   const splash = document.getElementById('splash');
@@ -783,9 +783,17 @@ function loadQuestion() {
   document.getElementById('feedback').innerHTML = '';
   const abox = document.getElementById('abox');
   abox.innerHTML = '';
-  
-  // Спеціальна логіка для теми "Правопис НЕ з прикметниками"
-  if (currentTheme === 'ne_z_prykmetnykamy') {
+
+  // Спеціальна логіка для теми "Ступені порівняння прикметників 2" — ТІЛЬКИ ДВА ВАРІАНТИ: Так / Ні
+  if (currentTheme === 'prykmetnyky_stupeni_2') {
+    ["Так", "Ні"].forEach(o => {
+      let btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.innerText = o;
+      btn.onclick = () => checkAnswer(o, q.a, btn);
+      abox.appendChild(btn);
+    });
+  } else if (currentTheme === 'ne_z_prykmetnykamy') {
     ["разом", "окремо"].forEach(o => {
       let btn = document.createElement('button');
       btn.className = 'btn';
@@ -794,7 +802,7 @@ function loadQuestion() {
       abox.appendChild(btn);
     });
   } else {
-    // Звичайна логіка для всіх інших тем
+    // звичайна логіка для всіх інших тем
     let answers = [q.a, ...q.w];
     answers.sort(() => Math.random() - 0.5);
     answers.forEach(o => {
