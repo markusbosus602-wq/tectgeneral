@@ -133,6 +133,7 @@
     <button class="btn" onclick="show('themes')">ГРАТИ</button>
     <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
+
     <div id="admin-panel">
       <b style="color:var(--red);cursor:pointer;font-size:18px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
       <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
@@ -198,6 +199,7 @@
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння прикметників</button>
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni_2')">Ступені порівняння прикметників 2</button>
     <button class="btn theme-btn" onclick="startTheme('ne_z_prykmetnykamy')">Правопис НЕ з прикметниками</button>
+    <button class="btn theme-btn" onclick="startTheme('chyslivnyky')">Числівники</button>
     <button class="btn red" onclick="show('themes')">НАЗАД</button>
   </div>
 </div>
@@ -233,6 +235,7 @@ let correctCount = 0;
 let wrongCount = 0;
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
 let currentCorrectAnswer = '';
+
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
@@ -483,22 +486,22 @@ const themes = {
     {q:"Ця форма правильна: менш стрімкий?", a:"Так", w:["Так","Ні"]},
     {q:"Ця форма правильна: радісніший?", a:"Так", w:["Так","Ні"]},
     {q:"Ця форма правильна: довший?", a:"Так", w:["Так","Ні"]},
-    {q:"Ця форма правильна: більш смачний?", a:"Так", w:["Так","Ні"]},
-    {q:"Ця форма правильна: швидкіший?", a:"Ні", w:["Так","Ні"]},
+    {q:"Ця форма правильна: смачніший?", a:"Так", w:["Так","Ні"]},
+    {q:"Ця форма правильна: швидший?", a:"Так", w:["Так","Ні"]},
     {q:"Ця форма правильна: поганіший?", a:"Ні", w:["Так","Ні"]},
     {q:"Ця форма правильна: холодніший?", a:"Так", w:["Так","Ні"]},
     {q:"Ця форма правильна: менш рішучий?", a:"Так", w:["Так","Ні"]},
-    {q:"Ця форма правильна: самий простіший?", a:"Ні", w:["Так","Ні"]},
-    {q:"Ця форма правильна: блищий?", a:"Ні", w:["Так","Ні"]},
+    {q:"Ця форма правильна: найпростіший?", a:"Так", w:["Так","Ні"]},
+    {q:"Ця форма правильна: блискучіший?", a:"Так", w:["Так","Ні"]},
     {q:"Ця форма правильна: високіший?", a:"Ні", w:["Так","Ні"]},
     {q:"Ця форма правильна: ващий?", a:"Ні", w:["Так","Ні"]},
-    {q:"Ця форма правильна: найбільш важливіший?", a:"Ні", w:["Так","Ні"]},
-    {q:"Ця форма правильна: солодкіший?", a:"Ні", w:["Так","Ні"]},
-    {q:"Ця форма правильна: менш веселіший?", a:"Ні", w:["Так","Ні"]},
-    {q:"Ця форма правильна: більш вередливіший?", a:"Ні", w:["Так","Ні"]},
-    {q:"Ця форма правильна: прекрасніший?", a:"Ні", w:["Так","Ні"]},
-    {q:"Ця форма правильна: величезніший?", a:"Ні", w:["Так","Ні"]},
-    {q:"Ця форма правильна: чорнявіший?", a:"Ні", w:["Так","Ні"]}
+    {q:"Ця форма правильна: найважливіший?", a:"Так", w:["Так","Ні"]},
+    {q:"Ця форма правильна: солідніший?", a:"Так", w:["Так","Ні"]},
+    {q:"Ця форма правильна: веселіший?", a:"Так", w:["Так","Ні"]},
+    {q:"Ця форма правильна: вередливіший?", a:"Так", w:["Так","Ні"]},
+    {q:"Ця форма правильна: прекрасніший?", a:"Так", w:["Так","Ні"]},
+    {q:"Ця форма правильна: величезніший?", a:"Так", w:["Так","Ні"]},
+    {q:"Ця форма правильна: чорнявіший?", a:"Так", w:["Так","Ні"]}
   ].sort(() => Math.random() - 0.5),
   ne_z_prykmetnykamy: [
     {q:"не/широка річка", a:"разом", w:["разом","окремо"]},
@@ -515,6 +518,12 @@ const themes = {
     {q:"аж ніяк не/складний тест", a:"окремо", w:["разом","окремо"]},
     {q:"не/озорий степ", a:"разом", w:["разом","окремо"]},
     {q:"не/щира посмішка, а фальшива", a:"окремо", w:["разом","окремо"]}
+  ].sort(() => Math.random() - 0.5),
+  chyslivnyky: [
+    {q:"Обери порядковий числівник", a:"сьомий", w:["Сім","семеро","одна сьома"]},
+    {q:"Обери власне кількісний числівник", a:"три", w:["Третій","троє","три десятих"]},
+    {q:"Обери дробовий числівник", a:"п'ять сьомих", w:["П'ятеро","п'ятий","п'ять"]},
+    {q:"Обери збірний числівник", a:"двоє", w:["Другий","два","дві десятих"]}
   ].sort(() => Math.random() - 0.5)
 };
 
@@ -525,35 +534,41 @@ window.onload = function() {
   const splash = document.getElementById('splash');
   const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
+
   video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+
   startBtn.onclick = function() {
     startBtn.style.display = 'none';
     video.muted = false;
     video.currentTime = 0;
-    video.play().then(() => {
-      console.log("Відео успішно запущено зі звуком");
-    }).catch(e => {
-      console.error("Помилка відтворення відео:", e);
-      alert("Не вдалося запустити відео. Спробуйте оновити сторінку.");
+    video.play().catch(e => {
+      console.error("Автозапуск заблоковано:", e);
+      video.muted = false;
+      video.play().catch(()=>{});
     });
   };
+
   video.onended = function() {
-    console.log("Відео закінчилося → перехід до меню");
     splash.style.display = 'none';
     tryAutoLogin();
   };
+
   setTimeout(() => {
     if (splash.style.display !== 'none') {
-      console.log("Запасний таймер спрацював — примусовий перехід");
       splash.style.display = 'none';
       tryAutoLogin();
     }
   }, 70000);
 };
 
+// ================================================
+// РЕШТА ФУНКЦІЙ (без змін)
+// ================================================
+
 function tryAutoLogin() {
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
+
   if (savedNick && savedPass) {
     document.getElementById('nick').value = savedNick;
     document.getElementById('pass').value = savedPass;
@@ -644,9 +659,9 @@ async function logAdminAccess() {
   });
 }
 
-function closeAdm() {
-  document.getElementById('admin-panel').style.display='none';
-  cC = 0;
+function closeAdm() { 
+  document.getElementById('admin-panel').style.display='none'; 
+  cC = 0; 
 }
 
 function toggleP() {
@@ -777,6 +792,7 @@ function loadQuestion() {
     save();
     return;
   }
+
   const q = qs[currentIndex];
   currentCorrectAnswer = q.a;
   document.getElementById('qtext').textContent = `Питання ${currentIndex+1}/${qs.length}: ${q.q}`;
@@ -784,35 +800,16 @@ function loadQuestion() {
   const abox = document.getElementById('abox');
   abox.innerHTML = '';
 
-  // Спеціальна логіка для теми "Ступені порівняння прикметників 2" — ТІЛЬКИ ДВА ВАРІАНТИ: Так / Ні
-  if (currentTheme === 'prykmetnyky_stupeni_2') {
-    ["Так", "Ні"].forEach(o => {
-      let btn = document.createElement('button');
-      btn.className = 'btn';
-      btn.innerText = o;
-      btn.onclick = () => checkAnswer(o, q.a, btn);
-      abox.appendChild(btn);
-    });
-  } else if (currentTheme === 'ne_z_prykmetnykamy') {
-    ["разом", "окремо"].forEach(o => {
-      let btn = document.createElement('button');
-      btn.className = 'btn';
-      btn.innerText = o.toUpperCase();
-      btn.onclick = () => checkAnswer(o, q.a, btn);
-      abox.appendChild(btn);
-    });
-  } else {
-    // звичайна логіка для всіх інших тем
-    let answers = [q.a, ...q.w];
-    answers.sort(() => Math.random() - 0.5);
-    answers.forEach(o => {
-      let btn = document.createElement('button');
-      btn.className = 'btn';
-      btn.innerText = o;
-      btn.onclick = () => checkAnswer(o, q.a, btn);
-      abox.appendChild(btn);
-    });
-  }
+  let answers = [q.a, ...q.w];
+  answers.sort(() => Math.random() - 0.5);
+
+  answers.forEach(o => {
+    let btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.innerText = o;
+    btn.onclick = () => checkAnswer(o, q.a, btn);
+    abox.appendChild(btn);
+  });
 }
 
 function checkAnswer(selected, correct, button) {
@@ -822,7 +819,7 @@ function checkAnswer(selected, correct, button) {
     user.points += 100;
     button.style.background = 'var(--green)';
     button.style.color = 'white';
-    document.getElementById('feedback').innerHTML = '<span class="correct">ПРАВИЛЬНО!</span>';
+    document.getElementById('feedback').innerHTML = '<span class="correct">ПРАВИЛЬНО! ✓</span>';
     correctSound.currentTime = 0;
     correctSound.play().catch(()=>{});
   } else {
@@ -830,7 +827,7 @@ function checkAnswer(selected, correct, button) {
     user.points = Math.max(0, user.points - 30);
     button.style.background = 'var(--red)';
     button.style.color = 'white';
-    document.getElementById('feedback').innerHTML = '<span class="wrong">❌</span>';
+    document.getElementById('feedback').innerHTML = '<span class="wrong">НЕПРАВИЛЬНО! ×</span>';
     wrongSound.currentTime = 0;
     wrongSound.play().catch(()=>{});
   }
@@ -839,7 +836,7 @@ function checkAnswer(selected, correct, button) {
   setTimeout(() => {
     currentIndex++;
     loadQuestion();
-  }, 1000);
+  }, 1400);
 }
 
 async function loadT() {
