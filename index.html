@@ -130,7 +130,7 @@
     <h3 onclick="admT()" style="cursor:pointer">МЕНЮ</h3>
     <div class="nickname" id="playerNick"></div>
     <div class="money"><span id="mon">0</span> ₴</div>
-    <button class="btn" onclick="show('themes')">ГРАТИ</button>
+    <button class="btn" onclick="show('sections')">ГРАТИ</button>
     <button class="btn" style="background:#333" onclick="loadT()">ТОП</button>
     <button class="btn green" onclick="show('shop')">МАГАЗИН</button>
 
@@ -173,11 +173,13 @@
   </div>
 </div>
 
-<div id="themes" class="screen">
+<!-- Новий екран вибору розділів (замість старого themes) -->
+<div id="sections" class="screen">
   <div class="card">
     <h2>Обери розділ</h2>
     <button class="btn theme-btn" onclick="show('imennyky')">Іменники</button>
     <button class="btn theme-btn" onclick="show('prykmetnyky')">Прикметники</button>
+    <button class="btn theme-btn" onclick="startTheme('chyslivnyky')">Числівники</button>
     <button class="btn red" onclick="show('menu')">НАЗАД</button>
   </div>
 </div>
@@ -187,7 +189,7 @@
     <h2>Іменники</h2>
     <button class="btn theme-btn" onclick="startTheme('vydminy')">Відміни іменників</button>
     <button class="btn theme-btn" onclick="startTheme('orudnyi_1vidmina')">Орудний відмінок 1 відміни</button>
-    <button class="btn red" onclick="show('themes')">НАЗАД</button>
+    <button class="btn red" onclick="show('sections')">НАЗАД</button>
   </div>
 </div>
 
@@ -199,8 +201,7 @@
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni')">Ступені порівняння прикметників</button>
     <button class="btn theme-btn" onclick="startTheme('prykmetnyky_stupeni_2')">Ступені порівняння прикметників 2</button>
     <button class="btn theme-btn" onclick="startTheme('ne_z_prykmetnykamy')">Правопис НЕ з прикметниками</button>
-    <button class="btn theme-btn" onclick="startTheme('chyslivnyky')">Числівники</button>
-    <button class="btn red" onclick="show('themes')">НАЗАД</button>
+    <button class="btn red" onclick="show('sections')">НАЗАД</button>
   </div>
 </div>
 
@@ -209,7 +210,7 @@
     <h3 id="qtext"></h3>
     <div id="feedback"></div>
     <div id="abox"></div>
-    <button class="btn red" style="margin-top:20px;" onclick="show('prykmetnyky')">НАЗАД</button>
+    <button class="btn red" style="margin-top:20px;" onclick="show('sections')">НАЗАД</button>
   </div>
 </div>
 
@@ -596,7 +597,7 @@ async function auth() {
       }
       user = d;
     } else {
-      user = {name:n, pass:p, points:0, items:{gold_frame:false}};
+      user = {name:n, pass:p, points:0, items:{gold_frame:false}, themeAttempts:{}};
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
     localStorage.setItem('un', n);
@@ -771,6 +772,11 @@ function startTheme(theme) {
   currentIndex = 0;
   correctCount = 0;
   wrongCount = 0;
+
+  // Ініціалізація лічильника спроб, якщо його ще немає
+  if (!user.themeAttempts) user.themeAttempts = {};
+  if (!user.themeAttempts[theme]) user.themeAttempts[theme] = 0;
+
   show('game');
   loadQuestion();
 }
@@ -778,6 +784,10 @@ function startTheme(theme) {
 function loadQuestion() {
   const qs = themes[currentTheme];
   if (currentIndex >= qs.length) {
+    // Збільшуємо лічильник спроб після завершення теми
+    user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
+    save();
+
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
@@ -785,11 +795,11 @@ function loadQuestion() {
         <strong>Гравець:</strong> ${user ? user.name : '—'}<br><br>
         <strong style="color:var(--green)">Правильних відповідей:</strong> ${correctCount}<br>
         <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrongCount}<br><br>
+        <strong>Цю тему ти проходив:</strong> ${user.themeAttempts[currentTheme]} раз(ів)<br><br>
         <strong>Поточний баланс:</strong> ${user ? user.points.toLocaleString() : 0} ₴
       </div>
-      <button class="btn" onclick="show('prykmetnyky')">Обрати іншу тему</button>
+      <button class="btn" onclick="show('sections')">Обрати іншу тему</button>
     `;
-    save();
     return;
   }
 
