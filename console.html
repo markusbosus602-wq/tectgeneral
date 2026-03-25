@@ -225,6 +225,8 @@
   .badge-gold { background: #ffd700; color: #000; }
   .badge-vip { background: #ff00ff; color: #fff; }
   .badge-crown { background: #ffa500; color: #000; }
+  .badge-fire { background: #ff4500; color: #fff; }
+  .badge-shield { background: #4169e1; color: #fff; }
   
   .control-group {
     display: inline-block;
@@ -252,6 +254,28 @@
   
   .offline {
     color: #f00;
+  }
+  
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modal-content {
+    background: #0a1a0a;
+    border: 2px solid #0f0;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 500px;
+    width: 90%;
   }
 </style>
 </head>
@@ -294,6 +318,7 @@
     <button onclick="delUser()" class="danger">🗑️ Видалити</button>
     <button onclick="giveAchievement()">🏆 Додати досягнення</button>
     <button onclick="sendMessageToPlayer()">📨 Надіслати повідомлення</button>
+    <button onclick="viewPlayerStats()">📊 Переглянути статистику</button>
   </div>
   
   <div id="players" style="margin-top: 15px; overflow-x: auto;"></div>
@@ -323,18 +348,28 @@
     <button onclick="resetAllPlayers()" class="danger">⚠️ СКИНУТИ ВСІХ ГРАВЦІВ</button>
     <button onclick="giveAllPlayersBonus()" class="success">🎁 БОНУС ВСІМ ГРАВЦЯМ</button>
     <button onclick="setGameSettings()">⚙️ Налаштування гри</button>
+    <button onclick="showTopPlayers()">🏆 ТОП-10 гравців</button>
   </div>
   <div id="gameSettings" style="margin-top: 15px;"></div>
+  <div id="topPlayers" style="margin-top: 15px;"></div>
 </div>
 
 <div class="section">
   <h3>📤 ІМПОРТ/ЕКСПОРТ</h3>
   <button onclick="exportFullDatabase()" class="warning">💾 Експорт повної БД (JSON)</button>
   <button onclick="showImportForm()">📥 Імпорт даних</button>
+  <button onclick="backupDatabase()">💿 Створити резервну копію</button>
   <div id="importArea" style="display: none; margin-top: 15px;">
     <textarea id="importData" rows="5" cols="50" placeholder="Вставте JSON дані для імпорту..."></textarea>
     <button onclick="importData()">Імпортувати</button>
   </div>
+</div>
+
+<div class="section">
+  <h3>📢 РОЗСИЛКА ПОВІДОМЛЕНЬ</h3>
+  <textarea id="broadcastMsg" rows="3" cols="50" placeholder="Текст для розсилки всім гравцям..." style="width: 100%;"></textarea>
+  <button onclick="sendBroadcast()" class="warning">📨 Розіслати всім</button>
+  <button onclick="sendBroadcastToVIP()">💎 Тільки VIP гравцям</button>
 </div>
 
 <div class="section">
@@ -346,6 +381,14 @@
   <pre id="consoleOutput">✅ Система готова...</pre>
 </div>
 
+</div>
+
+<div id="playerModal" class="modal">
+  <div class="modal-content">
+    <h3>📊 Статистика гравця</h3>
+    <div id="modalStats"></div>
+    <button onclick="closeModal()">Закрити</button>
+  </div>
 </div>
 
 <script>
@@ -435,7 +478,7 @@ async function loadPlayers() {
     }
   }
 
-  let html = `<table>
+  let html = `°
     <thead>
       <tr>
         <th>Нікнейм</th>
@@ -444,6 +487,7 @@ async function loadPlayers() {
         <th>🏆 Досягнення</th>
         <th>📊 Ігор зіграно</th>
         <th>🎯 Точність</th>
+        <th>✅/❌</th>
         <th>📅 Реєстрація</th>
       </tr>
     </thead>
@@ -457,6 +501,8 @@ async function loadPlayers() {
     if (u.items?.vip) achievements.push('<span class="badge badge-vip">VIP</span>');
     if (u.items?.gold_frame) achievements.push('<span class="badge badge-gold">🏅</span>');
     if (u.items?.crown) achievements.push('<span class="badge badge-crown">👑</span>');
+    if (u.items?.fire) achievements.push('<span class="badge badge-fire">🔥</span>');
+    if (u.items?.shield) achievements.push('<span class="badge badge-shield">🛡️</span>');
     
     html += `  
       <tr>
@@ -466,6 +512,7 @@ async function loadPlayers() {
         <td>${achievements.join(' ') || '—'}</td>
         <td>${u.themeAttempts ? Object.keys(u.themeAttempts).length : 0}</td>
         <td>${accuracy}%</td>
+        <td>${u.totalCorrect || 0}/${u.totalWrong || 0}</td>
         <td><small>${u.registeredAt ? new Date(u.registeredAt).toLocaleDateString('uk-UA') : '—'}</small></td>
       </tr>
     `;
@@ -610,7 +657,7 @@ async function loadLogs() {
   if (filter) {
     logsArray = logsArray.filter(entry => 
       entry.game_nick?.toLowerCase().includes(filter) || 
-      entry.tg_username?.toLowerCase().includes(filter)
+      (entry.tg_username?.toLowerCase().includes(filter) || "")
     );
   }
 
@@ -682,19 +729,20 @@ async function clearAdminLogs() {
 async function loadStats() {
   const users = await get("users");
   const logs = await get("user_logs");
-  const adminLogs = await get("admin_logs");
   
   let count = Object.keys(users).length;
   let totalMoney = 0;
   let totalCorrect = 0;
   let totalWrong = 0;
   let playersWithVIP = 0;
+  let totalThemesPlayed = 0;
   
   for (let k in users) {
     totalMoney += users[k].points || 0;
     totalCorrect += users[k].totalCorrect || 0;
     totalWrong += users[k].totalWrong || 0;
     if (users[k].items?.vip) playersWithVIP++;
+    totalThemesPlayed += users[k].themeAttempts ? Object.keys(users[k].themeAttempts).length : 0;
   }
   
   const totalAnswers = totalCorrect + totalWrong;
@@ -731,6 +779,10 @@ async function loadStats() {
       <div>💎 VIP гравців</div>
     </div>
     <div class="stat-card">
+      <div class="stat-number">${totalThemesPlayed}</div>
+      <div>📚 Всього пройдено тем</div>
+    </div>
+    <div class="stat-card">
       <div class="stat-number">${logs ? Object.keys(logs).length : 0}</div>
       <div>📝 Всього входів</div>
     </div>
@@ -747,6 +799,19 @@ async function exportFullDatabase() {
   a.click();
   URL.revokeObjectURL(url);
   addConsoleMessage("💾 Повна база даних експортована");
+}
+
+async function backupDatabase() {
+  const data = await get("");
+  const backups = await get("backups") || {};
+  const backupName = `backup_${new Date().toISOString().slice(0,19)}`;
+  backups[backupName] = {
+    date: new Date().toISOString(),
+    data: data
+  };
+  await put("backups", backups);
+  addConsoleMessage(`💿 Створено резервну копію: ${backupName}`);
+  alert("✅ Резервна копія створена!");
 }
 
 function exportPlayersData() {
@@ -807,6 +872,120 @@ async function sendMessageToPlayer() {
   alert("✅ Повідомлення надіслано! Гравець побачить його при наступному вході.");
 }
 
+async function sendBroadcast() {
+  const message = document.getElementById("broadcastMsg").value.trim();
+  if (!message) return alert("Введіть текст для розсилки");
+  if (!confirm(`Розіслати всім гравцям повідомлення:\n\n"${message}"\n\nПродовжити?`)) return;
+  
+  const users = await get("users");
+  let count = 0;
+  for (let key in users) {
+    if (!users[key].messages) users[key].messages = [];
+    users[key].messages.push({
+      from: "Адмін (розсилка)",
+      text: message,
+      time: new Date().toLocaleString("uk-UA"),
+      read: false
+    });
+    await put(`users/${key}`, users[key]);
+    count++;
+  }
+  logAdminAction(`Зробив розсилку всім ${count} гравцям: "${message.substring(0, 50)}"`);
+  addConsoleMessage(`📢 Розсилка надіслана ${count} гравцям`);
+  alert(`✅ Розсилку отримали ${count} гравців`);
+  document.getElementById("broadcastMsg").value = "";
+}
+
+async function sendBroadcastToVIP() {
+  const message = document.getElementById("broadcastMsg").value.trim();
+  if (!message) return alert("Введіть текст для розсилки");
+  if (!confirm(`Розіслати ТІЛЬКИ VIP гравцям повідомлення:\n\n"${message}"\n\nПродовжити?`)) return;
+  
+  const users = await get("users");
+  let count = 0;
+  for (let key in users) {
+    if (users[key].items?.vip) {
+      if (!users[key].messages) users[key].messages = [];
+      users[key].messages.push({
+        from: "Адмін (VIP розсилка)",
+        text: message,
+        time: new Date().toLocaleString("uk-UA"),
+        read: false
+      });
+      await put(`users/${key}`, users[key]);
+      count++;
+    }
+  }
+  logAdminAction(`Зробив VIP-розсилку ${count} гравцям: "${message.substring(0, 50)}"`);
+  addConsoleMessage(`💎 VIP-розсилка надіслана ${count} гравцям`);
+  alert(`✅ VIP-розсилку отримали ${count} гравців`);
+}
+
+async function viewPlayerStats() {
+  const nick = document.getElementById("nick").value.trim();
+  if (!nick) return alert("Введіть нік");
+  const user = await get(`users/${nick}`);
+  if (!user.name) return alert("❌ Гравця не знайдено");
+  
+  const totalAnswers = (user.totalCorrect || 0) + (user.totalWrong || 0);
+  const accuracy = totalAnswers > 0 ? Math.round((user.totalCorrect / totalAnswers) * 100) : 0;
+  const themesCount = user.themeAttempts ? Object.keys(user.themeAttempts).length : 0;
+  
+  const modal = document.getElementById("playerModal");
+  const modalStats = document.getElementById("modalStats");
+  modalStats.innerHTML = `
+    <p><strong>👤 Нікнейм:</strong> ${user.name}</p>
+    <p><strong>💰 Гроші:</strong> ${(user.points || 0).toLocaleString()} ₴</p>
+    <p><strong>⭐ Рівень:</strong> ${user.lvl || 1}</p>
+    <p><strong>✅ Правильні відповіді:</strong> ${user.totalCorrect || 0}</p>
+    <p><strong>❌ Неправильні відповіді:</strong> ${user.totalWrong || 0}</p>
+    <p><strong>🎯 Точність:</strong> ${accuracy}%</p>
+    <p><strong>📚 Пройдено тем:</strong> ${themesCount}</p>
+    <p><strong>🏆 Досягнення:</strong> ${user.items ? Object.keys(user.items).join(', ') || '—' : '—'}</p>
+    <p><strong>📅 Дата реєстрації:</strong> ${user.registeredAt ? new Date(user.registeredAt).toLocaleString('uk-UA') : '—'}</p>
+  `;
+  modal.style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("playerModal").style.display = "none";
+}
+
+async function showTopPlayers() {
+  const users = await get("users");
+  let players = [];
+  for (let key in users) {
+    players.push({
+      name: users[key].name || key,
+      points: users[key].points || 0,
+      accuracy: users[key].totalCorrect && users[key].totalWrong ? 
+        Math.round((users[key].totalCorrect / (users[key].totalCorrect + users[key].totalWrong)) * 100) : 0
+    });
+  }
+  players.sort((a,b) => b.points - a.points);
+  players = players.slice(0, 10);
+  
+  let html = '<h4>🏆 ТОП-10 гравців за грошима</h4><table><tr><th>#</th><th>Нікнейм</th><th>💰 Гроші</th><th>🎯 Точність</th></tr>';
+  players.forEach((p, i) => {
+    html += `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.points.toLocaleString()} ₴</td><td>${p.accuracy}%</td></tr>`;
+  });
+  html += '</table>';
+  document.getElementById("topPlayers").innerHTML = html;
+}
+
+async function setGameSettings() {
+  const newPointsPerQuestion = prompt("🎯 Скільки грошей давати за правильну відповідь? (зараз 100)", "100");
+  if (newPointsPerQuestion && !isNaN(newPointsPerQuestion)) {
+    await put("settings/points_per_question", Number(newPointsPerQuestion));
+  }
+  const newPenalty = prompt("💸 Скільки штрафувати за неправильну відповідь? (зараз 30)", "30");
+  if (newPenalty && !isNaN(newPenalty)) {
+    await put("settings/penalty", Number(newPenalty));
+  }
+  alert("✅ Налаштування збережено!");
+  addConsoleMessage("⚙️ Оновлено ігрові налаштування");
+}
+
 function showAddPlayerForm() {
   const nick = prompt("👤 Введіть нікнейм нового гравця:");
   if (!nick) return;
@@ -837,19 +1016,6 @@ async function createNewPlayer(nick, pass) {
   loadPlayers();
   logAdminAction(`Створив нового гравця: ${nick}`);
   addConsoleMessage(`✅ Створено нового гравця: ${nick}`);
-}
-
-async function setGameSettings() {
-  const newPointsPerQuestion = prompt("🎯 Скільки грошей давати за правильну відповідь? (зараз 100)");
-  if (newPointsPerQuestion) {
-    await put("settings/points_per_question", Number(newPointsPerQuestion));
-  }
-  const newPenalty = prompt("💸 Скільки штрафувати за неправильну відповідь? (зараз 30)");
-  if (newPenalty) {
-    await put("settings/penalty", Number(newPenalty));
-  }
-  alert("✅ Налаштування збережено!");
-  addConsoleMessage("⚙️ Оновлено ігрові налаштування");
 }
 
 function logAdminAction(action) {
