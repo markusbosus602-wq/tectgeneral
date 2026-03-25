@@ -567,4 +567,233 @@ async function loadAdminLogs() {
     } else {
       logDiv.innerHTML = 'Лог порожній';
     }
- 
+  } catch (e) {
+    document.getElementById('admin-log').innerHTML = 'Помилка завантаження логу';
+  }
+}
+
+async function clearAdminLogs() {
+  if (!confirm("Очистити лог адмінки?")) return;
+  await fetch(DB + "admin_logs.json", {method: 'DELETE'});
+  loadAdminLogs();
+  alert("Лог адмінки очищено");
+}
+
+function startTheme(theme) {
+  currentTheme = theme;
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+
+  if (!user.themeAttempts) user.themeAttempts = {};
+  if (!user.themeAttempts[theme]) user.themeAttempts[theme] = 0;
+
+  show('game');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const qs = themes[currentTheme];
+  if (currentIndex >= qs.length) {
+    user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
+    user.totalCorrect = (user.totalCorrect || 0) + correctCount;
+    user.totalWrong = (user.totalWrong || 0) + wrongCount;
+    user.gameHistory = user.gameHistory || [];
+    user.gameHistory.unshift({
+      theme: currentTheme,
+      date: new Date().toLocaleString('uk-UA'),
+      correct: correctCount,
+      wrong: wrongCount,
+      total: correctCount + wrongCount,
+      score: correctCount + wrongCount > 0 ? Math.round((correctCount / (correctCount + wrongCount)) * 100) : 0
+    });
+    if (user.gameHistory.length > 20) user.gameHistory.pop();
+    save();
+
+    document.getElementById('qtext').textContent = "Тема завершена!";
+    document.getElementById('feedback').innerHTML = '';
+    document.getElementById('abox').innerHTML = `
+      <div class="summary">
+        <strong>Гравець:</strong> ${user ? user.name : '—'}<br><br>
+        <strong style="color:var(--green)">Правильних відповідей:</strong> ${correctCount}<br>
+        <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrongCount}<br><br>
+        <strong>Цю тему ти проходив:</strong> ${user.themeAttempts[currentTheme]} раз(ів)<br><br>
+        <strong>Поточний баланс:</strong> ${user ? user.points.toLocaleString() : 0} ₴
+      </div>
+      <button class="btn" onclick="show('sections')">Обрати іншу тему</button>
+    `;
+    return;
+  }
+
+  const q = qs[currentIndex];
+  currentCorrectAnswer = q.a;
+  document.getElementById('qtext').textContent = `Питання ${currentIndex+1}/${qs.length}: ${q.q}`;
+  document.getElementById('feedback').innerHTML = '';
+  const abox = document.getElementById('abox');
+  abox.innerHTML = '';
+
+  let answers = [q.a, ...q.w];
+  answers.sort(() => Math.random() - 0.5);
+
+  answers.forEach(o => {
+    let btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.innerText = o;
+    btn.onclick = () => checkAnswer(o, q.a, btn);
+    abox.appendChild(btn);
+  });
+}
+
+function checkAnswer(selected, correct, button) {
+  document.querySelectorAll('#abox .btn').forEach(b => b.disabled = true);
+  if (selected === correct) {
+    correctCount++;
+    user.points += 100;
+    button.style.background = 'var(--green)';
+    button.style.color = 'white';
+    document.getElementById('feedback').innerHTML = '<span class="correct">ПРАВИЛЬНО! ✓</span>';
+    correctSound.currentTime = 0;
+    correctSound.play().catch(()=>{});
+  } else {
+    wrongCount++;
+    if(pOn) user.points = Math.max(0, user.points - 30);
+    button.style.background = 'var(--red)';
+    button.style.color = 'white';
+    document.getElementById('feedback').innerHTML = '<span class="wrong">НЕПРАВИЛЬНО! ×</span>';
+    wrongSound.currentTime = 0;
+    wrongSound.play().catch(()=>{});
+  }
+  document.getElementById('mon').innerText = user.points.toLocaleString();
+  save();
+  setTimeout(() => {
+    currentIndex++;
+    loadQuestion();
+  }, 1400);
+}
+
+async function loadT() {
+  show('top');
+  let r = await fetch(DB+"users/.json"), d = await r.json();
+  let l = document.getElementById('tlist');
+  l.innerHTML = '';
+  if(d) {
+    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,1000);
+    topPlayers.forEach((u,i) => {
+      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px">
+        <span>${i+1}. ${u.name}</span><b>${u.points||0}</b>
+      </div>`;
+    });
+  } else {
+    l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
+  }
+}
+
+function buyItem(item) {
+  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
+  if(user.points >= prices[item]){
+    user.points -= prices[item];
+    items[item] = true;
+    applyItems();
+    save(); update();
+    alert("Куплено: " + item);
+  } else alert("Недостатньо грошей!");
+}
+
+// ========== МІЙ КАБІНЕТ ==========
+function loadCabinetData() {
+  document.getElementById('currentNick').innerText = user.name;
+  const totalThemes = user.themeAttempts ? Object.keys(user.themeAttempts).length : 0;
+  document.getElementById('totalThemesPlayed').innerText = totalThemes;
+  document.getElementById('totalCorrect').innerText = user.totalCorrect || 0;
+  document.getElementById('totalWrong').innerText = user.totalWrong || 0;
+  const total = (user.totalCorrect || 0) + (user.totalWrong || 0);
+  const avg = total > 0 ? Math.round((user.totalCorrect / total) * 100) : 0;
+  document.getElementById('avgScore').innerText = avg;
+  
+  // Досягнення
+  const achievements = [];
+  if (user.points >= 10000) achievements.push({name:"💰 Мільйонер", desc:"Накопичити 10000 грн", unlocked:true});
+  else achievements.push({name:"💰 Мільйонер", desc:"Накопичити 10000 грн", unlocked:false});
+  if (totalThemes >= 5) achievements.push({name:"📚 Поліглот", desc:"Пройти 5 різних тем", unlocked:true});
+  else achievements.push({name:"📚 Поліглот", desc:"Пройти 5 різних тем", unlocked:false});
+  if ((user.totalCorrect || 0) >= 50) achievements.push({name:"🎯 Майстер", desc:"Правильно відповісти на 50 запитань", unlocked:true});
+  else achievements.push({name:"🎯 Майстер", desc:"Правильно відповісти на 50 запитань", unlocked:false});
+  if (items.vip) achievements.push({name:"💎 VIP", desc:"Купити VIP статус", unlocked:true});
+  else achievements.push({name:"💎 VIP", desc:"Купити VIP статус", unlocked:false});
+  
+  const achDiv = document.getElementById('achievementsList');
+  achDiv.innerHTML = achievements.map(a => 
+    `<div class="achievement ${a.unlocked ? 'unlocked' : 'locked'}">
+      <strong>${a.name}</strong><br>
+      <small>${a.desc}</small>
+      ${a.unlocked ? ' ✓' : ' 🔒'}
+    </div>`
+  ).join('');
+  
+  // Історія ігор
+  const histDiv = document.getElementById('gameHistory');
+  if (user.gameHistory && user.gameHistory.length > 0) {
+    histDiv.innerHTML = user.gameHistory.map(g => 
+      `<div class="log-entry">
+        ${g.date} — ${g.theme}<br>
+        <small>Правильно: ${g.correct} | Неправильно: ${g.wrong} | ${g.score}%</small>
+      </div>`
+    ).join('');
+  } else {
+    histDiv.innerHTML = 'Історія ігор порожня';
+  }
+}
+
+async function changeNickname() {
+  const newNick = document.getElementById('newNick').value.trim();
+  if (!newNick) return alert("Введіть новий нікнейм");
+  if (newNick === user.name) return alert("Це ваш поточний нікнейм");
+  
+  const r = await fetch(DB + "users/" + newNick + ".json");
+  const existing = await r.json();
+  if (existing) return alert("Цей нікнейм вже зайнятий");
+  
+  await fetch(DB + "users/" + newNick + ".json", {method:'PUT', body:JSON.stringify(user)});
+  await fetch(DB + "users/" + user.name + ".json", {method:'DELETE'});
+  user.name = newNick;
+  localStorage.setItem('un', newNick);
+  save();
+  alert("Нікнейм змінено!");
+  document.getElementById('newNick').value = '';
+  loadCabinetData();
+  applyItems();
+  update();
+}
+
+async function changePassword() {
+  const oldPass = document.getElementById('oldPass').value;
+  const newPass = document.getElementById('newPass').value;
+  const confirmPass = document.getElementById('confirmPass').value;
+  
+  if (!oldPass || !newPass || !confirmPass) return alert("Заповніть всі поля");
+  if (user.pass !== oldPass) return alert("Старий пароль неправильний");
+  if (newPass !== confirmPass) return alert("Новий пароль і підтвердження не співпадають");
+  if (newPass.length < 3) return alert("Пароль повинен мати мінімум 3 символи");
+  
+  user.pass = newPass;
+  localStorage.setItem('up', newPass);
+  save();
+  alert("Пароль змінено!");
+  document.getElementById('oldPass').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
+}
+
+function logout() {
+  if (confirm("Ви впевнені, що хочете вийти?")) {
+    localStorage.removeItem('un');
+    localStorage.removeItem('up');
+    user = null;
+    show('auth-screen');
+    document.getElementById('nick').value = '';
+    document.getElementById('pass').value = '';
+  }
+}
+</script>
+</body>
+</html>
