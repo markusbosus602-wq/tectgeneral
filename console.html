@@ -214,10 +214,6 @@
     margin-top: 10px;
     font-size: 12px;
   }
-  
-  .status-ok { color: #0f0; }
-  .status-error { color: #f00; }
-  .status-warning { color: #ff0; }
 </style>
 </head>
 <body>
@@ -235,16 +231,15 @@
 <h1>🤖 UKRMOVA PRO — АДМІН-ПАНЕЛЬ</h1>
 
 <div class="section">
-  <h3>📢 РОЗСИЛКА УВІДОМЛЕНЬ (ВСІМ, ХТО ВІДКРИВАВ БОТА)</h3>
+  <h3>📢 РОЗСИЛКА УВІДОМЛЕНЬ (ВСІМ ГРАВЦЯМ)</h3>
   <textarea id="broadcastMsg" rows="5" placeholder="Текст уведомлення..." style="width: 100%;"></textarea>
   <div class="broadcast-preview" id="previewMsg" style="display: none;"></div>
   <div style="margin-top: 10px;">
     <button onclick="previewMessage()" class="">👁️ ПЕРЕГЛЯД</button>
-    <button onclick="sendToAllSave()" class="success">📢 НАДІСЛАТИ ВСІМ ГРАВЦЯМ</button>
-    <button onclick="sendToVIPSave()" class="warning">💎 ТІЛЬКИ VIP ГРАВЦЯМ</button>
+    <button onclick="sendToAll()" class="success">📢 НАДІСЛАТИ ВСІМ ГРАВЦЯМ</button>
+    <button onclick="sendToVIP()" class="warning">💎 ТІЛЬКИ VIP ГРАВЦЯМ</button>
   </div>
-  <div id="sendResult" style="margin-top: 10px; color: #ff0;"></div>
-  <p style="font-size: 12px; margin-top: 15px; color: #aaa;">💡 <strong>Важливо:</strong> Повідомлення отримають ВСІ гравці, які коли-небудь запускали бота. Вони побачать його при наступному вході в гру!</p>
+  <p style="font-size: 12px; margin-top: 15px; color: #ff0;">💡 <strong>ВАЖЛИВО:</strong> Повідомлення отримають ВСІ гравці, які коли-небудь запускали бота. Вони побачать його при наступному вході в гру!</p>
 </div>
 
 <div class="section">
@@ -269,7 +264,7 @@
     <button onclick="setPlayerLevel()">⭐ Рівень</button>
     <button onclick="resetPlayerProgress()">🔄 Скинути</button>
     <button onclick="deletePlayer()" class="danger">🗑️ Видалити</button>
-    <button onclick="giveAchievementToPlayer()">🏆 Досягнення</button>
+    <button onclick="giveAchievement()">🏆 Досягнення</button>
     <button onclick="showPlayerStats()">📊 Статистика</button>
   </div>
   
@@ -409,8 +404,8 @@ function previewMessage() {
   }, 5000);
 }
 
-// ========== РОЗСИЛКА ДЛЯ ВСІХ ГРАВЦІВ (зберігається в Firebase) ==========
-async function sendToAllSave() {
+// ========== РОЗСИЛКА ДЛЯ ВСІХ ГРАВЦІВ ==========
+async function sendToAll() {
   const msg = document.getElementById("broadcastMsg").value.trim();
   if (!msg) return alert("Введіть текст повідомлення");
   if (!confirm(`📢 Надіслати повідомлення ВСІМ гравцям?\n\nВони побачать його при наступному вході в гру.\n\n"${msg}"`)) return;
@@ -440,7 +435,7 @@ async function sendToAllSave() {
 }
 
 // ========== РОЗСИЛКА ТІЛЬКИ ДЛЯ VIP ==========
-async function sendToVIPSave() {
+async function sendToVIP() {
   const msg = document.getElementById("broadcastMsg").value.trim();
   if (!msg) return alert("Введіть текст повідомлення");
   if (!confirm(`💎 Надіслати повідомлення ТІЛЬКИ VIP гравцям?\n\n"${msg}"`)) return;
@@ -574,7 +569,7 @@ async function deletePlayer() {
   addLog(`🗑️ Видалено ${nick}`);
 }
 
-async function giveAchievementToPlayer() {
+async function giveAchievement() {
   const nick = document.getElementById("playerNick").value.trim();
   if (!nick) return alert("Введіть нік");
   const ach = prompt("Досягнення: vip, gold_frame, crown, fire, shield");
@@ -772,9 +767,9 @@ async function showTopPlayers() {
   
   let html = '<h4>🏆 ТОП-10 гравців за грошима</h4>  <thead> <th>#</th><th>Нікнейм</th><th>💰 Гроші</th> </thead><tbody>';
   players.forEach((p, i) => {
-    html += `    <tr><td>${i+1}</td><td>${p.name}</td><td>${p.points.toLocaleString()} ₴</td></tr>`;
+    html += `     <tr><td>${i+1}</td><td>${p.name}</td><td>${p.points.toLocaleString()} ₴</td></tr>`;
   });
-  html += '</tbody> </div>';
+  html += '</tbody> </table>';
   document.getElementById("topPlayersList").innerHTML = html;
 }
 
