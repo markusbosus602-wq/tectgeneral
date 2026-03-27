@@ -7,8 +7,6 @@
   
   <!-- Підключаємо CSS -->
   <link rel="stylesheet" href="css/style.css">
-  <!-- Підключаємо Chart.js для графіків -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -213,7 +211,7 @@
       <!-- Вкладка СТАТИСТИКА -->
       <div id="cabinet-stats" class="cabinet-tab">
         <div class="cabinet-section">
-          <h3>📊 Цифрова статистика</h3>
+          <h3>📊 Моя статистика</h3>
           <div class="stats-grid">
             <div class="stat-card"><div class="stat-value" id="totalThemes">0</div><div class="stat-label">Пройдено тем</div></div>
             <div class="stat-card"><div class="stat-value" id="correctAnswers">0</div><div class="stat-label">Правильних</div></div>
@@ -221,20 +219,6 @@
             <div class="stat-card"><div class="stat-value" id="avgPercent">0%</div><div class="stat-label">Середній %</div></div>
             <div class="stat-card"><div class="stat-value" id="bestResult">0%</div><div class="stat-label">Найкращий результат</div></div>
             <div class="stat-card"><div class="stat-value" id="perfectCount">0</div><div class="stat-label">100% завершено</div></div>
-          </div>
-        </div>
-
-        <div class="cabinet-section">
-          <h3>📈 Графіки прогресу</h3>
-          <div class="charts-container">
-            <div class="chart-box">
-              <h4>Правильні vs Неправильні</h4>
-              <canvas id="correctWrongChart" width="200" height="200"></canvas>
-            </div>
-            <div class="chart-box">
-              <h4>Динаміка рівня</h4>
-              <canvas id="levelProgressChart" width="300" height="150"></canvas>
-            </div>
           </div>
         </div>
 
@@ -248,14 +232,6 @@
         <div class="cabinet-section">
           <h3>🏆 Досягнення</h3>
           <div class="badges-grid" id="badgesContainer"></div>
-        </div>
-
-        <div class="cabinet-section">
-          <h3>📤 Експорт даних</h3>
-          <div class="export-buttons">
-            <button class="btn small" onclick="exportDataJSON()">📄 Експорт JSON</button>
-            <button class="btn small" onclick="exportDataCSV()">📊 Експорт CSV</button>
-          </div>
         </div>
       </div>
 
