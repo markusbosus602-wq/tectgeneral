@@ -3,8 +3,6 @@
 // МОЯ СКРИНЬКА - ЛОГІКА
 // ================================================
 
-let correctWrongChart = null;
-let levelProgressChart = null;
 let earnedBadges = [];
 
 function loadCabinet() {
@@ -35,7 +33,6 @@ function loadCabinet() {
   document.getElementById('bestResult').innerText = stats.bestResult + '%';
   document.getElementById('perfectCount').innerText = stats.perfectCount;
   
-  updateCharts(stats);
   loadBadges(stats);
   updatePurchasesDisplay();
   loadHistory();
@@ -94,74 +91,8 @@ function calculateStats() {
   };
 }
 
-function updateCharts(stats) {
-  const ctx1 = document.getElementById('correctWrongChart');
-  const ctx2 = document.getElementById('levelProgressChart');
-  
-  if (ctx1) {
-    if (correctWrongChart) correctWrongChart.destroy();
-    correctWrongChart = new Chart(ctx1, {
-      type: 'doughnut',
-      data: {
-        labels: ['Правильні', 'Неправильні'],
-        datasets: [{
-          data: [stats.totalCorrect, stats.totalWrong],
-          backgroundColor: ['#4caf50', '#f44336'],
-          borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } }
-      }
-    });
-  }
-  
-  if (ctx2) {
-    if (levelProgressChart) levelProgressChart.destroy();
-    const levelData = getLevelProgressData();
-    levelProgressChart = new Chart(ctx2, {
-      type: 'line',
-      data: {
-        labels: levelData.labels,
-        datasets: [{
-          label: 'Правильні відповіді',
-          data: levelData.values,
-          borderColor: '#f1c40f',
-          backgroundColor: 'rgba(241, 196, 15, 0.1)',
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: { legend: { labels: { color: '#fff' } } },
-        scales: { y: { grid: { color: '#333' }, ticks: { color: '#fff' } }, x: { ticks: { color: '#fff' } } }
-      }
-    });
-  }
-}
-
-function getLevelProgressData() {
-  const results = [];
-  if (user.themeResults) {
-    let cumulative = 0;
-    for (let theme in user.themeResults) {
-      cumulative += user.themeResults[theme].correct || 0;
-      results.push(cumulative);
-    }
-  }
-  return {
-    labels: results.map((_, i) => i + 1),
-    values: results
-  };
-}
-
 function loadBadges(stats) {
   const badgesContainer = document.getElementById('badgesContainer');
-  const newBadges = [];
   
   const allBadges = [
     { name: '🌱 Новачок', condition: () => stats.totalThemes >= 1, id: 'novice' },
@@ -189,7 +120,7 @@ function loadBadges(stats) {
   });
   
   badgesContainer.innerHTML = allBadges.map(b => 
-    `<div class="badge ${badge.condition() ? '' : 'locked'}">${b.name}</div>`
+    `<div class="badge ${b.condition() ? '' : 'locked'}">${b.name}</div>`
   ).join('');
 }
 
@@ -366,57 +297,6 @@ function setAvatar(emoji) {
   save();
   document.getElementById('cabinetAvatar').innerHTML = emoji;
   closeAvatarModal();
-}
-
-function exportDataJSON() {
-  const data = {
-    name: user.name,
-    points: user.points,
-    regDate: user.regDate,
-    stats: calculateStats(),
-    themeResults: user.themeResults,
-    items: items
-  };
-  const json = JSON.stringify(data, null, 2);
-  downloadFile(`${user.name}_stats.json`, json, 'application/json');
-  showNotification('📄 Дані експортовано в JSON');
-}
-
-function exportDataCSV() {
-  const stats = calculateStats();
-  const rows = [
-    ['Нікнейм', user.name],
-    ['Баланс', user.points],
-    ['Дата реєстрації', user.regDate],
-    ['Пройдено тем', stats.totalThemes],
-    ['Правильних відповідей', stats.totalCorrect],
-    ['Неправильних відповідей', stats.totalWrong],
-    ['Середній відсоток', stats.avgPercent + '%'],
-    ['Найкращий результат', stats.bestResult + '%'],
-    ['100% завершено', stats.perfectCount],
-    [''],
-    ['Тема', 'Правильні', 'Всього', 'Відсоток', 'Дата']
-  ];
-  
-  if (user.themeResults) {
-    for (let theme in user.themeResults) {
-      const r = user.themeResults[theme];
-      rows.push([getThemeName(theme), r.correct, r.total, r.percent + '%', r.date]);
-    }
-  }
-  
-  const csv = rows.map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
-  downloadFile(`${user.name}_stats.csv`, csv, 'text/csv');
-  showNotification('📊 Дані експортовано в CSV');
-}
-
-function downloadFile(filename, content, type) {
-  const blob = new Blob([content], { type: type });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(link.href);
 }
 
 function toggleNotifications() {
