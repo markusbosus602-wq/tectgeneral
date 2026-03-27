@@ -10,14 +10,14 @@
 
   <!-- SPLASH SCREEN -->
   <div id="splash">
-    <div class="splash-bg"></div>
+    <video id="splash-video" playsinline preload="auto" muted></video>
     <button id="startBtn">ПОЧАТИ ГРУ</button>
   </div>
 
   <!-- AUTH SCREEN -->
   <div id="auth-screen" class="screen">
     <div class="card">
-      <h2 style="color:#f1c40f">UKRMOVA PRO</h2>
+      <h2 style="color:var(--gold)">UKRMOVA PRO</h2>
       <input type="text" id="nick" placeholder="Нікнейм" autocomplete="off">
       <input type="password" id="pass" placeholder="Пароль" autocomplete="off">
       <button class="btn" onclick="auth()">УВІЙТИ / ЗАРЕЄСТРУВАТИСЯ</button>
@@ -37,23 +37,23 @@
       <button class="btn" style="background:#9b59b6" onclick="show('cabinet')">📦 МОЯ СКРИНЬКА</button>
 
       <div id="admin-panel">
-        <b style="color:#f44336;cursor:pointer;font-size:18px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
-        <button class="btn" id="pen-btn" style="background:#f44336" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
+        <b style="color:var(--red);cursor:pointer;font-size:18px" onclick="closeAdm()">❌ ЗАКРИТИ АДМІНКУ</b><br><br>
+        <button class="btn" id="pen-btn" style="background:var(--red)" onclick="toggleP()">ШТРАФИ: ВКЛ</button>
         <p><b>Управління гравцями</b></p>
         <input type="text" id="a-n" placeholder="Нік гравця">
-        <button class="btn" style="background:#4caf50;color:#000" onclick="edO(true)">+ ГРОШІ</button>
-        <button class="btn" style="background:#f44336" onclick="edO(false)">- ГРОШІ</button>
+        <button class="btn" style="background:var(--green);color:#000" onclick="edO(true)">+ ГРОШІ</button>
+        <button class="btn" style="background:var(--red)" onclick="edO(false)">- ГРОШІ</button>
         <button class="btn danger" onclick="delU()">ВИДАЛИТИ ЗА НІКОМ</button>
         <br><br>
-        <button class="btn" style="background:#2196f3;width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
+        <button class="btn" style="background:var(--blue);width:100%" onclick="loadPlayers()">ПОКАЗАТИ ВСІХ ГРАВЦІВ</button>
         <div id="player-list"></div>
         <br><br>
-        <h4 style="color:#2196f3">Лог входів</h4>
+        <h4 style="color:var(--blue)">Лог входів</h4>
         <div id="user-log" class="log-box">Завантаження...</div>
         <button class="btn" style="background:#ff9800;margin-top:8px;width:48%;margin-right:4%" onclick="loadUserLog()">Оновити</button>
         <button class="btn danger" style="margin-top:8px;width:48%" onclick="clearUserLog()">Очистити</button>
         <br><br>
-        <h4 style="color:#2196f3">Лог адмінки</h4>
+        <h4 style="color:var(--blue)">Лог адмінки</h4>
         <div id="admin-log" class="log-box">Завантаження...</div>
         <button class="btn" style="background:#ff9800;margin-top:8px;width:48%;margin-right:4%" onclick="loadAdminLogs()">Оновити</button>
         <button class="btn danger" style="margin-top:8px;width:48%" onclick="clearAdminLogs()">Очистити</button>
