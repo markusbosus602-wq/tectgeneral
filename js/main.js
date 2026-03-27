@@ -1,7 +1,4 @@
 // js/main.js
-// ================================================
-// ГЛОБАЛЬНІ ЗМІННІ
-// ================================================
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
 let user = null;
 let cC = 0;
@@ -16,39 +13,23 @@ let currentCorrectAnswer = '';
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
 
-// ================================================
-// ЗАПУСК ВІДЕО + АВТОЛОГІН
-// ================================================
 window.onload = function() {
   const splash = document.getElementById('splash');
-  const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
-
-  if (video) {
-    video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
-    startBtn.onclick = function() {
-      startBtn.style.display = 'none';
-      video.muted = false;
-      video.currentTime = 0;
-      video.play().catch(() => {});
-    };
-    video.onended = function() {
-      splash.style.display = 'none';
-      tryAutoLogin();
-    };
-  }
-
+  
+  startBtn.onclick = function() {
+    splash.style.display = 'none';
+    tryAutoLogin();
+  };
+  
   setTimeout(() => {
     if (splash && splash.style.display !== 'none') {
       splash.style.display = 'none';
       tryAutoLogin();
     }
-  }, 70000);
+  }, 5000);
 };
 
-// ================================================
-// ОСНОВНІ ФУНКЦІЇ
-// ================================================
 function tryAutoLogin() {
   const savedNick = localStorage.getItem('un');
   const savedPass = localStorage.getItem('up');
@@ -82,16 +63,11 @@ async function auth() {
       user = d;
     } else {
       user = {
-        name: n, 
-        pass: p, 
-        points: 0, 
-        items: {gold_frame: false}, 
-        themeAttempts: {}, 
-        themeResults: {}, 
+        name: n, pass: p, points: 0, items: {gold_frame: false},
+        themeAttempts: {}, themeResults: {},
         regDate: new Date().toISOString().split('T')[0],
-        avatar: '👤',
-        friends: [],
-        notifications: true
+        avatar: '👤', avatarType: 'emoji', avatarData: null,
+        friends: [], notifications: true
       };
       await fetch(DB + "users/" + n + ".json", {method:'PUT', body:JSON.stringify(user)});
     }
@@ -106,6 +82,7 @@ async function auth() {
     if (!user.themeResults) user.themeResults = {};
     if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
     if (!user.avatar) user.avatar = '👤';
+    if (!user.avatarType) user.avatarType = 'emoji';
     if (!user.friends) user.friends = [];
     if (user.notifications === undefined) user.notifications = true;
     
@@ -137,7 +114,7 @@ function update() {
 function applyItems() {
   if (!user) return;
   let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  if(items.gold_frame) nickDisplay += ' [Золото]';
   if(items.crown) nickDisplay += ' 👑';
   if(items.fire) nickDisplay += ' 🔥';
   if(items.shield) nickDisplay += ' 🛡️';
@@ -156,7 +133,6 @@ function show(id) {
   }
 }
 
-// Адмінка
 function admT() {
   if(++cC >= 5) {
     const adminPanel = document.getElementById('admin-panel');
@@ -171,13 +147,11 @@ function admT() {
 async function logAdminAccess() {
   if (!user) return;
   const now = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' });
-  const entry = { nick: user.name, time: now };
-  await fetch(DB + "admin_logs.json", { method: 'POST', body: JSON.stringify(entry) });
+  await fetch(DB + "admin_logs.json", { method: 'POST', body: JSON.stringify({ nick: user.name, time: now }) });
 }
 
 function closeAdm() {
-  const adminPanel = document.getElementById('admin-panel');
-  if (adminPanel) adminPanel.style.display = 'none';
+  document.getElementById('admin-panel').style.display = 'none';
   cC = 0;
 }
 
@@ -186,7 +160,7 @@ function toggleP() {
   const btn = document.getElementById('pen-btn');
   if (btn) {
     btn.innerText = pOn ? "ШТРАФИ: ВКЛ" : "ШТРАФИ: ВИКЛ";
-    btn.style.background = pOn ? "var(--red)" : "var(--green)";
+    btn.style.background = pOn ? "#f44336" : "#4caf50";
   }
 }
 
@@ -227,15 +201,7 @@ async function loadPlayers() {
   }
   for (let key in d) {
     let u = d[key];
-    let displayNick = u.name || key;
-    list.innerHTML += `
-      <div style="padding:10px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
-        <div>
-          <strong>${displayNick}</strong><br>
-          <small>Баланс: ${u.points || 0} ₴ | Пароль: ${u.pass || '—'}</small>
-        </div>
-      </div>
-    `;
+    list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #ddd;"><strong>${u.name || key}</strong><br><small>Баланс: ${u.points || 0} ₴</small></div>`;
   }
 }
 
@@ -246,22 +212,21 @@ async function loadUserLog() {
     let logDiv = document.getElementById('user-log');
     logDiv.innerHTML = '';
     if (data) {
-      Object.values(data).reverse().slice(0,100).forEach(entry => {
+      Object.values(data).reverse().slice(0,50).forEach(entry => {
         logDiv.innerHTML += `<div class="log-entry">${entry.time} — <b>${entry.game_nick}</b></div>`;
       });
     } else {
       logDiv.innerHTML = 'Лог порожній';
     }
   } catch (e) {
-    document.getElementById('user-log').innerHTML = 'Помилка завантаження';
+    document.getElementById('user-log').innerHTML = 'Помилка';
   }
 }
 
 async function clearUserLog() {
-  if (!confirm("Очистити лог усіх входів?")) return;
+  if (!confirm("Очистити лог?")) return;
   await fetch(DB + "user_logs.json", {method: 'DELETE'});
   loadUserLog();
-  alert("Лог входів очищено");
 }
 
 async function loadAdminLogs() {
@@ -270,7 +235,7 @@ async function loadAdminLogs() {
     let data = await r.json();
     let logDiv = document.getElementById('admin-log');
     logDiv.innerHTML = '';
-    if (data && Object.keys(data).length > 0) {
+    if (data) {
       Object.values(data).reverse().forEach(log => {
         logDiv.innerHTML += `<div class="log-entry">${log.time} — <b>${log.nick}</b></div>`;
       });
@@ -278,7 +243,7 @@ async function loadAdminLogs() {
       logDiv.innerHTML = 'Лог порожній';
     }
   } catch (e) {
-    document.getElementById('admin-log').innerHTML = 'Помилка завантаження логу';
+    document.getElementById('admin-log').innerHTML = 'Помилка';
   }
 }
 
@@ -286,12 +251,8 @@ async function clearAdminLogs() {
   if (!confirm("Очистити лог адмінки?")) return;
   await fetch(DB + "admin_logs.json", {method: 'DELETE'});
   loadAdminLogs();
-  alert("Лог адмінки очищено");
 }
 
-// ================================================
-// ГРА
-// ================================================
 function startTheme(theme) {
   currentTheme = theme;
   currentIndex = 0;
@@ -305,32 +266,29 @@ function startTheme(theme) {
 
 function loadQuestion() {
   const qs = themes[currentTheme];
-  if (currentIndex >= qs.length) {
-    const totalQuestions = correctCount + wrongCount;
-    if (typeof saveThemeResult === 'function' && totalQuestions > 0) {
-      saveThemeResult(currentTheme, correctCount, totalQuestions);
+  if (!qs || currentIndex >= qs.length) {
+    const total = correctCount + wrongCount;
+    if (typeof saveThemeResult === 'function' && total > 0) {
+      saveThemeResult(currentTheme, correctCount, total);
     }
-    
     user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
     save();
     document.getElementById('qtext').textContent = "Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
       <div class="summary">
-        <strong>Гравець:</strong> ${user ? user.name : '—'}<br><br>
-        <strong style="color:var(--green)">Правильних відповідей:</strong> ${correctCount}<br>
-        <strong style="color:var(--red)">Неправильних відповідей:</strong> ${wrongCount}<br><br>
-        <strong>Цю тему ти проходив:</strong> ${user.themeAttempts[currentTheme]} раз(ів)<br><br>
-        <strong>Поточний баланс:</strong> ${user ? user.points.toLocaleString() : 0} ₴
+        <strong>Правильних:</strong> ${correctCount}<br>
+        <strong>Неправильних:</strong> ${wrongCount}<br>
+        <strong>Баланс:</strong> ${user.points.toLocaleString()} ₴
       </div>
-      <button class="btn" onclick="show('sections')">Обрати іншу тему</button>
+      <button class="btn" onclick="show('sections')">Обрати тему</button>
     `;
     return;
   }
 
   const q = qs[currentIndex];
   currentCorrectAnswer = q.a;
-  document.getElementById('qtext').textContent = `Питання ${currentIndex+1}/${qs.length}: ${q.q}`;
+  document.getElementById('qtext').textContent = `${currentIndex+1}/${qs.length}: ${q.q}`;
   document.getElementById('feedback').innerHTML = '';
   const abox = document.getElementById('abox');
   abox.innerHTML = '';
@@ -353,18 +311,14 @@ function checkAnswer(selected, correct, button) {
   if (selected === correct) {
     correctCount++;
     user.points += 100;
-    button.style.background = 'var(--green)';
-    button.style.color = 'white';
-    document.getElementById('feedback').innerHTML = '<span class="correct">ПРАВИЛЬНО! ✓</span>';
-    correctSound.currentTime = 0;
+    button.style.background = '#4caf50';
+    document.getElementById('feedback').innerHTML = '<span class="correct">✓ ПРАВИЛЬНО!</span>';
     correctSound.play().catch(()=>{});
   } else {
     wrongCount++;
     user.points = Math.max(0, user.points - 30);
-    button.style.background = 'var(--red)';
-    button.style.color = 'white';
-    document.getElementById('feedback').innerHTML = '<span class="wrong">НЕПРАВИЛЬНО! ×</span>';
-    wrongSound.currentTime = 0;
+    button.style.background = '#f44336';
+    document.getElementById('feedback').innerHTML = '<span class="wrong">✗ НЕПРАВИЛЬНО!</span>';
     wrongSound.play().catch(()=>{});
   }
 
@@ -374,7 +328,7 @@ function checkAnswer(selected, correct, button) {
   setTimeout(() => {
     currentIndex++;
     loadQuestion();
-  }, 1400);
+  }, 1200);
 }
 
 async function loadT() {
@@ -384,11 +338,9 @@ async function loadT() {
   let l = document.getElementById('tlist');
   l.innerHTML = '';
   if(d) {
-    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,1000);
+    let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,100);
     topPlayers.forEach((u,i) => {
-      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px">
-        <span>${i+1}. ${u.name}</span><b>${u.points||0}</b>
-      </div>`;
+      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points||0}</b></div>`;
     });
   } else {
     l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
@@ -403,7 +355,7 @@ function buyItem(item) {
     applyItems();
     save();
     update();
-    alert("Куплено: " + item);
+    alert("Куплено!");
   } else {
     alert("Недостатньо грошей!");
   }
