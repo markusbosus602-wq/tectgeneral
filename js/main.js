@@ -12,8 +12,6 @@ let correctCount = 0;
 let wrongCount = 0;
 let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
 let currentCorrectAnswer = '';
-let charts = { correctWrong: null, levelProgress: null };
-let notificationsEnabled = true;
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
 const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3");
@@ -110,10 +108,9 @@ async function auth() {
     if (!user.avatar) user.avatar = '👤';
     if (!user.friends) user.friends = [];
     if (user.notifications === undefined) user.notifications = true;
-    notificationsEnabled = user.notifications;
     
     const notifToggle = document.getElementById('notificationsToggle');
-    if (notifToggle) notifToggle.checked = notificationsEnabled;
+    if (notifToggle) notifToggle.checked = user.notifications !== false;
     
     save();
     applyItems();
