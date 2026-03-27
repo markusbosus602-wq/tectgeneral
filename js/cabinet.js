@@ -136,7 +136,13 @@ function getThemeName(key) {
     prykmetnyky_stupeni: 'Ступені', prykmetnyky_stupeni_2: 'Ступені 2',
     ne_z_prykmetnykamy: 'НЕ з прикметниками',
     chyslivnyky_1: 'Числівники 1', chyslivnyky_2: 'Числівники 2',
-    frazeologizmy1: 'Фразеологізми'
+    frazeologizmy1: 'Фразеологізми 1', frazeologizmy2: 'Фразеологізми 2',
+    frazeologizmy3: 'Фразеологізми 3', frazeologizmy4: 'Фразеологізми 4',
+    frazeologizmy5: 'Фразеологізми 5', frazeologizmy6: 'Фразеологізми 6',
+    frazeologizmy7: 'Фразеологізми 7', frazeologizmy8: 'Фразеологізми 8',
+    frazeologizmy9: 'Фразеологізми 9', frazeologizmy10: 'Фразеологізми 10',
+    frazeologizmy11: 'Фразеологізми 11', frazeologizmy12: 'Фразеологізми 12',
+    frazeologizmy13: 'Фразеологізми 13', frazeologizmy14: 'Фразеологізми 14'
   };
   return names[key] || key;
 }
