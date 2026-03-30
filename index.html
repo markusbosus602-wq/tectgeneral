@@ -66,11 +66,16 @@
     <div class="card">
       <h2>Магазин</h2>
       <div class="shop-grid">
-        <div class="shop-item" onclick="buyItem('gold_frame')">✨ Золота рамка — 1000 ₴</div>
-        <div class="shop-item" onclick="buyItem('crown')">👑 Корона — 2000 ₴</div>
-        <div class="shop-item" onclick="buyItem('fire')">🔥 Полум'я — 1500 ₴</div>
-        <div class="shop-item" onclick="buyItem('shield')">🛡️ Щит — 2500 ₴</div>
-        <div class="shop-item" onclick="buyItem('vip')">💎 ВІП — 5000 ₴</div>
+        <div class="shop-item" data-item="gold_frame">✨ Золота рамка — 1000 ₴</div>
+        <div class="shop-item" data-item="crown">👑 Корона — 2000 ₴</div>
+        <div class="shop-item" data-item="fire">🔥 Полум'я — 1500 ₴</div>
+        <div class="shop-item" data-item="shield">🛡️ Щит — 2500 ₴</div>
+        <div class="shop-item" data-item="vip">💎 ВІП — 5000 ₴</div>
+        <div class="shop-item" data-item="rainbow">🌈 Веселкове ім'я — 3000 ₴</div>
+        <div class="shop-item" data-item="star">⭐ Зірка — 4000 ₴</div>
+        <div class="shop-item" data-item="diamond">💎 Діамант — 8000 ₴</div>
+        <div class="shop-item" data-item="halo">😇 Німб — 6000 ₴</div>
+        <div class="shop-item" data-item="wings">🦋 Крила — 7000 ₴</div>
       </div>
       <button class="btn" onclick="show('menu')">НАЗАД</button>
     </div>
@@ -88,7 +93,7 @@
     </div>
   </div>
 
-  <!-- ІМЕННИКИ -->
+  <!-- Іменники -->
   <div id="imennyky" class="screen">
     <div class="card">
       <h2>Іменники</h2>
@@ -98,7 +103,7 @@
     </div>
   </div>
 
-  <!-- ПРИКМЕТНИКИ -->
+  <!-- Прикметники -->
   <div id="prykmetnyky" class="screen">
     <div class="card">
       <h2>Прикметники</h2>
@@ -111,7 +116,7 @@
     </div>
   </div>
 
-  <!-- ЧИСЛІВНИКИ -->
+  <!-- Числівники -->
   <div id="chyslivnyky" class="screen">
     <div class="card">
       <h2>Числівники</h2>
@@ -121,7 +126,7 @@
     </div>
   </div>
 
-  <!-- ФРАЗЕОЛОГІЗМИ - ВСІ 14 ЗАВДАНЬ -->
+  <!-- Фразеологізми -->
   <div id="frazeologizmy" class="screen">
     <div class="card">
       <h2>Фразеологізми</h2>
@@ -198,6 +203,11 @@
             <div class="purchase-item">🔥 Полум'я: <span id="purchaseFire">❌</span></div>
             <div class="purchase-item">🛡️ Щит: <span id="purchaseShield">❌</span></div>
             <div class="purchase-item">💎 ВІП: <span id="purchaseVip">❌</span></div>
+            <div class="purchase-item">🌈 Веселкове ім'я: <span id="purchaseRainbow">❌</span></div>
+            <div class="purchase-item">⭐ Зірка: <span id="purchaseStar">❌</span></div>
+            <div class="purchase-item">💎 Діамант: <span id="purchaseDiamond">❌</span></div>
+            <div class="purchase-item">😇 Німб: <span id="purchaseHalo">❌</span></div>
+            <div class="purchase-item">🦋 Крила: <span id="purchaseWings">❌</span></div>
           </div>
         </div>
       </div>
