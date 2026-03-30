@@ -18,29 +18,25 @@ const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-
 
 window.onload = function() {
   const splash = document.getElementById('splash');
-  const video = document.getElementById('splash-video');
   const startBtn = document.getElementById('startBtn');
   
-  if (video) {
-    video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
-    startBtn.onclick = function() {
-      startBtn.style.display = 'none';
-      video.muted = false;
-      video.currentTime = 0;
-      video.play().catch(() => {});
-    };
-    video.onended = function() {
-      splash.style.display = 'none';
-      tryAutoLogin();
-    };
+  // Telegram WebView адаптація
+  if (window.Telegram && window.Telegram.WebApp) {
+    window.Telegram.WebApp.expand();
+    window.Telegram.WebApp.enableClosingConfirmation();
   }
+  
+  startBtn.onclick = function() {
+    splash.style.display = 'none';
+    tryAutoLogin();
+  };
   
   setTimeout(() => {
     if (splash && splash.style.display !== 'none') {
       splash.style.display = 'none';
       tryAutoLogin();
     }
-  }, 70000);
+  }, 5000);
   
   // Додаємо обробники для магазину
   document.querySelectorAll('.shop-item').forEach(item => {
@@ -124,9 +120,9 @@ function applyItems() {
   if (!user) return;
   let nickDisplay = user.name;
   
-  // Ефекти від покупок
-  if(items.gold_frame) nickDisplay = `<span class="gold-nick">${user.name}</span>`;
   if(items.rainbow) nickDisplay = `<span class="rainbow-text">${user.name}</span>`;
+  else if(items.gold_frame) nickDisplay = `<span class="gold-nick">${user.name}</span>`;
+  
   if(items.star) nickDisplay += ' ⭐';
   if(items.diamond) nickDisplay += ' 💎';
   if(items.halo) nickDisplay += ' 😇';
@@ -214,7 +210,7 @@ async function loadPlayers() {
   }
   for (let key in d) {
     let u = d[key];
-    list.innerHTML += `<div style="padding:8px; border-bottom:1px solid #ddd;"><strong>${u.name || key}</strong><br><small>Баланс: ${u.points || 0} ₴</small></div>`;
+    list.innerHTML += `<div style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.1);"><strong>${u.name || key}</strong><br><small>💰 ${u.points || 0} ₴</small></div>`;
   }
 }
 
@@ -286,15 +282,15 @@ function loadQuestion() {
     }
     user.themeAttempts[currentTheme] = (user.themeAttempts[currentTheme] || 0) + 1;
     save();
-    document.getElementById('qtext').textContent = "Тема завершена!";
+    document.getElementById('qtext').textContent = "✅ Тема завершена!";
     document.getElementById('feedback').innerHTML = '';
     document.getElementById('abox').innerHTML = `
       <div class="summary">
-        <strong>Правильних:</strong> ${correctCount}<br>
-        <strong>Неправильних:</strong> ${wrongCount}<br>
-        <strong>Баланс:</strong> ${user.points.toLocaleString()} ₴
+        ✅ Правильних: ${correctCount}<br>
+        ❌ Неправильних: ${wrongCount}<br>
+        💰 Баланс: ${user.points.toLocaleString()} ₴
       </div>
-      <button class="btn" onclick="show('sections')">Обрати тему</button>
+      <button class="btn" onclick="show('sections')">📚 Обрати тему</button>
     `;
     return;
   }
@@ -353,7 +349,7 @@ async function loadT() {
       let avatar = u.avatar || '👤';
       let avatarHtml = '';
       if (u.avatarType === 'photo' && u.avatarData) {
-        avatarHtml = `<img src="${u.avatarData}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">`;
+        avatarHtml = `<img src="${u.avatarData}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">`;
       } else {
         avatarHtml = `<span style="font-size:24px;">${avatar}</span>`;
       }
@@ -361,7 +357,7 @@ async function loadT() {
       let nameDisplay = u.name;
       const userItems = u.items || {};
       if(userItems.rainbow) nameDisplay = `<span class="rainbow-text">${u.name}</span>`;
-      if(userItems.gold_frame) nameDisplay = `<span class="gold-nick">${u.name}</span>`;
+      else if(userItems.gold_frame) nameDisplay = `<span class="gold-nick">${u.name}</span>`;
       if(userItems.star) nameDisplay += ' ⭐';
       if(userItems.diamond) nameDisplay += ' 💎';
       if(userItems.halo) nameDisplay += ' 😇';
@@ -372,8 +368,8 @@ async function loadT() {
       if(userItems.vip) nameDisplay += ' 💎';
       
       l.innerHTML += `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #333;">
-          <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid rgba(255,255,255,0.1);">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
             <span style="font-weight:bold;color:var(--gold);width:30px;">${i+1}.</span>
             ${avatarHtml}
             <span>${nameDisplay}</span>
@@ -393,9 +389,8 @@ function buyItem(item) {
     rainbow: 3000, star: 4000, diamond: 8000, halo: 6000, wings: 7000
   };
   
-  // Перевірка чи вже куплено
   if (items[item]) {
-    alert("Цей предмет вже куплено!");
+    alert("❌ Цей предмет вже куплено!");
     return;
   }
   
@@ -407,12 +402,11 @@ function buyItem(item) {
     update();
     alert(`🎉 Куплено: ${getItemName(item)}!`);
     
-    // Оновлюємо відображення покупок у кабінеті
     if (typeof updatePurchasesDisplay === 'function') {
       updatePurchasesDisplay();
     }
   } else {
-    alert(`Недостатньо грошей! Потрібно ${prices[item]} ₴`);
+    alert(`💰 Недостатньо грошей! Потрібно ${prices[item]} ₴`);
   }
 }
 
