@@ -1,4 +1,4 @@
-// js/main.js - Повністю виправлена версія
+// js/main.js - Виправлений для мобільних пристроїв
 
 const DB = "https://ukrmova-game-default-rtdb.europe-west1.firebasedatabase.app/";
 let user = null;
@@ -16,29 +16,55 @@ const wrongSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-wrong-
 
 window.onload = function() {
     const splash = document.getElementById('splash');
-    const video = document.getElementById('splash-video');
     const startBtn = document.getElementById('startBtn');
     
-    if (video) {
-        video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+    // Перевіряємо чи це мобільний пристрій
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTelegram = /Telegram/i.test(navigator.userAgent);
+    
+    if (startBtn) {
         startBtn.onclick = function() {
             startBtn.style.display = 'none';
-            video.muted = false;
-            video.currentTime = 0;
-            video.play().catch(() => {});
-        };
-        video.onended = function() {
-            splash.style.display = 'none';
-            tryAutoLogin();
+            
+            // На мобільних та в телеграмі одразу переходимо до авторизації без відео
+            if (isMobile || isTelegram) {
+                splash.style.display = 'none';
+                tryAutoLogin();
+            } else {
+                // На десктопі показуємо відео
+                const video = document.createElement('video');
+                video.id = 'splash-video';
+                video.playsInline = true;
+                video.muted = false;
+                video.preload = 'auto';
+                video.src = "https://file.garden/aZHnP_3ch2qR4tWj/video_2026-02-14_17-15-12.mp4";
+                
+                video.onended = function() {
+                    splash.style.display = 'none';
+                    tryAutoLogin();
+                };
+                
+                video.onerror = function() {
+                    splash.style.display = 'none';
+                    tryAutoLogin();
+                };
+                
+                splash.prepend(video);
+                video.play().catch(() => {
+                    splash.style.display = 'none';
+                    tryAutoLogin();
+                });
+            }
         };
     }
     
+    // Таймаут на всяк випадок
     setTimeout(() => {
         if (splash && splash.style.display !== 'none') {
             splash.style.display = 'none';
             tryAutoLogin();
         }
-    }, 70000);
+    }, 3000);
 };
 
 function tryAutoLogin() {
@@ -112,7 +138,7 @@ async function auth() {
 function save() {
     if (!user) return;
     user.items = items;
-    fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)});
+    fetch(DB + "users/" + user.name + ".json", {method:'PUT', body:JSON.stringify(user)}).catch(e => console.error('Помилка збереження:', e));
 }
 
 function update() {
@@ -387,10 +413,6 @@ function buyItem(item) {
         'vip': '💎 ВІП'
     };
     
-    console.log("Спроба купити:", item);
-    console.log("Поточний баланс:", user.points);
-    console.log("Поточні предмети:", items);
-    
     if (items[item]) {
         alert(`❌ У вас вже є ${itemNames[item]}!`);
         return;
@@ -411,7 +433,6 @@ function buyItem(item) {
         }
         
         alert(`✅ Ви придбали ${itemNames[item]} за ${price} ₴!`);
-        console.log("Після покупки:", items);
     } else {
         alert(`❌ Недостатньо грошей! Потрібно ${price} ₴, у вас ${user.points} ₴`);
     }
