@@ -7,7 +7,10 @@ let currentTheme = '';
 let currentIndex = 0;
 let correctCount = 0;
 let wrongCount = 0;
-let items = { gold_frame: false, crown: false, fire: false, shield: false, vip: false };
+let items = { 
+  gold_frame: false, crown: false, fire: false, shield: false, vip: false,
+  rainbow: false, star: false, diamond: false, halo: false, wings: false
+};
 let currentCorrectAnswer = '';
 
 const correctSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3");
@@ -38,6 +41,11 @@ window.onload = function() {
       tryAutoLogin();
     }
   }, 70000);
+  
+  // Додаємо обробники для магазину
+  document.querySelectorAll('.shop-item').forEach(item => {
+    item.onclick = () => buyItem(item.dataset.item);
+  });
 };
 
 function tryAutoLogin() {
@@ -71,7 +79,7 @@ async function auth() {
       user = d;
     } else {
       user = {
-        name: n, pass: p, points: 0, items: {gold_frame: false},
+        name: n, pass: p, points: 0, items: {gold_frame: false, crown: false, fire: false, shield: false, vip: false, rainbow: false, star: false, diamond: false, halo: false, wings: false},
         themeAttempts: {}, themeResults: {},
         regDate: new Date().toISOString().split('T')[0],
         avatar: '👤', avatarType: 'emoji', avatarData: null,
@@ -83,7 +91,7 @@ async function auth() {
     localStorage.setItem('up', p);
     const now = new Date().toLocaleString('uk-UA',{timeZone:'Europe/Kyiv'});
     await fetch(DB + "user_logs.json", {method:'POST',body:JSON.stringify({game_nick:n, time:now})});
-    items = user.items || {gold_frame:false};
+    items = user.items || {gold_frame:false, crown:false, fire:false, shield:false, vip:false, rainbow:false, star:false, diamond:false, halo:false, wings:false};
     if (!user.themeResults) user.themeResults = {};
     if (!user.regDate) user.regDate = new Date().toISOString().split('T')[0];
     if (!user.avatar) user.avatar = '👤';
@@ -115,11 +123,19 @@ function update() {
 function applyItems() {
   if (!user) return;
   let nickDisplay = user.name;
-  if(items.gold_frame) nickDisplay += ' <span class="gold-nick">[Золото]</span>';
+  
+  // Ефекти від покупок
+  if(items.gold_frame) nickDisplay = `<span class="gold-nick">${user.name}</span>`;
+  if(items.rainbow) nickDisplay = `<span class="rainbow-text">${user.name}</span>`;
+  if(items.star) nickDisplay += ' ⭐';
+  if(items.diamond) nickDisplay += ' 💎';
+  if(items.halo) nickDisplay += ' 😇';
+  if(items.wings) nickDisplay += ' 🦋';
   if(items.crown) nickDisplay += ' 👑';
   if(items.fire) nickDisplay += ' 🔥';
   if(items.shield) nickDisplay += ' 🛡️';
   if(items.vip) nickDisplay += ' 💎 VIP';
+  
   const nickEl = document.getElementById('playerNick');
   if (nickEl) nickEl.innerHTML = nickDisplay;
 }
@@ -327,13 +343,44 @@ function checkAnswer(selected, correct, button) {
 
 async function loadT() {
   show('top');
-  let r = await fetch(DB+"users/.json"), d = await r.json();
+  let r = await fetch(DB+"users/.json");
+  let d = await r.json();
   let l = document.getElementById('tlist');
   l.innerHTML = '';
   if(d) {
     let topPlayers = Object.values(d).sort((a,b)=> (b.points||0) - (a.points||0)).slice(0,100);
     topPlayers.forEach((u,i) => {
-      l.innerHTML += `<div style="display:flex;justify-content:space-between;padding:8px"><span>${i+1}. ${u.name}</span><b>${u.points||0}</b></div>`;
+      let avatar = u.avatar || '👤';
+      let avatarHtml = '';
+      if (u.avatarType === 'photo' && u.avatarData) {
+        avatarHtml = `<img src="${u.avatarData}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">`;
+      } else {
+        avatarHtml = `<span style="font-size:24px;">${avatar}</span>`;
+      }
+      
+      let nameDisplay = u.name;
+      const userItems = u.items || {};
+      if(userItems.rainbow) nameDisplay = `<span class="rainbow-text">${u.name}</span>`;
+      if(userItems.gold_frame) nameDisplay = `<span class="gold-nick">${u.name}</span>`;
+      if(userItems.star) nameDisplay += ' ⭐';
+      if(userItems.diamond) nameDisplay += ' 💎';
+      if(userItems.halo) nameDisplay += ' 😇';
+      if(userItems.wings) nameDisplay += ' 🦋';
+      if(userItems.crown) nameDisplay += ' 👑';
+      if(userItems.fire) nameDisplay += ' 🔥';
+      if(userItems.shield) nameDisplay += ' 🛡️';
+      if(userItems.vip) nameDisplay += ' 💎';
+      
+      l.innerHTML += `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #333;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-weight:bold;color:var(--gold);width:30px;">${i+1}.</span>
+            ${avatarHtml}
+            <span>${nameDisplay}</span>
+          </div>
+          <b style="color:var(--gold);">${u.points||0} ₴</b>
+        </div>
+      `;
     });
   } else {
     l.innerHTML = '<div style="padding:12px;color:#aaa">Топ порожній</div>';
@@ -341,15 +388,38 @@ async function loadT() {
 }
 
 function buyItem(item) {
-  const prices = {gold_frame:1000, crown:2000, fire:1500, shield:2500, vip:5000};
+  const prices = {
+    gold_frame: 1000, crown: 2000, fire: 1500, shield: 2500, vip: 5000,
+    rainbow: 3000, star: 4000, diamond: 8000, halo: 6000, wings: 7000
+  };
+  
+  // Перевірка чи вже куплено
+  if (items[item]) {
+    alert("Цей предмет вже куплено!");
+    return;
+  }
+  
   if(user.points >= prices[item]){
     user.points -= prices[item];
     items[item] = true;
     applyItems();
     save();
     update();
-    alert("Куплено!");
+    alert(`🎉 Куплено: ${getItemName(item)}!`);
+    
+    // Оновлюємо відображення покупок у кабінеті
+    if (typeof updatePurchasesDisplay === 'function') {
+      updatePurchasesDisplay();
+    }
   } else {
-    alert("Недостатньо грошей!");
+    alert(`Недостатньо грошей! Потрібно ${prices[item]} ₴`);
   }
+}
+
+function getItemName(item) {
+  const names = {
+    gold_frame: 'Золота рамка', crown: 'Корона', fire: 'Полум\'я', shield: 'Щит', vip: 'ВІП',
+    rainbow: 'Веселкове ім\'я', star: 'Зірка', diamond: 'Діамант', halo: 'Німб', wings: 'Крила'
+  };
+  return names[item] || item;
 }
