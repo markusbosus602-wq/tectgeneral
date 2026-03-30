@@ -608,3 +608,96 @@ input::placeholder {
   background: var(--gold);
   border-radius: 4px;
 }
+/* Додаткові стилі для мобільних пристроїв */
+@media (max-width: 768px) {
+    .card {
+        padding: 15px;
+        max-width: 95%;
+    }
+    
+    .btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+    
+    h2 {
+        font-size: 20px;
+    }
+    
+    h3 {
+        font-size: 18px;
+    }
+    
+    .shop-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .shop-item {
+        padding: 10px;
+        font-size: 12px;
+    }
+    
+    .cabinet-tabs {
+        gap: 4px;
+    }
+    
+    .tab-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .avatar-options {
+        gap: 8px;
+    }
+    
+    .avatar-option {
+        font-size: 24px;
+    }
+    
+    .friend-item {
+        flex-wrap: wrap;
+    }
+    
+    .leaderboard-item {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+}
+
+/* Стилі для сплеш-екрану на мобільних */
+#splash {
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+                url('https://file.garden/aZHnP_3ch2qR4tWj/61faf7df-bcea-4915-be1f-680907b3eb8f.jpg') center/cover no-repeat;
+}
+
+#startBtn {
+    padding: 14px 30px;
+    font-size: 24px;
+}
+
+@media (max-width: 768px) {
+    #startBtn {
+        padding: 12px 24px;
+        font-size: 20px;
+    }
+}
+
+/* Покращення для торкання на мобільних */
+.btn, .shop-item, .avatar-option, .tab-btn {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active, .shop-item:active, .avatar-option:active {
+    transform: scale(0.97);
+    transition: transform 0.05s;
+}
